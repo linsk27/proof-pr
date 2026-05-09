@@ -6,10 +6,20 @@
   "license": "MIT",
   "type": "module",
   "packageManager": "pnpm@10.33.3",
+  "homepage": "https://github.com/linsk27/proof-pr#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/linsk27/proof-pr.git"
+  },
+  "bugs": {
+    "url": "https://github.com/linsk27/proof-pr/issues"
+  },
   "scripts": {
     "build": "pnpm -r build",
     "test": "pnpm -r test",
-    "typecheck": "pnpm --filter @proof-pr/core build && pnpm -r typecheck"
+    "typecheck": "pnpm --filter @proof-pr/core build && pnpm -r typecheck",
+    "pack:cli": "pnpm --filter proof-pr exec npm pack --dry-run",
+    "release:check": "pnpm typecheck && pnpm test && pnpm build && pnpm pack:cli"
   },
   "devDependencies": {
     "@types/node": "^20.19.24",

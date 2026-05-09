@@ -192,7 +192,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: proof-pr/proof-pr@v1
+      - uses: linsk27/proof-pr@v0.1.0
         with:
           fail-on: ${failOn}
           comment: "true"

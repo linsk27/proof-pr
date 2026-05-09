@@ -1,27 +1,30 @@
 # ProofPR
 
-Review evidence, not vibes.
+[![CI](https://github.com/linsk27/proof-pr/actions/workflows/ci.yml/badge.svg)](https://github.com/linsk27/proof-pr/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-ProofPR is a GitHub Action and CLI that helps maintainers triage pull requests by checking whether a contribution is scoped, testable, reproducible, and safe to review.
+看证据，不看感觉。
 
-It does not guess whether code was written by AI. It checks whether the contribution provides enough evidence to deserve maintainer time.
+ProofPR 是一个 GitHub Action 和 CLI，帮助开源维护者在深入 review 之前，先判断一个 PR 是否范围清晰、可验证、可复现、值得投入维护者时间。
 
-## Why
+它不会猜代码是不是 AI 写的。ProofPR 只检查贡献是否提供了足够的证据。
 
-AI coding tools made it cheap to create code, pull requests, issue reports, and security claims. They did not make maintainer attention cheap.
+## 为什么做这个项目
 
-ProofPR gives maintainers a first-pass evidence report before deep review:
+AI 编程工具让创建代码、PR、Issue 和安全报告变得非常便宜，但维护者的注意力并没有因此变便宜。
 
-- Did the change include tests or verification evidence?
-- Does the PR description explain how it was verified?
-- Did it touch security-sensitive files?
-- Did it add dependencies or change CI permissions?
-- Did it expose secrets or risky MCP configuration?
-- Is the review surface unusually large?
+ProofPR 给维护者一份第一轮证据报告，用来快速回答这些问题：
 
-## Install
+- 这个改动有没有测试或验证证据？
+- PR 描述有没有说明如何验证？
+- 是否改动了安全敏感文件？
+- 是否新增依赖或修改 CI 权限？
+- 是否暴露了 secrets 或危险的 MCP 配置？
+- review 面积是否异常大？
 
-Add this workflow to `.github/workflows/proofpr.yml`:
+## 安装
+
+在仓库中添加 `.github/workflows/proofpr.yml`：
 
 ```yaml
 name: ProofPR
@@ -39,12 +42,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: proof-pr/proof-pr@v1
+      - uses: linsk27/proof-pr@v0.1.0
         with:
           fail-on: high
 ```
 
-For local use:
+当前仓库内本地运行：
 
 ```bash
 pnpm install
@@ -52,14 +55,14 @@ pnpm --filter proof-pr build
 pnpm --filter proof-pr exec proof-pr scan --format markdown
 ```
 
-After publishing to npm, local use becomes:
+npm 包发布后，可以这样使用：
 
 ```bash
 npx proof-pr init
 npx proof-pr scan --base origin/main --head HEAD
 ```
 
-## Example Report
+## 报告示例
 
 ```md
 # ProofPR Review
@@ -88,9 +91,9 @@ Risk: high
 - Recommendation: Check whether the workflow really needs write or token permissions.
 ```
 
-## Configuration
+## 配置
 
-Create `.proofpr.yml`:
+创建 `.proofpr.yml`：
 
 ```yaml
 riskThreshold: high
@@ -119,17 +122,17 @@ comment:
   enabled: true
 ```
 
-## Rules In The MVP
+## MVP 内置规则
 
-- `change-size`: flags unusually broad review surfaces.
-- `sensitive-path`: flags changes to CI, dependency, secret, Docker, and MCP files.
-- `missing-tests`: flags code changes without test-file changes.
-- `thin-pr-description`: flags empty or thin PR descriptions.
-- `missing-reproduction-context`: flags broad or sensitive changes without reproduction or before/after context.
-- `secret-detected:*`: flags common API keys, tokens, database URLs, and generic secret assignments.
-- `dependency-added`: flags dependency-like entries in manifests.
-- `workflow-permission-change`: flags GitHub Actions permission changes.
-- `mcp-credential-risk`: flags MCP command, args, env, and credential surfaces.
+- `change-size`：标记 review 面积过大的 PR。
+- `sensitive-path`：标记 CI、依赖、secret、Docker、MCP 等敏感文件改动。
+- `missing-tests`：标记没有测试文件或验证说明的代码改动。
+- `thin-pr-description`：标记为空或过薄的 PR 描述。
+- `missing-reproduction-context`：标记缺少复现、预期/实际行为或 before/after 说明的高风险改动。
+- `secret-detected:*`：标记常见 API key、token、数据库连接串和 secret 赋值。
+- `dependency-added`：标记依赖清单中的新增依赖。
+- `workflow-permission-change`：标记 GitHub Actions 权限变化。
+- `mcp-credential-risk`：标记 MCP command、args、env 和凭证相关风险。
 
 ## CLI
 
@@ -140,15 +143,15 @@ proof-pr scan --base origin/main --pr-body-file pr-body.md --format json
 proof-pr scan --base origin/main --fail-on medium
 ```
 
-## Design Principles
+## 设计原则
 
-- Evidence over authorship guesses.
-- Deterministic checks before optional AI.
-- Maintainer-friendly output.
-- Zero API key required for the core scanner.
-- Easy to run locally, in CI, or as a GitHub Action.
+- 看证据，不猜作者。
+- 先做确定性检查，再考虑可选 AI。
+- 输出要对维护者友好。
+- 核心扫描不需要任何 API key。
+- 本地、CI、GitHub Action 都能跑。
 
-## Development
+## 开发
 
 ```bash
 pnpm install
@@ -157,14 +160,15 @@ pnpm test
 pnpm build
 ```
 
-## Roadmap
+## 路线图
 
-- GitHub Check annotations.
-- SARIF upload examples.
-- Issue triage mode for reproduction quality.
-- Rule plugins.
-- Optional AI summary provider.
-- OpenSSF Scorecard and gitleaks integration.
+- 发布 `proof-pr` CLI 到 npm。
+- GitHub Check annotations。
+- SARIF 上传示例。
+- Issue 复现质量检查模式。
+- 规则插件系统。
+- 可选 AI 摘要 provider。
+- 集成 OpenSSF Scorecard 和 gitleaks。
 
 ## License
 

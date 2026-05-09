@@ -5,6 +5,12 @@
   "license": "MIT",
   "type": "module",
   "private": true,
+  "homepage": "https://github.com/linsk27/proof-pr#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/linsk27/proof-pr.git",
+    "directory": "packages/github-action"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json && ncc build dist/index.js -o action-dist --license licenses.txt",
     "test": "vitest run src --passWithNoTests",

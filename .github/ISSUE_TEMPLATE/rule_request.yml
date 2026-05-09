@@ -1,0 +1,26 @@
+name: 规则建议
+description: 建议一个新的确定性 ProofPR 规则。
+title: "[Rule]: "
+labels:
+  - rule
+  - enhancement
+body:
+  - type: textarea
+    id: maintainer-problem
+    attributes:
+      label: 维护者问题
+      description: 这个规则能减少哪类 review 负担？
+    validations:
+      required: true
+  - type: textarea
+    id: signal
+    attributes:
+      label: 确定性信号
+      description: 这个规则应该检查哪些文件、diff 行、元数据或 PR 证据？
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: 期望输出
+      description: ProofPR 应该告诉维护者什么？

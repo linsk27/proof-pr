@@ -4,19 +4,48 @@
   "description": "CLI for ProofPR, a maintainer-focused pull request evidence scanner.",
   "license": "MIT",
   "type": "module",
+  "homepage": "https://github.com/linsk27/proof-pr#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/linsk27/proof-pr.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/linsk27/proof-pr/issues"
+  },
+  "keywords": [
+    "github-action",
+    "pull-request",
+    "code-review",
+    "maintainers",
+    "open-source",
+    "security",
+    "ai-coding",
+    "mcp",
+    "cli"
+  ],
   "bin": {
     "proof-pr": "./dist/index.js"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && ncc build build/index.js -o dist --license licenses.txt",
     "test": "vitest run src --passWithNoTests",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
-  "dependencies": {
+  "devDependencies": {
     "@proof-pr/core": "workspace:*",
+    "@vercel/ncc": "^0.38.4",
     "commander": "^14.0.2"
   }
 }

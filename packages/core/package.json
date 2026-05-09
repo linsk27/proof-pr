@@ -4,6 +4,23 @@
   "description": "Core rule engine for ProofPR.",
   "license": "MIT",
   "type": "module",
+  "homepage": "https://github.com/linsk27/proof-pr#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/linsk27/proof-pr.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/linsk27/proof-pr/issues"
+  },
+  "keywords": [
+    "pull-request",
+    "code-review",
+    "maintainers",
+    "security",
+    "ai-coding",
+    "mcp"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -12,6 +29,10 @@
       "import": "./dist/index.js"
     }
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "vitest run src",
