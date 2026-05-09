@@ -2,6 +2,8 @@
 
 这份文档只讲怎么安装和怎么跑起来。
 
+![ProofPR PR 评论效果图](assets/proofpr-pr-comment.svg)
+
 ## 你应该选哪种方式？
 
 大多数用户应该选择 GitHub Action。

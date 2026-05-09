@@ -16,12 +16,21 @@
   "keywords": [
     "github-action",
     "pull-request",
+    "pull-request-review",
+    "pr-triage",
     "code-review",
     "maintainers",
+    "maintainer-tools",
     "open-source",
     "security",
+    "security-tools",
+    "secrets-scanning",
+    "github-actions-security",
+    "dependency-review",
     "ai-coding",
+    "ai-generated-code",
     "mcp",
+    "mcp-security",
     "cli"
   ],
   "bin": {

@@ -15,10 +15,16 @@
   },
   "keywords": [
     "pull-request",
+    "pull-request-review",
+    "pr-triage",
     "code-review",
     "maintainers",
+    "maintainer-tools",
     "security",
     "ai-coding",
+    "ai-generated-code",
+    "secrets-scanning",
+    "github-actions-security",
     "mcp"
   ],
   "main": "./dist/index.js",

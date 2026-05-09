@@ -1,0 +1,39 @@
+<svg width="1120" height="500" viewBox="0 0 1120 500" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">ProofPR workflow diagram</title>
+  <desc id="desc">A workflow diagram showing how ProofPR scans pull requests and produces review guidance.</desc>
+  <rect width="1120" height="500" rx="24" fill="#FFFFFF"/>
+  <rect x="52" y="52" width="1016" height="396" rx="18" fill="#F6F8FA" stroke="#D8DEE4"/>
+  <text x="92" y="106" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700" fill="#24292F">ProofPR 工作流</text>
+  <text x="92" y="138" font-family="Segoe UI, Arial, sans-serif" font-size="16" fill="#57606A">Pull Request 进入仓库后，ProofPR 先检查证据，再把维护者该关注的点写回 PR。</text>
+
+  <rect x="92" y="202" width="186" height="120" rx="14" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="128" y="252" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#24292F">1. PR diff</text>
+  <text x="124" y="282" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#57606A">代码改动</text>
+
+  <path d="M292 262H352" stroke="#57606A" stroke-width="3" stroke-linecap="round"/>
+  <path d="M352 262L340 252M352 262L340 272" stroke="#57606A" stroke-width="3" stroke-linecap="round"/>
+
+  <rect x="372" y="202" width="186" height="120" rx="14" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="402" y="244" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#24292F">2. 规则扫描</text>
+  <text x="400" y="274" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#57606A">敏感路径 / secret</text>
+  <text x="400" y="296" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#57606A">测试 / 权限 / MCP</text>
+
+  <path d="M572 262H632" stroke="#57606A" stroke-width="3" stroke-linecap="round"/>
+  <path d="M632 262L620 252M632 262L620 272" stroke="#57606A" stroke-width="3" stroke-linecap="round"/>
+
+  <rect x="652" y="202" width="186" height="120" rx="14" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <text x="684" y="244" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#24292F">3. 风险评分</text>
+  <text x="690" y="274" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#57606A">low / medium / high</text>
+  <text x="690" y="296" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#57606A">生成证据摘要</text>
+
+  <path d="M852 262H912" stroke="#57606A" stroke-width="3" stroke-linecap="round"/>
+  <path d="M912 262L900 252M912 262L900 272" stroke="#57606A" stroke-width="3" stroke-linecap="round"/>
+
+  <rect x="932" y="202" width="96" height="120" rx="14" fill="#0969DA"/>
+  <text x="956" y="244" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#FFFFFF">4. 报告</text>
+  <text x="952" y="274" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#DDF4FF">PR 评论</text>
+  <text x="952" y="296" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#DDF4FF">CLI 输出</text>
+
+  <rect x="92" y="368" width="936" height="44" rx="12" fill="#EAF5FF" stroke="#B6E3FF"/>
+  <text x="120" y="396" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#0969DA">目标：让维护者先 review 证据，再决定是否深入 review 代码。</text>
+</svg>

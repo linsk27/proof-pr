@@ -1,45 +1,52 @@
 # ProofPR
 
 [![CI](https://github.com/linsk27/proof-pr/actions/workflows/ci.yml/badge.svg)](https://github.com/linsk27/proof-pr/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/linsk27/proof-pr)](https://github.com/linsk27/proof-pr/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 看证据，不看感觉。
 
-ProofPR 是一个给开源维护者用的 PR 风险和证据检查工具。它会在 PR 里自动生成报告，帮助维护者快速判断：这个 PR 有没有测试证据、是否改了敏感文件、是否可能泄露 secret、是否值得马上深入 review。
+ProofPR 是一个面向开源维护者的 **PR 证据检查器 / PR 风险扫描器**。它可以作为 GitHub Action 自动运行，在每个 Pull Request 中生成一份风险报告，帮助维护者快速判断这个 PR 是否值得深入 review。
 
-它不会猜代码是不是 AI 写的。ProofPR 只检查贡献是否提供了足够的证据。
+它不会猜代码是不是 AI 写的。它只检查一件更可靠的事：**这个贡献有没有足够的测试、复现、权限、依赖和安全证据。**
 
-## 当前开发进度
+![ProofPR PR 评论效果图](docs/assets/proofpr-pr-comment.svg)
 
-当前版本：`v0.1.0`
+## 适合谁
 
-已经完成：
+- 维护开源项目，经常收到社区 PR 的开发者。
+- 担心 AI 生成 PR、低质量 PR、安全噪音占用 review 时间的维护者。
+- 想在 GitHub Actions 中增加 PR 质量门禁的团队。
+- 关注 secrets、CI 权限、MCP 配置、依赖风险的工程团队。
 
-- GitHub Action：可以安装到任意 GitHub 仓库，在 PR 中自动运行。
-- CLI：可以本地扫描 git diff。
-- PR 报告：可以输出 Markdown、JSON、SARIF。
-- PR 证据分析：检查 PR 标题/正文里是否有测试、验证、复现、before/after 信息。
-- 内置规则：改动规模、敏感路径、缺少测试、secret、依赖、workflow 权限、MCP 配置风险。
-- GitHub Release：已发布 `v0.1.0`，并附带 CLI tarball。
+## 它会检查什么
 
-还没完成：
+ProofPR 会扫描 PR diff 和 PR 描述，生成 `low`、`medium`、`high` 风险等级。
 
-- npm 包还没有发布，所以现在不要使用 `npx proof-pr` 作为主要安装方式。
-- GitHub Check annotations 还没做。
-- Issue 质量检查模式还没做。
-- 规则插件系统还没做。
+| 检查项 | 作用 |
+| --- | --- |
+| 改动规模 | 判断 PR 是否过大、是否应该拆分 |
+| 敏感路径 | 标记 `.github/workflows/**`、`.env*`、`mcp*.json`、依赖文件等 |
+| 测试证据 | 检查是否有测试文件变化或 PR 验证说明 |
+| PR 描述 | 检查是否有复现步骤、before/after、验证信息 |
+| secrets | 检测疑似 API key、token、数据库连接串 |
+| 依赖变化 | 标记新增依赖或依赖清单变化 |
+| CI 权限 | 标记 GitHub Actions 写权限、OIDC 权限变化 |
+| MCP 风险 | 标记 MCP command、args、env、credential 风险 |
 
-## 最推荐的安装方式：GitHub Action
+## 三步安装到你的 GitHub 仓库
 
-如果你想在自己的某个 GitHub 仓库里使用 ProofPR，只需要添加一个 workflow 文件。
+这是目前最推荐的使用方式。
 
-在目标仓库中创建文件：
+### 1. 创建 workflow 文件
+
+在你的目标仓库中创建：
 
 ```txt
 .github/workflows/proofpr.yml
 ```
 
-内容如下：
+### 2. 写入下面的内容
 
 ```yaml
 name: ProofPR
@@ -63,11 +70,19 @@ jobs:
           comment: "true"
 ```
 
-然后打开一个 PR，ProofPR 就会自动运行，并在 PR 页面写入一条风险报告评论。
+### 3. 打开一个 PR
+
+ProofPR 会自动运行，并在 PR 评论区生成 `ProofPR Review` 报告。
 
 ## 可选配置
 
-在目标仓库根目录创建 `.proofpr.yml`：
+不创建配置文件也可以运行。想自定义规则时，在仓库根目录添加：
+
+```txt
+.proofpr.yml
+```
+
+示例：
 
 ```yaml
 riskThreshold: high
@@ -96,20 +111,18 @@ comment:
   enabled: true
 ```
 
-不创建 `.proofpr.yml` 也可以运行，ProofPR 会使用默认配置。
-
 ## 本地 CLI 使用
 
-目前 CLI 还没有发布到 npm。现在有两种方式可以本地使用。
+当前 CLI 已经随 GitHub Release 提供 tarball，但还没有发布到 npm，所以暂时不要把 `npx proof-pr` 当作主要路径。
 
-方式一：从 GitHub Release 安装：
+从 GitHub Release 安装：
 
 ```bash
 npm install -g https://github.com/linsk27/proof-pr/releases/download/v0.1.0/proof-pr-0.1.0.tgz
 proof-pr scan --base origin/main --head HEAD
 ```
 
-方式二：从源码运行：
+从源码运行：
 
 ```bash
 git clone https://github.com/linsk27/proof-pr.git
@@ -119,7 +132,11 @@ pnpm build
 node packages/cli/dist/index.js scan --base origin/main --head HEAD
 ```
 
-常用 CLI 命令：
+CLI 效果图：
+
+![ProofPR CLI 输出效果图](docs/assets/proofpr-cli-output.svg)
+
+常用命令：
 
 ```bash
 proof-pr init
@@ -130,42 +147,38 @@ proof-pr scan --base origin/main --pr-body-file pr-body.md
 proof-pr scan --base origin/main --fail-on medium
 ```
 
+## 工作流
+
+![ProofPR 工作流示意图](docs/assets/proofpr-flow.svg)
+
 ## 报告怎么看
 
 ProofPR 报告主要看三块：
 
 1. `Risk`：整体风险等级，可能是 `low`、`medium`、`high`。
-2. `Evidence`：改动文件数、增删行数、测试文件变化、敏感文件变化、PR 描述质量。
+2. `Evidence`：文件数量、增删行数、测试文件变化、敏感文件变化、PR 描述质量。
 3. `Findings`：具体风险点和维护者应该重点 review 的地方。
 
-报告示例：
+## 当前开发进度
 
-```md
-# ProofPR Review
+当前版本：`v0.1.0`
 
-Risk: high
+已经完成：
 
-## Evidence
+- GitHub Action 自动扫描 PR。
+- PR 评论报告和 GitHub job summary。
+- 本地 CLI 扫描 git diff。
+- Markdown、JSON、SARIF 输出。
+- PR title/body 证据分析。
+- 改动规模、敏感路径、缺少测试、secrets、依赖、workflow 权限、MCP 配置风险规则。
+- GitHub Release，附带 CLI tarball。
 
-- Files changed: 12
-- Additions: 480
-- Deletions: 120
-- Test files changed: 0
-- Sensitive files changed: 2
-- PR description: thin
-- Verification evidence: no
-- Reproduction context: no
+还没完成：
 
-## Findings
-
-### Workflow permission changed
-
-- Rule: `workflow-permission-change`
-- Severity: `high`
-- Path: `.github/workflows/release.yml`
-- Detail: `.github/workflows/release.yml` adds or changes GitHub Actions permissions.
-- Recommendation: Check whether the workflow really needs write or token permissions.
-```
+- npm 包发布。
+- GitHub Check annotations。
+- Issue 质量检查模式。
+- 规则插件系统。
 
 ## 内置规则
 
@@ -178,6 +191,19 @@ Risk: high
 - `dependency-added`：标记依赖清单中的新增依赖。
 - `workflow-permission-change`：标记 GitHub Actions 权限变化。
 - `mcp-credential-risk`：标记 MCP command、args、env 和凭证相关风险。
+
+## 文档
+
+- [快速开始](docs/getting-started.md)
+- [配置说明](docs/configuration.md)
+- [规则说明](docs/rules.md)
+- [贡献指南](CONTRIBUTING.md)
+- [安全政策](SECURITY.md)
+- [变更记录](CHANGELOG.md)
+
+## 搜索关键词
+
+GitHub Action、Pull Request、PR review、PR triage、code review、maintainer tools、open source maintainer、AI coding、AI-generated PR、MCP security、secrets scanning、GitHub Actions security、dependency review、TypeScript CLI。
 
 ## 开发
 

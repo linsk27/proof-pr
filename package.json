@@ -6,6 +6,18 @@
   "license": "MIT",
   "type": "module",
   "packageManager": "pnpm@10.33.3",
+  "keywords": [
+    "github-action",
+    "pull-request",
+    "pull-request-review",
+    "pr-triage",
+    "code-review",
+    "maintainer-tools",
+    "open-source",
+    "security-tools",
+    "ai-coding",
+    "mcp-security"
+  ],
   "homepage": "https://github.com/linsk27/proof-pr#readme",
   "repository": {
     "type": "git",

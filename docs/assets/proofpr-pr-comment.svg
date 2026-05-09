@@ -1,0 +1,36 @@
+<svg width="1120" height="760" viewBox="0 0 1120 760" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">ProofPR PR comment screenshot</title>
+  <desc id="desc">A mock GitHub pull request comment showing a ProofPR risk report.</desc>
+  <rect width="1120" height="760" rx="24" fill="#F6F8FA"/>
+  <rect x="48" y="42" width="1024" height="676" rx="14" fill="#FFFFFF" stroke="#D8DEE4"/>
+  <rect x="48" y="42" width="1024" height="58" rx="14" fill="#F6F8FA"/>
+  <rect x="48" y="86" width="1024" height="14" fill="#F6F8FA"/>
+  <circle cx="82" cy="71" r="14" fill="#2DA44E"/>
+  <text x="108" y="78" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#24292F">ProofPR Review</text>
+  <text x="930" y="78" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#57606A">GitHub PR comment</text>
+
+  <rect x="80" y="130" width="960" height="86" rx="10" fill="#FFF8C5" stroke="#D4A72C"/>
+  <text x="108" y="164" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#24292F">Risk: high</text>
+  <text x="108" y="193" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#57606A">This PR changes sensitive files and lacks clear verification evidence.</text>
+
+  <text x="80" y="263" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#24292F">Evidence</text>
+  <rect x="80" y="284" width="296" height="106" rx="10" fill="#F6F8FA" stroke="#D8DEE4"/>
+  <text x="104" y="319" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#57606A">Files changed</text>
+  <text x="104" y="358" font-family="Segoe UI, Arial, sans-serif" font-size="36" font-weight="700" fill="#24292F">12</text>
+  <rect x="412" y="284" width="296" height="106" rx="10" fill="#F6F8FA" stroke="#D8DEE4"/>
+  <text x="436" y="319" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#57606A">Sensitive files</text>
+  <text x="436" y="358" font-family="Segoe UI, Arial, sans-serif" font-size="36" font-weight="700" fill="#CF222E">2</text>
+  <rect x="744" y="284" width="296" height="106" rx="10" fill="#F6F8FA" stroke="#D8DEE4"/>
+  <text x="768" y="319" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#57606A">Verification evidence</text>
+  <text x="768" y="358" font-family="Segoe UI, Arial, sans-serif" font-size="36" font-weight="700" fill="#CF222E">no</text>
+
+  <text x="80" y="444" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#24292F">Findings</text>
+  <rect x="80" y="466" width="960" height="68" rx="10" fill="#FFEBE9" stroke="#FF8182"/>
+  <text x="108" y="496" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#24292F">Workflow permission changed</text>
+  <text x="108" y="520" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#57606A">.github/workflows/release.yml adds or changes GitHub Actions permissions.</text>
+  <rect x="80" y="550" width="960" height="68" rx="10" fill="#FFF8C5" stroke="#D4A72C"/>
+  <text x="108" y="580" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#24292F">No verification evidence</text>
+  <text x="108" y="604" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#57606A">Code changed, but no test files or PR verification notes were found.</text>
+  <rect x="80" y="634" width="960" height="44" rx="10" fill="#F6F8FA" stroke="#D8DEE4"/>
+  <text x="108" y="662" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#57606A">Maintainer focus: review workflow permissions, ask for tests, and require before/after context.</text>
+</svg>
