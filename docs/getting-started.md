@@ -28,6 +28,12 @@ jobs:
 
 ## Local CLI
 
+Initialize ProofPR in a repository:
+
+```bash
+proof-pr init
+```
+
 Scan the current working tree diff:
 
 ```bash

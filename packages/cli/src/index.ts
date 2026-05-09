@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { execFile } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { access, mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
 import { promisify } from "node:util";
 import { Command, InvalidArgumentError } from "commander";
 import {
@@ -27,6 +28,13 @@ interface ScanCommandOptions {
   config: string;
   format: OutputFormat;
   failOn: FailLevel;
+}
+
+interface InitCommandOptions {
+  configPath: string;
+  workflowPath: string;
+  failOn: FailLevel;
+  force: boolean;
 }
 
 const program = new Command();
@@ -69,6 +77,25 @@ program
     }
   });
 
+program
+  .command("init")
+  .description("Create a starter .proofpr.yml and GitHub Actions workflow.")
+  .option("--config-path <path>", "Path to write the ProofPR configuration file.", ".proofpr.yml")
+  .option(
+    "--workflow-path <path>",
+    "Path to write the GitHub Actions workflow.",
+    ".github/workflows/proofpr.yml"
+  )
+  .option("--fail-on <level>", "Workflow failure threshold: low, medium, high, or never.", parseFailLevel, "high")
+  .option("--force", "Overwrite existing files.", false)
+  .action(async (options: InitCommandOptions) => {
+    await writeIfMissing(options.configPath, renderConfigTemplate(), options.force);
+    await writeIfMissing(options.workflowPath, renderWorkflowTemplate(options.failOn), options.force);
+    process.stdout.write(
+      `ProofPR initialized:\n- ${options.configPath}\n- ${options.workflowPath}\n`
+    );
+  });
+
 program.parseAsync(process.argv).catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);
   process.stderr.write(`ProofPR failed: ${message}\n`);
@@ -92,6 +119,84 @@ async function readPullRequestBody(options: ScanCommandOptions): Promise<string 
   }
 
   return options.prBody;
+}
+
+async function writeIfMissing(path: string, contents: string, force: boolean): Promise<void> {
+  if (!force && (await pathExists(path))) {
+    throw new Error(`${path} already exists. Pass --force to overwrite it.`);
+  }
+
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, contents, "utf8");
+}
+
+async function pathExists(path: string): Promise<boolean> {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function renderConfigTemplate(): string {
+  return `riskThreshold: high
+
+sensitivePaths:
+  - ".github/workflows/**"
+  - ".github/actions/**"
+  - "**/.env*"
+  - "**/mcp*.json"
+  - "**/*mcp*.json"
+  - "Dockerfile"
+  - "**/Dockerfile"
+  - "package.json"
+  - "pnpm-lock.yaml"
+  - "package-lock.json"
+  - "yarn.lock"
+  - "bun.lockb"
+
+requireTests:
+  enabled: true
+  paths:
+    - "src/**"
+    - "packages/**/src/**"
+    - "app/**"
+    - "lib/**"
+
+secrets:
+  enabled: true
+
+dependencies:
+  flagNewPackages: true
+  flagMajorUpgrades: true
+
+comment:
+  enabled: true
+`;
+}
+
+function renderWorkflowTemplate(failOn: FailLevel): string {
+  return `name: ProofPR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  proofpr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: proof-pr/proof-pr@v1
+        with:
+          fail-on: ${failOn}
+          comment: "true"
+`;
 }
 
 function renderOutput(result: ReturnType<typeof scanDiff>, format: OutputFormat): string {

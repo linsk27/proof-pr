@@ -55,6 +55,7 @@ pnpm --filter proof-pr exec proof-pr scan --format markdown
 After publishing to npm, local use becomes:
 
 ```bash
+npx proof-pr init
 npx proof-pr scan --base origin/main --head HEAD
 ```
 
@@ -129,6 +130,15 @@ comment:
 - `dependency-added`: flags dependency-like entries in manifests.
 - `workflow-permission-change`: flags GitHub Actions permission changes.
 - `mcp-credential-risk`: flags MCP command, args, env, and credential surfaces.
+
+## CLI
+
+```bash
+proof-pr init
+proof-pr scan --base origin/main --head HEAD
+proof-pr scan --base origin/main --pr-body-file pr-body.md --format json
+proof-pr scan --base origin/main --fail-on medium
+```
 
 ## Design Principles
 
