@@ -5,26 +5,41 @@
 
 看证据，不看感觉。
 
-ProofPR 是一个 GitHub Action 和 CLI，帮助开源维护者在深入 review 之前，先判断一个 PR 是否范围清晰、可验证、可复现、值得投入维护者时间。
+ProofPR 是一个给开源维护者用的 PR 风险和证据检查工具。它会在 PR 里自动生成报告，帮助维护者快速判断：这个 PR 有没有测试证据、是否改了敏感文件、是否可能泄露 secret、是否值得马上深入 review。
 
 它不会猜代码是不是 AI 写的。ProofPR 只检查贡献是否提供了足够的证据。
 
-## 为什么做这个项目
+## 当前开发进度
 
-AI 编程工具让创建代码、PR、Issue 和安全报告变得非常便宜，但维护者的注意力并没有因此变便宜。
+当前版本：`v0.1.0`
 
-ProofPR 给维护者一份第一轮证据报告，用来快速回答这些问题：
+已经完成：
 
-- 这个改动有没有测试或验证证据？
-- PR 描述有没有说明如何验证？
-- 是否改动了安全敏感文件？
-- 是否新增依赖或修改 CI 权限？
-- 是否暴露了 secrets 或危险的 MCP 配置？
-- review 面积是否异常大？
+- GitHub Action：可以安装到任意 GitHub 仓库，在 PR 中自动运行。
+- CLI：可以本地扫描 git diff。
+- PR 报告：可以输出 Markdown、JSON、SARIF。
+- PR 证据分析：检查 PR 标题/正文里是否有测试、验证、复现、before/after 信息。
+- 内置规则：改动规模、敏感路径、缺少测试、secret、依赖、workflow 权限、MCP 配置风险。
+- GitHub Release：已发布 `v0.1.0`，并附带 CLI tarball。
 
-## 安装
+还没完成：
 
-在仓库中添加 `.github/workflows/proofpr.yml`：
+- npm 包还没有发布，所以现在不要使用 `npx proof-pr` 作为主要安装方式。
+- GitHub Check annotations 还没做。
+- Issue 质量检查模式还没做。
+- 规则插件系统还没做。
+
+## 最推荐的安装方式：GitHub Action
+
+如果你想在自己的某个 GitHub 仓库里使用 ProofPR，只需要添加一个 workflow 文件。
+
+在目标仓库中创建文件：
+
+```txt
+.github/workflows/proofpr.yml
+```
+
+内容如下：
 
 ```yaml
 name: ProofPR
@@ -45,55 +60,14 @@ jobs:
       - uses: linsk27/proof-pr@v0.1.0
         with:
           fail-on: high
+          comment: "true"
 ```
 
-当前仓库内本地运行：
+然后打开一个 PR，ProofPR 就会自动运行，并在 PR 页面写入一条风险报告评论。
 
-```bash
-pnpm install
-pnpm --filter proof-pr build
-pnpm --filter proof-pr exec proof-pr scan --format markdown
-```
+## 可选配置
 
-npm 包发布后，可以这样使用：
-
-```bash
-npx proof-pr init
-npx proof-pr scan --base origin/main --head HEAD
-```
-
-## 报告示例
-
-```md
-# ProofPR Review
-
-Risk: high
-
-## Evidence
-
-- Files changed: 12
-- Additions: 480
-- Deletions: 120
-- Test files changed: 0
-- Sensitive files changed: 2
-- PR description: thin
-- Verification evidence: no
-- Reproduction context: no
-
-## Findings
-
-### Workflow permission changed
-
-- Rule: `workflow-permission-change`
-- Severity: `high`
-- Path: `.github/workflows/release.yml`
-- Detail: `.github/workflows/release.yml` adds or changes GitHub Actions permissions.
-- Recommendation: Check whether the workflow really needs write or token permissions.
-```
-
-## 配置
-
-创建 `.proofpr.yml`：
+在目标仓库根目录创建 `.proofpr.yml`：
 
 ```yaml
 riskThreshold: high
@@ -122,7 +96,78 @@ comment:
   enabled: true
 ```
 
-## MVP 内置规则
+不创建 `.proofpr.yml` 也可以运行，ProofPR 会使用默认配置。
+
+## 本地 CLI 使用
+
+目前 CLI 还没有发布到 npm。现在有两种方式可以本地使用。
+
+方式一：从 GitHub Release 安装：
+
+```bash
+npm install -g https://github.com/linsk27/proof-pr/releases/download/v0.1.0/proof-pr-0.1.0.tgz
+proof-pr scan --base origin/main --head HEAD
+```
+
+方式二：从源码运行：
+
+```bash
+git clone https://github.com/linsk27/proof-pr.git
+cd proof-pr
+pnpm install
+pnpm build
+node packages/cli/dist/index.js scan --base origin/main --head HEAD
+```
+
+常用 CLI 命令：
+
+```bash
+proof-pr init
+proof-pr scan
+proof-pr scan --base origin/main --head HEAD
+proof-pr scan --base origin/main --format json
+proof-pr scan --base origin/main --pr-body-file pr-body.md
+proof-pr scan --base origin/main --fail-on medium
+```
+
+## 报告怎么看
+
+ProofPR 报告主要看三块：
+
+1. `Risk`：整体风险等级，可能是 `low`、`medium`、`high`。
+2. `Evidence`：改动文件数、增删行数、测试文件变化、敏感文件变化、PR 描述质量。
+3. `Findings`：具体风险点和维护者应该重点 review 的地方。
+
+报告示例：
+
+```md
+# ProofPR Review
+
+Risk: high
+
+## Evidence
+
+- Files changed: 12
+- Additions: 480
+- Deletions: 120
+- Test files changed: 0
+- Sensitive files changed: 2
+- PR description: thin
+- Verification evidence: no
+- Reproduction context: no
+
+## Findings
+
+### Workflow permission changed
+
+- Rule: `workflow-permission-change`
+- Severity: `high`
+- Path: `.github/workflows/release.yml`
+- Detail: `.github/workflows/release.yml` adds or changes GitHub Actions permissions.
+- Recommendation: Check whether the workflow really needs write or token permissions.
+```
+
+## 内置规则
 
 - `change-size`：标记 review 面积过大的 PR。
 - `sensitive-path`：标记 CI、依赖、secret、Docker、MCP 等敏感文件改动。
@@ -134,23 +179,6 @@ comment:
 - `workflow-permission-change`：标记 GitHub Actions 权限变化。
 - `mcp-credential-risk`：标记 MCP command、args、env 和凭证相关风险。
 
-## CLI
-
-```bash
-proof-pr init
-proof-pr scan --base origin/main --head HEAD
-proof-pr scan --base origin/main --pr-body-file pr-body.md --format json
-proof-pr scan --base origin/main --fail-on medium
-```
-
-## 设计原则
-
-- 看证据，不猜作者。
-- 先做确定性检查，再考虑可选 AI。
-- 输出要对维护者友好。
-- 核心扫描不需要任何 API key。
-- 本地、CI、GitHub Action 都能跑。
-
 ## 开发
 
 ```bash
@@ -158,6 +186,12 @@ pnpm install
 pnpm typecheck
 pnpm test
 pnpm build
+```
+
+发布前检查：
+
+```bash
+pnpm release:check
 ```
 
 ## 路线图
