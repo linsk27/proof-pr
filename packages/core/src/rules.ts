@@ -1,14 +1,20 @@
-import type { DiffFile, Finding, ProofPRConfig, ScanSummary } from "./types.js";
+import type { DiffFile, Finding, ProofPRConfig, PullRequestContext, ScanSummary } from "./types.js";
+import { analyzeEvidence } from "./evidence.js";
 import { matchesAny, isCodePath, isDependencyManifest, isMcpConfigPath, isTestPath, isWorkflowPath } from "./path-utils.js";
 import { detectSecrets } from "./secrets.js";
 
-export function analyzeDiffFiles(files: DiffFile[], config: ProofPRConfig): Finding[] {
+export function analyzeDiffFiles(
+  files: DiffFile[],
+  config: ProofPRConfig,
+  pullRequest?: PullRequestContext
+): Finding[] {
   const activeFiles = files.filter((file) => !matchesAny(file.path, config.ignorePaths));
   const findings: Finding[] = [];
 
   findings.push(...analyzeChangeSize(activeFiles));
   findings.push(...analyzeSensitivePaths(activeFiles, config));
-  findings.push(...analyzeMissingTests(activeFiles, config));
+  findings.push(...analyzeMissingTests(activeFiles, config, pullRequest));
+  findings.push(...analyzePullRequestEvidence(activeFiles, pullRequest));
   findings.push(...analyzeDependencyChanges(activeFiles, config));
   findings.push(...analyzeWorkflowPermissions(activeFiles));
   findings.push(...analyzeMcpConfigs(activeFiles));
@@ -22,15 +28,23 @@ export function analyzeDiffFiles(files: DiffFile[], config: ProofPRConfig): Find
   return findings;
 }
 
-export function summarizeDiffFiles(files: DiffFile[], config: ProofPRConfig): ScanSummary {
+export function summarizeDiffFiles(
+  files: DiffFile[],
+  config: ProofPRConfig,
+  pullRequest?: PullRequestContext
+): ScanSummary {
   const activeFiles = files.filter((file) => !matchesAny(file.path, config.ignorePaths));
+  const evidence = analyzeEvidence(pullRequest);
 
   return {
     filesChanged: activeFiles.length,
     additions: activeFiles.reduce((sum, file) => sum + file.added, 0),
     deletions: activeFiles.reduce((sum, file) => sum + file.removed, 0),
     testFilesChanged: activeFiles.filter((file) => isTestPath(file.path)).length,
-    sensitiveFilesChanged: activeFiles.filter((file) => matchesAny(file.path, config.sensitivePaths)).length
+    sensitiveFilesChanged: activeFiles.filter((file) => matchesAny(file.path, config.sensitivePaths)).length,
+    pullRequestDescription: evidence.descriptionState,
+    verificationEvidence: evidence.verificationEvidence,
+    reproductionEvidence: evidence.reproductionEvidence
   };
 }
 
@@ -84,7 +98,11 @@ function analyzeSensitivePaths(files: DiffFile[], config: ProofPRConfig): Findin
     }));
 }
 
-function analyzeMissingTests(files: DiffFile[], config: ProofPRConfig): Finding[] {
+function analyzeMissingTests(
+  files: DiffFile[],
+  config: ProofPRConfig,
+  pullRequest?: PullRequestContext
+): Finding[] {
   if (!config.requireTests.enabled) {
     return [];
   }
@@ -96,22 +114,67 @@ function analyzeMissingTests(files: DiffFile[], config: ProofPRConfig): Finding[
       matchesAny(file.path, config.requireTests.paths)
   );
   const hasTestChanges = files.some((file) => isTestPath(file.path));
+  const hasVerificationEvidence = analyzeEvidence(pullRequest).verificationEvidence;
 
-  if (codeFiles.length === 0 || hasTestChanges) {
+  if (codeFiles.length === 0 || hasTestChanges || hasVerificationEvidence) {
     return [];
   }
 
   return [
     {
       ruleId: "missing-tests",
-      title: "No test evidence in changed files",
-      message: `Code changed in ${codeFiles.length} file(s), but no test files changed.`,
+      title: "No verification evidence",
+      message: `Code changed in ${codeFiles.length} file(s), but no test files or PR verification notes were found.`,
       severity: codeFiles.length >= 5 ? "medium" : "low",
       evidence: codeFiles.slice(0, 5).map((file) => file.path),
       recommendation:
         "Ask for tests or a clear manual verification note before spending deep review time."
     }
   ];
+}
+
+function analyzePullRequestEvidence(files: DiffFile[], pullRequest?: PullRequestContext): Finding[] {
+  if (!pullRequest) {
+    return [];
+  }
+
+  const evidence = analyzeEvidence(pullRequest);
+  const codeFiles = files.filter((file) => isCodePath(file.path) && !isTestPath(file.path));
+  const hasSensitiveChanges = files.some((file) => isWorkflowPath(file.path) || isMcpConfigPath(file.path));
+  const findings: Finding[] = [];
+
+  if (evidence.descriptionState === "missing") {
+    findings.push({
+      ruleId: "thin-pr-description",
+      title: "Pull request description is missing",
+      message: "The PR body is empty, so maintainers have little context before review.",
+      severity: hasSensitiveChanges || codeFiles.length >= 3 ? "medium" : "low",
+      recommendation:
+        "Ask for the motivation, test evidence, and any rollout or compatibility notes before review."
+    });
+  } else if (evidence.descriptionState === "thin") {
+    findings.push({
+      ruleId: "thin-pr-description",
+      title: "Pull request description is thin",
+      message: "The PR body is short and may not provide enough review context.",
+      severity: hasSensitiveChanges ? "medium" : "low",
+      recommendation:
+        "Ask for a short explanation of why the change is needed and how it was verified."
+    });
+  }
+
+  if ((hasSensitiveChanges || codeFiles.length >= 5) && !evidence.reproductionEvidence) {
+    findings.push({
+      ruleId: "missing-reproduction-context",
+      title: "No reproduction or before/after context",
+      message: "The PR does not mention reproduction steps, expected behavior, actual behavior, or before/after context.",
+      severity: hasSensitiveChanges ? "medium" : "low",
+      recommendation:
+        "Ask for reproduction steps or a before/after note so reviewers can validate the change path."
+    });
+  }
+
+  return findings;
 }
 
 function analyzeDependencyChanges(files: DiffFile[], config: ProofPRConfig): Finding[] {
@@ -124,7 +187,7 @@ function analyzeDependencyChanges(files: DiffFile[], config: ProofPRConfig): Fin
   for (const file of files.filter((candidate) => isDependencyManifest(candidate.path))) {
     const addedDependencyLines = file.addedLines
       .map((line) => line.value.trim())
-      .filter((line) => /^["']?[@A-Za-z0-9_.-]+["']?\s*[:=]\s*["'][^"']+["']/.test(line));
+      .filter((line) => isDependencyLikeAddition(file.path, line));
 
     if (addedDependencyLines.length === 0) {
       continue;
@@ -143,6 +206,30 @@ function analyzeDependencyChanges(files: DiffFile[], config: ProofPRConfig): Fin
   }
 
   return findings;
+}
+
+function isDependencyLikeAddition(path: string, line: string): boolean {
+  if (path.endsWith("package.json")) {
+    return /^"[@A-Za-z0-9_.-]+"\s*:\s*"(?:\^|~|>=?|<=?|\d|workspace:|npm:|file:|link:|portal:|git\+|https?:|github:)[^"]*"/.test(
+      line
+    );
+  }
+
+  if (path.endsWith("requirements.txt")) {
+    return /^[A-Za-z0-9_.-]+(?:\[.*\])?\s*(?:==|>=|<=|~=|>|<)\s*[^#\s]+/.test(line);
+  }
+
+  if (path.endsWith("pyproject.toml") || path.endsWith("Cargo.toml")) {
+    return /^[A-Za-z0-9_.-]+\s*=\s*"(?:\^|~|>=?|<=?|\d|workspace:|path\s*=|git\s*=)[^"]*"/.test(
+      line
+    );
+  }
+
+  if (path.endsWith("go.mod")) {
+    return /^(?:require\s+)?[A-Za-z0-9_.\-/]+\s+v\d+\.\d+\.\d+/.test(line);
+  }
+
+  return false;
 }
 
 function analyzeWorkflowPermissions(files: DiffFile[]): Finding[] {

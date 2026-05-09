@@ -1,5 +1,6 @@
 export { loadConfig, parseConfig, riskMeetsThreshold, riskRank } from "./config.js";
 export { parseUnifiedDiff } from "./diff.js";
+export { analyzeEvidence } from "./evidence.js";
 export { renderMarkdownReport, renderSarifReport, getReportMarker } from "./reporters.js";
 export { scanDiff } from "./scan.js";
 export type {
@@ -8,6 +9,7 @@ export type {
   Finding,
   FindingSeverity,
   ProofPRConfig,
+  PullRequestContext,
   RiskLevel,
   ScanResult,
   ScanSummary

@@ -21,6 +21,9 @@ interface ScanCommandOptions {
   base?: string;
   head: string;
   diffFile?: string;
+  prTitle?: string;
+  prBody?: string;
+  prBodyFile?: string;
   config: string;
   format: OutputFormat;
   failOn: FailLevel;
@@ -39,6 +42,9 @@ program
   .option("--base <ref>", "Base git ref. When provided, ProofPR scans base...head.")
   .option("--head <ref>", "Head git ref used with --base.", "HEAD")
   .option("--diff-file <path>", "Read a unified diff from a file instead of running git diff.")
+  .option("--pr-title <title>", "Pull request title used for evidence checks.")
+  .option("--pr-body <body>", "Pull request body used for evidence checks.")
+  .option("--pr-body-file <path>", "Read a pull request body from a Markdown file.")
   .option("--config <path>", "Path to .proofpr.yml.", ".proofpr.yml")
   .option("--format <format>", "Output format: markdown, json, or sarif.", parseFormat, "markdown")
   .option("--fail-on <level>", "Exit with code 1 on risk level: low, medium, high, or never.", parseFailLevel, "never")
@@ -48,7 +54,12 @@ program
       : await readGitDiff(options.base, options.head);
 
     const config = await loadConfig(options.config);
-    const result = scanDiff(diffText, { config });
+    const prBody = await readPullRequestBody(options);
+    const pullRequest =
+      options.prTitle !== undefined || prBody !== undefined
+        ? { title: options.prTitle, body: prBody }
+        : undefined;
+    const result = scanDiff(diffText, { config, pullRequest });
     const output = renderOutput(result, options.format);
 
     process.stdout.write(`${output}\n`);
@@ -73,6 +84,14 @@ async function readGitDiff(base: string | undefined, head: string): Promise<stri
 
   const { stdout } = await execFileAsync("git", args, { maxBuffer: 20 * 1024 * 1024 });
   return stdout;
+}
+
+async function readPullRequestBody(options: ScanCommandOptions): Promise<string | undefined> {
+  if (options.prBodyFile) {
+    return readFile(options.prBodyFile, "utf8");
+  }
+
+  return options.prBody;
 }
 
 function renderOutput(result: ReturnType<typeof scanDiff>, format: OutputFormat): string {

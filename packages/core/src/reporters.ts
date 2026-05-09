@@ -16,6 +16,9 @@ export function renderMarkdownReport(result: ScanResult): string {
     `- Deletions: ${result.summary.deletions}`,
     `- Test files changed: ${result.summary.testFilesChanged}`,
     `- Sensitive files changed: ${result.summary.sensitiveFilesChanged}`,
+    `- PR description: ${result.summary.pullRequestDescription}`,
+    `- Verification evidence: ${formatBoolean(result.summary.verificationEvidence)}`,
+    `- Reproduction context: ${formatBoolean(result.summary.reproductionEvidence)}`,
     ""
   ];
 
@@ -126,6 +129,10 @@ function maintainerFocus(findings: Finding[]): string[] {
       focus.add("Review GitHub Actions permissions before merging.");
     } else if (finding.ruleId === "missing-tests") {
       focus.add("Ask for tests or a manual verification note.");
+    } else if (finding.ruleId === "thin-pr-description") {
+      focus.add("Ask for a clearer PR description before deep review.");
+    } else if (finding.ruleId === "missing-reproduction-context") {
+      focus.add("Ask for reproduction steps or before/after context.");
     } else if (finding.ruleId === "change-size") {
       focus.add("Request a smaller PR or a file-by-file review guide.");
     } else if (finding.ruleId === "mcp-credential-risk") {
@@ -138,6 +145,10 @@ function maintainerFocus(findings: Finding[]): string[] {
   }
 
   return [...focus];
+}
+
+function formatBoolean(value: boolean): "yes" | "no" {
+  return value ? "yes" : "no";
 }
 
 function sarifLevel(severity: Finding["severity"]): "note" | "warning" | "error" {

@@ -46,6 +46,12 @@ Emit JSON:
 proof-pr scan --base origin/main --format json
 ```
 
+Include PR description evidence checks:
+
+```bash
+proof-pr scan --base origin/main --pr-title "Fix login redirect" --pr-body-file pr-body.md
+```
+
 Fail the process on medium or high risk:
 
 ```bash

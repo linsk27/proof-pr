@@ -22,6 +22,11 @@ export interface ProofPRConfig {
   };
 }
 
+export interface PullRequestContext {
+  title?: string;
+  body?: string;
+}
+
 export interface ChangeLine {
   value: string;
   lineNumber?: number;
@@ -54,6 +59,9 @@ export interface ScanSummary {
   deletions: number;
   testFilesChanged: number;
   sensitiveFilesChanged: number;
+  pullRequestDescription: "unavailable" | "missing" | "thin" | "present";
+  verificationEvidence: boolean;
+  reproductionEvidence: boolean;
 }
 
 export interface ScanResult {

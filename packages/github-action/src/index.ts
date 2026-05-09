@@ -23,7 +23,13 @@ async function run(): Promise<void> {
 
   const config = await loadConfig(configPath);
   const diffText = await readDiff(token);
-  const result = scanDiff(diffText, { config });
+  const pullRequest = github.context.payload.pull_request
+    ? {
+        title: github.context.payload.pull_request.title,
+        body: github.context.payload.pull_request.body ?? ""
+      }
+    : undefined;
+  const result = scanDiff(diffText, { config, pullRequest });
   const markdown = renderMarkdownReport(result);
 
   core.setOutput("risk", result.risk);

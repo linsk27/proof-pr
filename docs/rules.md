@@ -12,7 +12,15 @@ Flags paths that often change project trust boundaries, such as CI workflows, de
 
 ## `missing-tests`
 
-Flags code changes under configured source paths when no test files changed.
+Flags code changes under configured source paths when no test files changed and no PR verification note is present.
+
+## `thin-pr-description`
+
+Flags missing or thin PR bodies when maintainers need more context before review.
+
+## `missing-reproduction-context`
+
+Flags broad or sensitive changes when the PR body does not mention reproduction steps, expected behavior, actual behavior, or before/after context.
 
 ## `secret-detected:*`
 

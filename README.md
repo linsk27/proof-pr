@@ -13,6 +13,7 @@ AI coding tools made it cheap to create code, pull requests, issue reports, and 
 ProofPR gives maintainers a first-pass evidence report before deep review:
 
 - Did the change include tests or verification evidence?
+- Does the PR description explain how it was verified?
 - Did it touch security-sensitive files?
 - Did it add dependencies or change CI permissions?
 - Did it expose secrets or risky MCP configuration?
@@ -71,6 +72,9 @@ Risk: high
 - Deletions: 120
 - Test files changed: 0
 - Sensitive files changed: 2
+- PR description: thin
+- Verification evidence: no
+- Reproduction context: no
 
 ## Findings
 
@@ -119,6 +123,8 @@ comment:
 - `change-size`: flags unusually broad review surfaces.
 - `sensitive-path`: flags changes to CI, dependency, secret, Docker, and MCP files.
 - `missing-tests`: flags code changes without test-file changes.
+- `thin-pr-description`: flags empty or thin PR descriptions.
+- `missing-reproduction-context`: flags broad or sensitive changes without reproduction or before/after context.
 - `secret-detected:*`: flags common API keys, tokens, database URLs, and generic secret assignments.
 - `dependency-added`: flags dependency-like entries in manifests.
 - `workflow-permission-change`: flags GitHub Actions permission changes.

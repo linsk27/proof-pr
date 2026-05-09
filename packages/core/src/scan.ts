@@ -1,17 +1,18 @@
 import { parseConfig } from "./config.js";
 import { parseUnifiedDiff } from "./diff.js";
 import { analyzeDiffFiles, summarizeDiffFiles } from "./rules.js";
-import type { Finding, ProofPRConfig, RiskLevel, ScanResult } from "./types.js";
+import type { Finding, ProofPRConfig, PullRequestContext, RiskLevel, ScanResult } from "./types.js";
 
 export interface ScanOptions {
   config?: Partial<ProofPRConfig> | ProofPRConfig;
+  pullRequest?: PullRequestContext;
 }
 
 export function scanDiff(diffText: string, options: ScanOptions = {}): ScanResult {
   const config = parseConfig(options.config ?? {});
   const files = parseUnifiedDiff(diffText);
-  const findings = dedupeFindings(analyzeDiffFiles(files, config));
-  const summary = summarizeDiffFiles(files, config);
+  const findings = dedupeFindings(analyzeDiffFiles(files, config, options.pullRequest));
+  const summary = summarizeDiffFiles(files, config, options.pullRequest);
 
   return {
     risk: calculateRisk(findings),

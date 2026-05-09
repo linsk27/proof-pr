@@ -50518,6 +50518,9 @@ function renderMarkdownReport(result) {
         `- Deletions: ${result.summary.deletions}`,
         `- Test files changed: ${result.summary.testFilesChanged}`,
         `- Sensitive files changed: ${result.summary.sensitiveFilesChanged}`,
+        `- PR description: ${result.summary.pullRequestDescription}`,
+        `- Verification evidence: ${formatBoolean(result.summary.verificationEvidence)}`,
+        `- Reproduction context: ${formatBoolean(result.summary.reproductionEvidence)}`,
         ""
     ];
     if (result.findings.length === 0) {
@@ -50606,6 +50609,12 @@ function maintainerFocus(findings) {
         else if (finding.ruleId === "missing-tests") {
             focus.add("Ask for tests or a manual verification note.");
         }
+        else if (finding.ruleId === "thin-pr-description") {
+            focus.add("Ask for a clearer PR description before deep review.");
+        }
+        else if (finding.ruleId === "missing-reproduction-context") {
+            focus.add("Ask for reproduction steps or before/after context.");
+        }
         else if (finding.ruleId === "change-size") {
             focus.add("Request a smaller PR or a file-by-file review guide.");
         }
@@ -50617,6 +50626,9 @@ function maintainerFocus(findings) {
         focus.add("Review the listed sensitive files and ask for evidence where context is thin.");
     }
     return [...focus];
+}
+function formatBoolean(value) {
+    return value ? "yes" : "no";
 }
 function sarifLevel(severity) {
     if (severity === "high") {
@@ -50710,6 +50722,49 @@ function toChangeLine(value, lineNumber) {
     return lineNumber > 0 ? { value, lineNumber } : { value };
 }
 //# sourceMappingURL=diff.js.map
+;// CONCATENATED MODULE: ../core/dist/evidence.js
+const VERIFICATION_PATTERNS = [
+    /\b(?:tested|tests?|verified|validated|checks?|ci|unit test|integration test)\b/i,
+    /\b(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?test\b/i,
+    /\b(?:pytest|go test|cargo test|mvn test|gradle test|dotnet test)\b/i,
+    /\bmanual(?:ly)?\s+(?:tested|verified|checked)\b/i,
+    /\bscreenshot(?:s)?\b/i,
+    /测试|验证|已测|截图|单元测试|集成测试/
+];
+const REPRODUCTION_PATTERNS = [
+    /\b(?:repro|reproduce|reproduction|steps to reproduce|minimal reproduction)\b/i,
+    /\b(?:before|after|expected|actual)\b/i,
+    /复现|重现|复现步骤|期望|实际/
+];
+function analyzeEvidence(context) {
+    if (!context) {
+        return {
+            descriptionState: "unavailable",
+            verificationEvidence: false,
+            reproductionEvidence: false
+        };
+    }
+    const text = [context.title ?? "", context.body ?? ""].join("\n").trim();
+    const body = (context.body ?? "").trim();
+    return {
+        descriptionState: descriptionState(body),
+        verificationEvidence: matchesAnyPattern(text, VERIFICATION_PATTERNS),
+        reproductionEvidence: matchesAnyPattern(text, REPRODUCTION_PATTERNS)
+    };
+}
+function descriptionState(body) {
+    if (body.length === 0) {
+        return "missing";
+    }
+    if (body.length < 80) {
+        return "thin";
+    }
+    return "present";
+}
+function matchesAnyPattern(value, patterns) {
+    return patterns.some((pattern) => pattern.test(value));
+}
+//# sourceMappingURL=evidence.js.map
 // EXTERNAL MODULE: ../../node_modules/.pnpm/picomatch@4.0.4/node_modules/picomatch/index.js
 var picomatch = __nccwpck_require__(2095);
 ;// CONCATENATED MODULE: ../core/dist/path-utils.js
@@ -50844,12 +50899,14 @@ function redactLine(line) {
 ;// CONCATENATED MODULE: ../core/dist/rules.js
 
 
-function analyzeDiffFiles(files, config) {
+
+function analyzeDiffFiles(files, config, pullRequest) {
     const activeFiles = files.filter((file) => !matchesAny(file.path, config.ignorePaths));
     const findings = [];
     findings.push(...analyzeChangeSize(activeFiles));
     findings.push(...analyzeSensitivePaths(activeFiles, config));
-    findings.push(...analyzeMissingTests(activeFiles, config));
+    findings.push(...analyzeMissingTests(activeFiles, config, pullRequest));
+    findings.push(...analyzePullRequestEvidence(activeFiles, pullRequest));
     findings.push(...analyzeDependencyChanges(activeFiles, config));
     findings.push(...analyzeWorkflowPermissions(activeFiles));
     findings.push(...analyzeMcpConfigs(activeFiles));
@@ -50860,14 +50917,18 @@ function analyzeDiffFiles(files, config) {
     }
     return findings;
 }
-function summarizeDiffFiles(files, config) {
+function summarizeDiffFiles(files, config, pullRequest) {
     const activeFiles = files.filter((file) => !matchesAny(file.path, config.ignorePaths));
+    const evidence = analyzeEvidence(pullRequest);
     return {
         filesChanged: activeFiles.length,
         additions: activeFiles.reduce((sum, file) => sum + file.added, 0),
         deletions: activeFiles.reduce((sum, file) => sum + file.removed, 0),
         testFilesChanged: activeFiles.filter((file) => isTestPath(file.path)).length,
-        sensitiveFilesChanged: activeFiles.filter((file) => matchesAny(file.path, config.sensitivePaths)).length
+        sensitiveFilesChanged: activeFiles.filter((file) => matchesAny(file.path, config.sensitivePaths)).length,
+        pullRequestDescription: evidence.descriptionState,
+        verificationEvidence: evidence.verificationEvidence,
+        reproductionEvidence: evidence.reproductionEvidence
     };
 }
 function analyzeChangeSize(files) {
@@ -50912,7 +50973,7 @@ function analyzeSensitivePaths(files, config) {
         recommendation: "Review this file deliberately, especially permission, credential, release, and dependency changes."
     }));
 }
-function analyzeMissingTests(files, config) {
+function analyzeMissingTests(files, config, pullRequest) {
     if (!config.requireTests.enabled) {
         return [];
     }
@@ -50920,19 +50981,57 @@ function analyzeMissingTests(files, config) {
         !isTestPath(file.path) &&
         matchesAny(file.path, config.requireTests.paths));
     const hasTestChanges = files.some((file) => isTestPath(file.path));
-    if (codeFiles.length === 0 || hasTestChanges) {
+    const hasVerificationEvidence = analyzeEvidence(pullRequest).verificationEvidence;
+    if (codeFiles.length === 0 || hasTestChanges || hasVerificationEvidence) {
         return [];
     }
     return [
         {
             ruleId: "missing-tests",
-            title: "No test evidence in changed files",
-            message: `Code changed in ${codeFiles.length} file(s), but no test files changed.`,
+            title: "No verification evidence",
+            message: `Code changed in ${codeFiles.length} file(s), but no test files or PR verification notes were found.`,
             severity: codeFiles.length >= 5 ? "medium" : "low",
             evidence: codeFiles.slice(0, 5).map((file) => file.path),
             recommendation: "Ask for tests or a clear manual verification note before spending deep review time."
         }
     ];
+}
+function analyzePullRequestEvidence(files, pullRequest) {
+    if (!pullRequest) {
+        return [];
+    }
+    const evidence = analyzeEvidence(pullRequest);
+    const codeFiles = files.filter((file) => isCodePath(file.path) && !isTestPath(file.path));
+    const hasSensitiveChanges = files.some((file) => isWorkflowPath(file.path) || isMcpConfigPath(file.path));
+    const findings = [];
+    if (evidence.descriptionState === "missing") {
+        findings.push({
+            ruleId: "thin-pr-description",
+            title: "Pull request description is missing",
+            message: "The PR body is empty, so maintainers have little context before review.",
+            severity: hasSensitiveChanges || codeFiles.length >= 3 ? "medium" : "low",
+            recommendation: "Ask for the motivation, test evidence, and any rollout or compatibility notes before review."
+        });
+    }
+    else if (evidence.descriptionState === "thin") {
+        findings.push({
+            ruleId: "thin-pr-description",
+            title: "Pull request description is thin",
+            message: "The PR body is short and may not provide enough review context.",
+            severity: hasSensitiveChanges ? "medium" : "low",
+            recommendation: "Ask for a short explanation of why the change is needed and how it was verified."
+        });
+    }
+    if ((hasSensitiveChanges || codeFiles.length >= 5) && !evidence.reproductionEvidence) {
+        findings.push({
+            ruleId: "missing-reproduction-context",
+            title: "No reproduction or before/after context",
+            message: "The PR does not mention reproduction steps, expected behavior, actual behavior, or before/after context.",
+            severity: hasSensitiveChanges ? "medium" : "low",
+            recommendation: "Ask for reproduction steps or a before/after note so reviewers can validate the change path."
+        });
+    }
+    return findings;
 }
 function analyzeDependencyChanges(files, config) {
     if (!config.dependencies.flagNewPackages) {
@@ -50942,7 +51041,7 @@ function analyzeDependencyChanges(files, config) {
     for (const file of files.filter((candidate) => isDependencyManifest(candidate.path))) {
         const addedDependencyLines = file.addedLines
             .map((line) => line.value.trim())
-            .filter((line) => /^["']?[@A-Za-z0-9_.-]+["']?\s*[:=]\s*["'][^"']+["']/.test(line));
+            .filter((line) => isDependencyLikeAddition(file.path, line));
         if (addedDependencyLines.length === 0) {
             continue;
         }
@@ -50957,6 +51056,21 @@ function analyzeDependencyChanges(files, config) {
         });
     }
     return findings;
+}
+function isDependencyLikeAddition(path, line) {
+    if (path.endsWith("package.json")) {
+        return /^"[@A-Za-z0-9_.-]+"\s*:\s*"(?:\^|~|>=?|<=?|\d|workspace:|npm:|file:|link:|portal:|git\+|https?:|github:)[^"]*"/.test(line);
+    }
+    if (path.endsWith("requirements.txt")) {
+        return /^[A-Za-z0-9_.-]+(?:\[.*\])?\s*(?:==|>=|<=|~=|>|<)\s*[^#\s]+/.test(line);
+    }
+    if (path.endsWith("pyproject.toml") || path.endsWith("Cargo.toml")) {
+        return /^[A-Za-z0-9_.-]+\s*=\s*"(?:\^|~|>=?|<=?|\d|workspace:|path\s*=|git\s*=)[^"]*"/.test(line);
+    }
+    if (path.endsWith("go.mod")) {
+        return /^(?:require\s+)?[A-Za-z0-9_.\-/]+\s+v\d+\.\d+\.\d+/.test(line);
+    }
+    return false;
 }
 function analyzeWorkflowPermissions(files) {
     const findings = [];
@@ -51020,8 +51134,8 @@ function sensitivePathSeverity(path) {
 function scanDiff(diffText, options = {}) {
     const config = parseConfig(options.config ?? {});
     const files = parseUnifiedDiff(diffText);
-    const findings = dedupeFindings(analyzeDiffFiles(files, config));
-    const summary = summarizeDiffFiles(files, config);
+    const findings = dedupeFindings(analyzeDiffFiles(files, config, options.pullRequest));
+    const summary = summarizeDiffFiles(files, config, options.pullRequest);
     return {
         risk: calculateRisk(findings),
         summary,
@@ -51059,6 +51173,7 @@ function dedupeFindings(findings) {
 
 
 
+
 //# sourceMappingURL=index.js.map
 ;// CONCATENATED MODULE: ./dist/index.js
 
@@ -51074,7 +51189,13 @@ async function run() {
     const shouldComment = parseBoolean(lib_core.getInput("comment", { required: false }) || "true");
     const config = await loadConfig(configPath);
     const diffText = await readDiff(token);
-    const result = scanDiff(diffText, { config });
+    const pullRequest = github.context.payload.pull_request
+        ? {
+            title: github.context.payload.pull_request.title,
+            body: github.context.payload.pull_request.body ?? ""
+        }
+        : undefined;
+    const result = scanDiff(diffText, { config, pullRequest });
     const markdown = renderMarkdownReport(result);
     lib_core.setOutput("risk", result.risk);
     lib_core.setOutput("findings", String(result.findings.length));
