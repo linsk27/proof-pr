@@ -1,0 +1,22 @@
+{
+  "name": "proof-pr",
+  "version": "0.1.0",
+  "description": "CLI for ProofPR, a maintainer-focused pull request evidence scanner.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "proof-pr": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run src --passWithNoTests",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@proof-pr/core": "workspace:*",
+    "commander": "^14.0.2"
+  }
+}

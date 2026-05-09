@@ -1,0 +1,20 @@
+riskThreshold: high
+
+sensitivePaths:
+  - ".github/workflows/**"
+  - "package.json"
+  - "pnpm-lock.yaml"
+  - "tsconfig*.json"
+  - "**/.env*"
+
+requireTests:
+  enabled: true
+  paths:
+    - "src/**"
+    - "packages/**/src/**"
+
+secrets:
+  enabled: true
+
+dependencies:
+  flagNewPackages: true

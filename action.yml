@@ -1,0 +1,23 @@
+name: ProofPR
+description: Review pull request evidence, scope, and safety before maintainers spend time on it.
+author: ProofPR contributors
+inputs:
+  github-token:
+    description: GitHub token used to read pull request diffs and post comments.
+    required: false
+    default: ${{ github.token }}
+  config-path:
+    description: Path to the ProofPR configuration file.
+    required: false
+    default: .proofpr.yml
+  fail-on:
+    description: Lowest risk level that should fail the workflow. One of low, medium, high, never.
+    required: false
+    default: high
+  comment:
+    description: Whether to create or update a pull request comment.
+    required: false
+    default: "true"
+runs:
+  using: node20
+  main: packages/github-action/action-dist/index.js

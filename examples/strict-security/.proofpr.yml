@@ -1,0 +1,33 @@
+riskThreshold: medium
+
+sensitivePaths:
+  - ".github/workflows/**"
+  - ".github/actions/**"
+  - "**/.env*"
+  - "**/mcp*.json"
+  - "**/*mcp*.json"
+  - "Dockerfile"
+  - "**/Dockerfile"
+  - "package.json"
+  - "pnpm-lock.yaml"
+  - "package-lock.json"
+  - "yarn.lock"
+  - "pyproject.toml"
+  - "requirements.txt"
+  - "go.mod"
+  - "Cargo.toml"
+
+requireTests:
+  enabled: true
+  paths:
+    - "src/**"
+    - "packages/**/src/**"
+    - "app/**"
+    - "lib/**"
+
+secrets:
+  enabled: true
+
+dependencies:
+  flagNewPackages: true
+  flagMajorUpgrades: true

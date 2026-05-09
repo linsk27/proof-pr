@@ -1,0 +1,33 @@
+riskThreshold: high
+
+sensitivePaths:
+  - ".github/workflows/**"
+  - ".github/actions/**"
+  - "**/.env*"
+  - "**/mcp*.json"
+  - "**/*mcp*.json"
+  - "Dockerfile"
+  - "**/Dockerfile"
+  - "package.json"
+  - "pnpm-lock.yaml"
+  - "package-lock.json"
+  - "yarn.lock"
+  - "bun.lockb"
+
+requireTests:
+  enabled: true
+  paths:
+    - "src/**"
+    - "packages/**/src/**"
+    - "app/**"
+    - "lib/**"
+
+secrets:
+  enabled: true
+
+dependencies:
+  flagNewPackages: true
+  flagMajorUpgrades: true
+
+comment:
+  enabled: true

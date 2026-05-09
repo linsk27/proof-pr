@@ -1,0 +1,9 @@
+riskThreshold: high
+
+requireTests:
+  enabled: true
+  paths:
+    - "src/**"
+
+secrets:
+  enabled: true
