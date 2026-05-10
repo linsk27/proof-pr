@@ -50433,37 +50433,125 @@ function preprocess(fn, schema) {
 
 const riskLevelSchema = schemas_enum(["low", "medium", "high"]);
 const localeSchema = schemas_enum(["en", "zh-CN"]);
+const configPresetSchema = schemas_enum([
+    "balanced",
+    "open-source-maintainer",
+    "security-strict",
+    "ai-generated-pr",
+    "mcp-security",
+    "dependency-careful"
+]);
+const CONFIG_PRESETS = (/* unused pure expression or super */ null && ([
+    "balanced",
+    "open-source-maintainer",
+    "security-strict",
+    "ai-generated-pr",
+    "mcp-security",
+    "dependency-careful"
+]));
+const DEFAULT_SENSITIVE_PATHS = [
+    ".github/workflows/**",
+    ".github/actions/**",
+    "**/.env*",
+    "**/mcp*.json",
+    "**/*mcp*.json",
+    "Dockerfile",
+    "**/Dockerfile",
+    "package.json",
+    "pnpm-lock.yaml",
+    "package-lock.json",
+    "yarn.lock",
+    "bun.lockb",
+    "requirements.txt",
+    "pyproject.toml",
+    "Cargo.toml",
+    "Cargo.lock",
+    "go.mod",
+    "go.sum"
+];
+const DEFAULT_TEST_PATHS = ["src/**", "packages/**/src/**", "app/**", "lib/**"];
+const PRESET_DEFAULTS = {
+    balanced: {},
+    "open-source-maintainer": {
+        riskThreshold: "high",
+        sensitivePaths: DEFAULT_SENSITIVE_PATHS,
+        requireTests: {
+            enabled: true,
+            paths: DEFAULT_TEST_PATHS
+        }
+    },
+    "security-strict": {
+        riskThreshold: "medium",
+        sensitivePaths: [
+            ...DEFAULT_SENSITIVE_PATHS,
+            ".npmrc",
+            "**/.npmrc",
+            ".pypirc",
+            "**/.pypirc",
+            ".dockerignore",
+            "docker-compose*.yml",
+            "**/docker-compose*.yml",
+            ".github/dependabot.yml",
+            ".github/codeql/**",
+            "terraform/**/*.tf",
+            "**/*.pem",
+            "**/*.key"
+        ],
+        requireTests: {
+            enabled: true,
+            paths: ["src/**", "packages/**/src/**", "app/**", "lib/**", "server/**", "api/**"]
+        }
+    },
+    "ai-generated-pr": {
+        riskThreshold: "medium",
+        sensitivePaths: DEFAULT_SENSITIVE_PATHS,
+        requireTests: {
+            enabled: true,
+            paths: ["src/**", "packages/**/src/**", "app/**", "lib/**", "server/**", "api/**", "components/**"]
+        }
+    },
+    "mcp-security": {
+        riskThreshold: "medium",
+        sensitivePaths: [
+            ...DEFAULT_SENSITIVE_PATHS,
+            ".cursor/**",
+            ".vscode/**"
+        ],
+        requireTests: {
+            enabled: true,
+            paths: DEFAULT_TEST_PATHS
+        }
+    },
+    "dependency-careful": {
+        riskThreshold: "medium",
+        sensitivePaths: [
+            ...DEFAULT_SENSITIVE_PATHS,
+            "poetry.lock",
+            "Pipfile",
+            "Pipfile.lock",
+            "pom.xml",
+            "build.gradle",
+            "build.gradle.kts",
+            "Gemfile",
+            "Gemfile.lock"
+        ],
+        requireTests: {
+            enabled: true,
+            paths: DEFAULT_TEST_PATHS
+        }
+    }
+};
 const configSchema = object({
+    preset: configPresetSchema.default("balanced"),
     locale: localeSchema.default("en"),
     riskThreshold: riskLevelSchema.default("high"),
     ignorePaths: array(schemas_string()).default([]),
-    sensitivePaths: array(schemas_string())
-        .default([
-        ".github/workflows/**",
-        ".github/actions/**",
-        "**/.env*",
-        "**/mcp*.json",
-        "**/*mcp*.json",
-        "Dockerfile",
-        "**/Dockerfile",
-        "package.json",
-        "pnpm-lock.yaml",
-        "package-lock.json",
-        "yarn.lock",
-        "bun.lockb",
-        "requirements.txt",
-        "pyproject.toml",
-        "Cargo.toml",
-        "Cargo.lock",
-        "go.mod",
-        "go.sum"
-    ]),
+    sensitivePaths: array(schemas_string()).default(DEFAULT_SENSITIVE_PATHS),
     requireTests: object({
         enabled: schemas_boolean().default(true),
-        paths: array(schemas_string())
-            .default(["src/**", "packages/**/src/**", "app/**", "lib/**"])
+        paths: array(schemas_string()).default(DEFAULT_TEST_PATHS)
     })
-        .default({ enabled: true, paths: ["src/**", "packages/**/src/**", "app/**", "lib/**"] }),
+        .default({ enabled: true, paths: DEFAULT_TEST_PATHS }),
     secrets: object({ enabled: schemas_boolean().default(true) }).default({ enabled: true }),
     dependencies: object({
         flagNewPackages: schemas_boolean().default(true),
@@ -50473,7 +50561,9 @@ const configSchema = object({
     comment: object({ enabled: schemas_boolean().default(true) }).default({ enabled: true })
 });
 function parseConfig(input) {
-    return configSchema.parse(input ?? {});
+    const raw = isRecord(input) ? input : {};
+    const preset = configPresetSchema.parse(raw.preset ?? "balanced");
+    return configSchema.parse(deepMerge(PRESET_DEFAULTS[preset], raw, { preset }));
 }
 async function loadConfig(path) {
     try {
@@ -50500,6 +50590,33 @@ function riskRank(risk) {
 function parseLocale(value, fallback = "en") {
     const result = localeSchema.safeParse(value);
     return result.success ? result.data : fallback;
+}
+function parsePreset(value, fallback = "balanced") {
+    const result = configPresetSchema.safeParse(value);
+    return result.success ? result.data : fallback;
+}
+function listConfigPresets() {
+    return CONFIG_PRESETS;
+}
+function deepMerge(...items) {
+    const output = {};
+    for (const item of items) {
+        if (!isRecord(item)) {
+            continue;
+        }
+        for (const [key, value] of Object.entries(item)) {
+            if (isRecord(value) && isRecord(output[key])) {
+                output[key] = deepMerge(output[key], value);
+            }
+            else {
+                output[key] = value;
+            }
+        }
+    }
+    return output;
+}
+function isRecord(value) {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 function isMissingFileError(error) {
     return (typeof error === "object" &&

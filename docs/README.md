@@ -14,7 +14,8 @@
 ## 当前发布
 
 - GitHub Release：[`v0.1.4`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.4)
-- npm：[`proof-pr@0.1.4`](https://www.npmjs.com/package/proof-pr)
+- npm 最新公开包：[`proof-pr@0.1.3`](https://www.npmjs.com/package/proof-pr)
+- `main` 分支继续开发下一版，包含 Review Plan 和规则预设。
 
 ## 真实运行截图
 
@@ -30,6 +31,7 @@ CLI 输出截图来自本机 `AI-Vue3-python-flask-Blog` 项目，使用 `npx pr
 
 ```yaml
 locale: zh-CN
+preset: open-source-maintainer
 ```
 
 ## 示意图

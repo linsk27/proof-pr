@@ -14,7 +14,8 @@ ProofPR 是一个面向开源维护者的 **PR 证据检查器 / PR 风险扫描
 ## 发布状态
 
 - GitHub Release：[`v0.1.4`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.4)
-- npm：[`proof-pr@0.1.4`](https://www.npmjs.com/package/proof-pr)
+- npm 最新公开包：[`proof-pr@0.1.3`](https://www.npmjs.com/package/proof-pr)
+- `main` 分支：正在继续开发下一版，已包含 Review Plan 和规则预设，暂未发布新的 npm 版本。
 - 直接运行：`npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN`
 
 ## 真实运行截图
@@ -176,6 +177,7 @@ npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 
 ```yaml
 locale: zh-CN
+preset: open-source-maintainer
 
 riskThreshold: high
 
@@ -201,6 +203,34 @@ dependencies:
 
 comment:
   enabled: true
+```
+
+## 规则预设怎么选
+
+如果你不想一开始就理解所有规则，可以先用 `preset`。它会自动设置风险阈值、敏感路径和需要测试覆盖的源码路径。
+
+| 预设 | 适合场景 |
+| --- | --- |
+| `balanced` | 默认均衡模式，适合先低噪音试用。 |
+| `open-source-maintainer` | 开源仓库推荐，关注 PR 描述、测试证据、CI、依赖和 secret 风险。 |
+| `security-strict` | 安全更敏感的仓库，敏感路径更多，`medium` 风险就会更早暴露。 |
+| `ai-generated-pr` | 担心 AI 生成 PR 缺少验证证据时使用。 |
+| `mcp-security` | 重点关注 MCP、Cursor、VS Code、本地 agent 配置和凭证风险。 |
+| `dependency-careful` | 重点关注依赖清单、锁文件、包管理配置变化。 |
+
+快速初始化：
+
+```bash
+# main 分支源码版
+pnpm build
+node packages/cli/dist/index.js init --preset security-strict
+```
+
+下一次 npm 发版后可直接使用：
+
+```bash
+npx proof-pr@latest init --preset open-source-maintainer
+npx proof-pr@latest init --preset security-strict
 ```
 
 ## 本地 CLI 使用
@@ -264,7 +294,7 @@ ProofPR 报告主要看三块：
 
 ## 当前开发进度
 
-当前版本：`v0.1.4`
+当前 GitHub Action 发布版：`v0.1.4`。`main` 分支还包含下一版开发中的能力，npm 最新公开包暂时是 `0.1.3`。
 
 已经完成：
 
@@ -275,6 +305,7 @@ ProofPR 报告主要看三块：
 - 中文报告输出：`.proofpr.yml` 配置 `locale: zh-CN`，或 CLI 使用 `--locale zh-CN`。
 - PR title/body 证据分析。
 - 改动规模、敏感路径、缺少测试、secrets、依赖、workflow 权限、MCP 配置风险规则。
+- 规则预设：`open-source-maintainer`、`security-strict`、`ai-generated-pr`、`mcp-security`、`dependency-careful`。
 - npm 包发布和 CLI 安装体验。
 - GitHub Release，附带 CLI tarball。
 
@@ -330,7 +361,6 @@ pnpm release:check
 
 - npm 发布自动化。
 - GitHub Check annotations。
-- 规则预设。
 - GitHub Marketplace。
 - SARIF 上传示例。
 - Issue 复现质量检查模式。

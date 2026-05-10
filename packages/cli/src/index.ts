@@ -5,12 +5,15 @@ import { dirname } from "node:path";
 import { promisify } from "node:util";
 import { Command, InvalidArgumentError } from "commander";
 import {
+  listConfigPresets,
   loadConfig,
   parseLocale,
+  parsePreset,
   renderMarkdownReport,
   renderSarifReport,
   riskMeetsThreshold,
   scanDiff,
+  type ConfigPreset,
   type ReportLocale,
   type RiskLevel
 } from "@proof-pr/core";
@@ -36,6 +39,7 @@ interface ScanCommandOptions {
 interface InitCommandOptions {
   configPath: string;
   workflowPath: string;
+  preset: ConfigPreset;
   failOn: FailLevel;
   force: boolean;
 }
@@ -91,10 +95,16 @@ program
     "Path to write the GitHub Actions workflow.",
     ".github/workflows/proofpr.yml"
   )
+  .option(
+    "--preset <preset>",
+    `Config preset: ${listConfigPresets().join(", ")}.`,
+    parsePresetOption,
+    "open-source-maintainer"
+  )
   .option("--fail-on <level>", "Workflow failure threshold: low, medium, high, or never.", parseFailLevel, "high")
   .option("--force", "Overwrite existing files.", false)
   .action(async (options: InitCommandOptions) => {
-    await writeIfMissing(options.configPath, renderConfigTemplate(), options.force);
+    await writeIfMissing(options.configPath, renderConfigTemplate(options.preset), options.force);
     await writeIfMissing(options.workflowPath, renderWorkflowTemplate(options.failOn), options.force);
     process.stdout.write(
       `ProofPR initialized:\n- ${options.configPath}\n- ${options.workflowPath}\n`
@@ -144,42 +154,55 @@ async function pathExists(path: string): Promise<boolean> {
   }
 }
 
-function renderConfigTemplate(): string {
+function renderConfigTemplate(preset: ConfigPreset): string {
   return `locale: zh-CN
-
-riskThreshold: high
-
-sensitivePaths:
-  - ".github/workflows/**"
-  - ".github/actions/**"
-  - "**/.env*"
-  - "**/mcp*.json"
-  - "**/*mcp*.json"
-  - "Dockerfile"
-  - "**/Dockerfile"
-  - "package.json"
-  - "pnpm-lock.yaml"
-  - "package-lock.json"
-  - "yarn.lock"
-  - "bun.lockb"
-
-requireTests:
-  enabled: true
-  paths:
-    - "src/**"
-    - "packages/**/src/**"
-    - "app/**"
-    - "lib/**"
-
-secrets:
-  enabled: true
-
-dependencies:
-  flagNewPackages: true
-  flagMajorUpgrades: true
+preset: ${preset}
 
 comment:
   enabled: true
+
+# 如需更严格或更宽松，可以先换 preset：
+# preset: security-strict
+#
+# 可用预设：
+# - balanced
+# - open-source-maintainer
+# - security-strict
+# - ai-generated-pr
+# - mcp-security
+# - dependency-careful
+#
+# 也可以取消注释下面这些字段，覆盖 preset 的默认值。
+# riskThreshold: high
+#
+# sensitivePaths:
+#   - ".github/workflows/**"
+#   - ".github/actions/**"
+#   - "**/.env*"
+#   - "**/mcp*.json"
+#   - "**/*mcp*.json"
+#   - "Dockerfile"
+#   - "**/Dockerfile"
+#   - "package.json"
+#   - "pnpm-lock.yaml"
+#   - "package-lock.json"
+#   - "yarn.lock"
+#   - "bun.lockb"
+#
+# requireTests:
+#   enabled: true
+#   paths:
+#     - "src/**"
+#     - "packages/**/src/**"
+#     - "app/**"
+#     - "lib/**"
+#
+# secrets:
+#   enabled: true
+#
+# dependencies:
+#   flagNewPackages: true
+#   flagMajorUpgrades: true
 `;
 }
 
@@ -232,4 +255,14 @@ function parseFailLevel(value: string): FailLevel {
   }
 
   throw new InvalidArgumentError("fail-on must be one of: low, medium, high, never");
+}
+
+function parsePresetOption(value: string): ConfigPreset {
+  const preset = parsePreset(value);
+
+  if (preset === value) {
+    return preset;
+  }
+
+  throw new InvalidArgumentError(`preset must be one of: ${listConfigPresets().join(", ")}`);
 }

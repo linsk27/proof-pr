@@ -87,6 +87,7 @@ on:
 
 ```yaml
 locale: zh-CN
+preset: open-source-maintainer
 
 riskThreshold: high
 
@@ -146,6 +147,21 @@ node packages/cli/dist/index.js scan --base origin/main --head HEAD --locale zh-
 
 ```bash
 proof-pr init
+```
+
+如果你的仓库更关注安全、MCP 或依赖风险，下一次 npm 发版后可以换成：
+
+```bash
+proof-pr init --preset security-strict
+proof-pr init --preset mcp-security
+proof-pr init --preset dependency-careful
+```
+
+当前 `main` 分支源码版也可以这样运行：
+
+```bash
+pnpm build
+node packages/cli/dist/index.js init --preset security-strict
 ```
 
 扫描当前工作区 diff：

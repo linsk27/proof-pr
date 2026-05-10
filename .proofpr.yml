@@ -1,4 +1,5 @@
 locale: zh-CN
+preset: open-source-maintainer
 
 riskThreshold: high
 

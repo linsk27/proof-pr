@@ -13,6 +13,9 @@ Pull Request / git diff
 读取配置 .proofpr.yml
         |
         v
+应用 preset 预设和用户覆盖项
+        |
+        v
 解析 unified diff
         |
         v
@@ -70,6 +73,19 @@ on:
 因此普通分支 push 不会单独生成报告。只有打开 PR、向已打开的 PR 分支继续推送、或重新打开 PR 时，GitHub Action 才会运行。这个设计是为了让报告围绕 review 场景出现，而不是让每一次分支推送都产生噪音。
 
 报告可以在 PR 评论区、GitHub Actions job summary 和 PR checks 状态里看到。同一个 PR 多次运行时，ProofPR 会更新已有评论，而不是每次新建一条评论。
+
+## 规则预设
+
+`.proofpr.yml` 可以通过 `preset` 选择内置模式：
+
+```yaml
+locale: zh-CN
+preset: open-source-maintainer
+```
+
+预设本质上是一组确定性的默认配置，不是大模型提示词。ProofPR 会先应用预设，再应用用户写在配置文件里的覆盖项。因此你可以先选 `security-strict`，再单独覆盖 `ignorePaths`、`sensitivePaths` 或 `requireTests.paths`。
+
+当前内置预设包括 `balanced`、`open-source-maintainer`、`security-strict`、`ai-generated-pr`、`mcp-security` 和 `dependency-careful`。
 
 ## diff 解析
 

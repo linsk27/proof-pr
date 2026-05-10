@@ -1,8 +1,58 @@
 import { describe, expect, it } from "vitest";
+import { parseConfig } from "./config.js";
 import { renderMarkdownReport } from "./reporters.js";
 import { scanDiff } from "./scan.js";
 
 describe("scanDiff", () => {
+  it("applies built-in config presets", () => {
+    const config = parseConfig({ preset: "security-strict" });
+
+    expect(config.preset).toBe("security-strict");
+    expect(config.riskThreshold).toBe("medium");
+    expect(config.sensitivePaths).toContain(".npmrc");
+  });
+
+  it("allows explicit config to override preset defaults", () => {
+    const config = parseConfig({
+      preset: "security-strict",
+      riskThreshold: "high",
+      sensitivePaths: ["custom/**"],
+      requireTests: {
+        enabled: false
+      }
+    });
+
+    expect(config.riskThreshold).toBe("high");
+    expect(config.sensitivePaths).toEqual(["custom/**"]);
+    expect(config.requireTests.enabled).toBe(false);
+    expect(config.requireTests.paths).toContain("server/**");
+  });
+
+  it("rejects unknown config presets", () => {
+    expect(() => parseConfig({ preset: "strict" })).toThrow();
+  });
+
+  it("uses the MCP security preset to focus local agent configuration", () => {
+    const result = scanDiff(
+      `diff --git a/.cursor/settings.json b/.cursor/settings.json
+index 0000000..1111111 100644
+--- a/.cursor/settings.json
++++ b/.cursor/settings.json
+@@ -1 +1,2 @@
+ {}
++{"mcpServers":{"local":{"command":"node","args":["server.js"]}}}
+`,
+      {
+        config: {
+          preset: "mcp-security"
+        }
+      }
+    );
+
+    expect(result.findings.some((finding) => finding.ruleId === "sensitive-path")).toBe(true);
+    expect(result.summary.sensitiveFilesChanged).toBe(1);
+  });
+
   it("detects possible committed secrets", () => {
     const result = scanDiff(`diff --git a/.env b/.env
 new file mode 100644

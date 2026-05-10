@@ -11,6 +11,7 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 - Evidence Score：0-100 证据评分。
 - Review Gate：维护者下一步动作建议。
 - Review Plan：可勾选行动清单和重点文件。
+- 规则预设：`open-source-maintainer`、`security-strict`、`ai-generated-pr`、`mcp-security`、`dependency-careful`。
 - 内置规则：改动规模、敏感路径、缺少测试、PR 描述、复现上下文、secret、依赖、workflow 权限、MCP 配置。
 
 ## 短期方向
@@ -18,18 +19,10 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 1. GitHub Check annotations
    在 PR Files changed 页面直接标出高风险文件，让维护者不用只看评论。
 
-2. 规则预设
-   提供几套开箱即用模式：
-   - `open-source-maintainer`
-   - `security-strict`
-   - `ai-generated-pr`
-   - `mcp-security`
-   - `dependency-careful`
-
-3. GitHub Marketplace
+2. GitHub Marketplace
    上架 GitHub Marketplace，降低安装门槛，并提升项目可信度。
 
-4. 真实案例库
+3. 真实案例库
    文档展示典型 PR 场景：
    - 大 PR
    - 缺少测试
@@ -60,4 +53,4 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 
 ## 下一版优先级
 
-下一版优先做 GitHub Check annotations 和规则预设。这两个能力最容易让用户感受到“安装后马上有用”，也更适合后续上架 GitHub Marketplace。
+下一版优先做 GitHub Check annotations、真实案例库和 GitHub Marketplace 安装体验。这些能力最容易让用户感受到“安装后马上有用”，也更适合后续扩大开源传播。

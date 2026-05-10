@@ -16,10 +16,13 @@ ProofPR 帮助维护者在投入深入 review 之前，先检查 PR 的证据、
 
 ```bash
 npx proof-pr@latest init
+npx proof-pr@latest init --preset security-strict
 npx proof-pr@latest scan --base origin/main --head HEAD
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 npx proof-pr@latest scan --base origin/main --pr-body-file pr-body.md --format json
 ```
+
+可用预设：`balanced`、`open-source-maintainer`、`security-strict`、`ai-generated-pr`、`mcp-security`、`dependency-careful`。
 
 ## GitHub Action
 

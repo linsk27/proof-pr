@@ -4,6 +4,7 @@ ProofPR 默认读取 `.proofpr.yml`。
 
 ```yaml
 locale: zh-CN
+preset: open-source-maintainer
 
 riskThreshold: high
 
@@ -45,6 +46,28 @@ CLI 也可以临时指定：
 
 ```bash
 proof-pr scan --base origin/main --head HEAD --locale zh-CN
+```
+
+## `preset`
+
+选择内置规则预设。预设会自动设置风险阈值、敏感路径和需要测试覆盖的源码路径，你也可以在同一个 `.proofpr.yml` 里继续覆盖具体字段。
+
+可选值：
+
+| 预设 | 适合场景 |
+| --- | --- |
+| `balanced` | 默认均衡模式，适合先低噪音试用。 |
+| `open-source-maintainer` | 开源仓库推荐，关注 PR 描述、测试证据、CI、依赖和 secret 风险。 |
+| `security-strict` | 安全敏感项目，更多路径会被视为敏感，默认风险阈值为 `medium`。 |
+| `ai-generated-pr` | AI 生成 PR 较多的仓库，重点要求验证证据和清晰 PR 描述。 |
+| `mcp-security` | 关注 MCP、Cursor、VS Code、本地 agent 配置和凭证风险。 |
+| `dependency-careful` | 关注依赖清单、锁文件和多语言包管理配置变化。 |
+
+示例：
+
+```yaml
+locale: zh-CN
+preset: security-strict
 ```
 
 ## `riskThreshold`

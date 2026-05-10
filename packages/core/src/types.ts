@@ -4,6 +4,14 @@ export type FindingSeverity = "info" | RiskLevel;
 
 export type ReportLocale = "en" | "zh-CN";
 
+export type ConfigPreset =
+  | "balanced"
+  | "open-source-maintainer"
+  | "security-strict"
+  | "ai-generated-pr"
+  | "mcp-security"
+  | "dependency-careful";
+
 export type EvidenceScoreGrade = "strong" | "adequate" | "thin" | "risky";
 
 export type ReviewDecision = "ready" | "review-carefully" | "needs-evidence" | "block-merge";
@@ -11,6 +19,7 @@ export type ReviewDecision = "ready" | "review-carefully" | "needs-evidence" | "
 export type ReviewActionPriority = "low" | "medium" | "high";
 
 export interface ProofPRConfig {
+  preset: ConfigPreset;
   locale: ReportLocale;
   riskThreshold: RiskLevel;
   ignorePaths: string[];

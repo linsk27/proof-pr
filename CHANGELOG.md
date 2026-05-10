@@ -1,5 +1,12 @@
 # 变更记录
 
+## Unreleased
+
+- 新增 Review Plan：报告会生成维护者行动清单和重点文件列表。
+- 新增规则预设：`open-source-maintainer`、`security-strict`、`ai-generated-pr`、`mcp-security`、`dependency-careful`。
+- `proof-pr init` 支持 `--preset`，初始化配置时可直接选择审查策略。
+- 文档补充规则预设、报告查看位置、运行时机和项目定位说明。
+
 ## 0.1.4 - 2026-05-10
 
 - 新增 Evidence Score：每份报告输出 0-100 证据评分，并列出证据优势和扣分项。
