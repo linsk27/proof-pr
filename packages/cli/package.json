@@ -1,6 +1,6 @@
 {
   "name": "proof-pr",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "CLI for ProofPR, a maintainer-focused pull request evidence scanner.",
   "license": "MIT",
   "type": "module",
@@ -34,7 +34,7 @@
     "cli"
   ],
   "bin": {
-    "proof-pr": "./dist/index.js"
+    "proof-pr": "dist/index.js"
   },
   "engines": {
     "node": ">=20"
@@ -44,8 +44,7 @@
     "README.md"
   ],
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json && ncc build build/index.js -o dist --license licenses.txt",

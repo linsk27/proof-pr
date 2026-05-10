@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.0
+      - uses: linsk27/proof-pr@v0.1.1
         with:
           fail-on: high
           comment: "true"
@@ -87,12 +87,17 @@ comment:
 
 ## 方式三：本地使用 CLI
 
-当前 CLI 还没有发布到 npm，所以暂时不要把 `npx proof-pr` 当作主要路径。
-
-可以从 GitHub Release 安装：
+可以直接通过 npm 使用：
 
 ```bash
-npm install -g https://github.com/linsk27/proof-pr/releases/download/v0.1.0/proof-pr-0.1.0.tgz
+npx proof-pr init
+proof-pr scan --base origin/main --head HEAD
+```
+
+也可以全局安装：
+
+```bash
+npm install -g proof-pr
 proof-pr scan --base origin/main --head HEAD
 ```
 
