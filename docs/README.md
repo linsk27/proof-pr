@@ -7,20 +7,25 @@
 - [快速开始](getting-started.md)：安装 GitHub Action、本地 CLI 使用方式、如何判断安装成功。
 - [配置说明](configuration.md)：`.proofpr.yml` 的字段说明和示例配置。
 - [规则说明](rules.md)：每条内置规则会检查什么、为什么触发。
+- [实现原理](how-it-works.md)：ProofPR 如何解析 diff、执行规则、评分并输出报告。
 
-## 效果图
+## 真实运行截图
 
-PR 评论效果：
+PR 评论截图来自 [demo PR #1](https://github.com/linsk27/proof-pr/pull/1)，由 GitHub Action 真实生成：
 
-![ProofPR PR 评论效果图](assets/proofpr-pr-comment.svg)
+![ProofPR 真实 PR 评论截图](screenshots/proofpr-demo-pr-comment.png)
 
-CLI 输出效果：
+CLI 输出截图来自本机 `AI-Vue3-python-flask-Blog` 项目，使用 `npx proof-pr@latest scan --base HEAD~5 --head HEAD` 真实扫描生成：
 
-![ProofPR CLI 输出效果图](assets/proofpr-cli-output.svg)
+![ProofPR 真实 CLI 输出截图](screenshots/ai-vue-flask-cli-output.png)
 
-工作流示意：
+## 示意图
 
-![ProofPR 工作流示意图](assets/proofpr-flow.svg)
+下面这些 SVG 是说明流程和界面的示意图，不是真实截图：
+
+- [PR 评论示意图](assets/proofpr-pr-comment.svg)
+- [CLI 输出示意图](assets/proofpr-cli-output.svg)
+- [工作流示意图](assets/proofpr-flow.svg)
 
 ## 当前定位
 

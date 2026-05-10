@@ -1,0 +1,32 @@
+﻿<!-- proof-pr-report -->
+# ProofPR Review
+
+Risk: **medium**
+
+## Evidence
+
+- Files changed: 4
+- Additions: 114
+- Deletions: 180
+- Test files changed: 0
+- Sensitive files changed: 0
+- PR description: present
+- Verification evidence: yes
+- Reproduction context: yes
+
+## Findings
+
+### Broad review surface
+- Rule: `change-size`
+- Severity: `medium`
+- Detail: This change touches 4 files and 294 changed lines.
+- Evidence:
+  - `files: 4`
+  - `changed lines: 294`
+- Recommendation: Ask the contributor to explain the scope boundaries and identify the files that need the closest review.
+
+## Maintainer Focus
+
+- Request a smaller PR or a file-by-file review guide.
+
+

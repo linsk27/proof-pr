@@ -2,7 +2,7 @@
 
 这份文档只讲怎么安装和怎么跑起来。
 
-![ProofPR PR 评论效果图](assets/proofpr-pr-comment.svg)
+![ProofPR 真实 PR 评论截图](screenshots/proofpr-demo-pr-comment.png)
 
 ## 你应该选哪种方式？
 

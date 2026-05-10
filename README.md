@@ -10,7 +10,16 @@ ProofPR 是一个面向开源维护者的 **PR 证据检查器 / PR 风险扫描
 
 它不会猜代码是不是 AI 写的。它只检查一件更可靠的事：**这个贡献有没有足够的测试、复现、权限、依赖和安全证据。**
 
-![ProofPR PR 评论效果图](docs/assets/proofpr-pr-comment.svg)
+## 真实运行截图
+
+下面两张图来自真实运行结果，不是手绘 mock：
+
+- PR 评论截图来自 [demo PR #1](https://github.com/linsk27/proof-pr/pull/1)，由 GitHub Action 真实生成。
+- CLI 输出截图来自本机 `AI-Vue3-python-flask-Blog` 项目，使用 `npx proof-pr@latest scan --base HEAD~5 --head HEAD` 真实扫描生成。
+
+![ProofPR 真实 PR 评论截图](docs/screenshots/proofpr-demo-pr-comment.png)
+
+![ProofPR 在 AI-Vue3-python-flask-Blog 中的真实 CLI 输出](docs/screenshots/ai-vue-flask-cli-output.png)
 
 ## 适合谁
 
@@ -137,9 +146,9 @@ pnpm build
 node packages/cli/dist/index.js scan --base origin/main --head HEAD
 ```
 
-CLI 效果图：
+CLI 真实输出截图：
 
-![ProofPR CLI 输出效果图](docs/assets/proofpr-cli-output.svg)
+![ProofPR 在 AI-Vue3-python-flask-Blog 中的真实 CLI 输出](docs/screenshots/ai-vue-flask-cli-output.png)
 
 常用命令：
 
@@ -152,7 +161,9 @@ proof-pr scan --base origin/main --pr-body-file pr-body.md
 proof-pr scan --base origin/main --fail-on medium
 ```
 
-## 工作流
+## 工作流示意图
+
+这张是帮助理解流程的示意图，不是截图。
 
 ![ProofPR 工作流示意图](docs/assets/proofpr-flow.svg)
 
@@ -202,6 +213,7 @@ ProofPR 报告主要看三块：
 - [快速开始](docs/getting-started.md)
 - [配置说明](docs/configuration.md)
 - [规则说明](docs/rules.md)
+- [实现原理](docs/how-it-works.md)
 - [贡献指南](CONTRIBUTING.md)
 - [安全政策](SECURITY.md)
 - [变更记录](CHANGELOG.md)
