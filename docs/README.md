@@ -12,8 +12,8 @@
 
 ## 当前发布
 
-- GitHub Release：[`v0.1.3`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.3)
-- npm：[`proof-pr@0.1.3`](https://www.npmjs.com/package/proof-pr)
+- GitHub Release：[`v0.1.4`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.4)
+- npm：[`proof-pr@0.1.4`](https://www.npmjs.com/package/proof-pr)
 
 ## 真实运行截图
 
@@ -41,7 +41,13 @@ locale: zh-CN
 
 ## 当前定位
 
-ProofPR 是一个给开源维护者使用的 PR 证据检查器。它关注的是“这个 PR 有没有足够证据值得 review”，而不是猜测“代码是不是 AI 写的”。
+ProofPR 是一个给开源维护者使用的 PR 证据门禁。它关注的是“这个 PR 有没有足够证据值得 review”，而不是猜测“代码是不是 AI 写的”。
+
+核心输出包括：
+
+- 风险等级：判断风险强度。
+- 证据评分：用 0-100 分衡量 review 证据是否充分。
+- Review 门禁：给维护者下一步动作建议。
 
 核心关键词：
 

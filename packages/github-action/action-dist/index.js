@@ -50565,6 +50565,8 @@ function renderEnglishMarkdownReport(result) {
         "# ProofPR Review",
         "",
         `Risk: **${result.risk}**`,
+        `Evidence score: **${result.evidenceScore.value}/100 (${formatEvidenceGrade(result.evidenceScore.grade, "en")})**`,
+        `Review gate: **${formatReviewDecision(result.reviewDecision, "en")}**`,
         "",
         "## Evidence",
         "",
@@ -50578,6 +50580,7 @@ function renderEnglishMarkdownReport(result) {
         `- Reproduction context: ${formatBoolean(result.summary.reproductionEvidence)}`,
         ""
     ];
+    appendEvidenceScoreSection(lines, result, "en");
     if (result.findings.length === 0) {
         lines.push("## Findings", "", "No review-risk findings detected by the enabled rules.", "");
         return lines.join("\n");
@@ -50595,6 +50598,8 @@ function renderChineseMarkdownReport(result) {
         "# ProofPR 审查报告",
         "",
         `风险等级：**${translateRisk(result.risk)}**`,
+        `证据评分：**${result.evidenceScore.value}/100（${formatEvidenceGrade(result.evidenceScore.grade, "zh-CN")}）**`,
+        `Review 门禁：**${formatReviewDecision(result.reviewDecision, "zh-CN")}**`,
         "",
         "## 证据概览",
         "",
@@ -50608,6 +50613,7 @@ function renderChineseMarkdownReport(result) {
         `- 复现上下文：${formatChineseBoolean(result.summary.reproductionEvidence)}`,
         ""
     ];
+    appendEvidenceScoreSection(lines, result, "zh-CN");
     if (result.findings.length === 0) {
         lines.push("## 风险发现", "", "启用的规则没有发现需要优先关注的 review 风险。", "");
         return lines.join("\n");
@@ -50618,6 +50624,30 @@ function renderChineseMarkdownReport(result) {
     }
     lines.push("## 维护者关注点", "", ...maintainerFocus(result.findings, "zh-CN").map((item) => `- ${item}`), "");
     return lines.join("\n");
+}
+function appendEvidenceScoreSection(lines, result, locale) {
+    lines.push(locale === "zh-CN" ? "## 证据评分细节" : "## Evidence Score", "");
+    if (result.evidenceScore.strengths.length > 0) {
+        for (const strength of result.evidenceScore.strengths) {
+            lines.push(locale === "zh-CN"
+                ? `- 证据优势：${translateScoreMessage(strength)}`
+                : `- Strength: ${strength}`);
+        }
+    }
+    else {
+        lines.push(locale === "zh-CN" ? "- 证据优势：暂无明显优势信号。" : "- Strength: No strong evidence signals detected.");
+    }
+    if (result.evidenceScore.deductions.length > 0) {
+        for (const deduction of result.evidenceScore.deductions) {
+            lines.push(locale === "zh-CN"
+                ? `- 扣分项：-${deduction.points}，${translateDeduction(deduction.reasonId, deduction.message)}`
+                : `- Deduction: -${deduction.points}, ${deduction.message}`);
+        }
+    }
+    else {
+        lines.push(locale === "zh-CN" ? "- 扣分项：无。" : "- Deduction: none.");
+    }
+    lines.push("");
 }
 function formatEnglishFinding(finding) {
     const lines = [
@@ -50792,6 +50822,60 @@ function translateSeverity(severity) {
 }
 function translateDescriptionState(state) {
     return { unavailable: "不可用", missing: "缺失", thin: "过薄", present: "充足" }[state] ?? state;
+}
+function formatEvidenceGrade(grade, locale) {
+    if (locale === "zh-CN") {
+        return {
+            strong: "证据充分",
+            adequate: "基本充分",
+            thin: "证据偏薄",
+            risky: "证据不足"
+        }[grade] ?? grade;
+    }
+    return grade;
+}
+function formatReviewDecision(decision, locale) {
+    if (locale === "zh-CN") {
+        return {
+            ready: "可以进入常规 review",
+            "review-carefully": "带着重点进入 review",
+            "needs-evidence": "先要求补充证据",
+            "block-merge": "处理风险前不建议合并"
+        }[decision] ?? decision;
+    }
+    return {
+        ready: "Ready for normal review",
+        "review-carefully": "Review with focused attention",
+        "needs-evidence": "Ask for evidence before deep review",
+        "block-merge": "Block merge until risks are handled"
+    }[decision] ?? decision;
+}
+function translateScoreMessage(message) {
+    return {
+        "PR description provides review context.": "PR 描述提供了 review 上下文。",
+        "Verification evidence was found.": "检测到测试或手动验证证据。",
+        "Reproduction or before/after context was found.": "检测到复现步骤或 before/after 上下文。",
+        "Test files changed with the PR.": "PR 同时修改了测试文件。",
+        "No configured sensitive files changed.": "没有改动已配置的敏感文件。"
+    }[message] ?? message;
+}
+function translateDeduction(reasonId, fallback) {
+    return {
+        "missing-pr-description": "PR 描述缺失。",
+        "thin-pr-description": "PR 描述过薄，不足以支撑可靠 review。",
+        "no-pr-context": "扫描时没有可用的 PR 描述上下文。",
+        "missing-verification": "没有检测到测试或手动验证证据。",
+        "missing-reproduction-context": "没有检测到复现步骤、before/after 或预期/实际上下文。",
+        "secret-detected": "检测到疑似已提交 secret。",
+        "workflow-permission-change": "Workflow 权限变化需要重点审查。",
+        "mcp-credential-risk": "MCP 配置扩大了本地执行面或凭证风险。",
+        "large-review-surface": "PR 规模过大，常规 review 可靠性会下降。",
+        "broad-review-surface": "PR review 面积偏大。",
+        "sensitive-path-high": "高敏感文件发生变更，需要重点 review。",
+        "sensitive-path-medium": "敏感文件发生变更，需要重点 review。",
+        "dependency-change": "依赖清单发生变更。",
+        "missing-tests": "代码发生变更，但缺少测试变更或验证说明。"
+    }[reasonId] ?? fallback;
 }
 function formatBoolean(value) {
     return value ? "yes" : "no";
@@ -51336,8 +51420,12 @@ function scanDiff(diffText, options = {}) {
     const files = parseUnifiedDiff(diffText);
     const findings = dedupeFindings(analyzeDiffFiles(files, config, options.pullRequest));
     const summary = summarizeDiffFiles(files, config, options.pullRequest);
+    const risk = calculateRisk(findings);
+    const evidenceScore = calculateEvidenceScore(summary, findings);
     return {
-        risk: calculateRisk(findings),
+        risk,
+        evidenceScore,
+        reviewDecision: calculateReviewDecision(risk, evidenceScore, findings),
         summary,
         findings
     };
@@ -51353,6 +51441,126 @@ function calculateRisk(findings) {
         return "medium";
     }
     return "low";
+}
+function calculateEvidenceScore(summary, findings) {
+    const deductions = new Map();
+    const addDeduction = (reasonId, points, message) => {
+        const existing = deductions.get(reasonId);
+        if (existing) {
+            existing.points = Math.max(existing.points, points);
+            return;
+        }
+        deductions.set(reasonId, { message, points });
+    };
+    if (summary.pullRequestDescription === "missing") {
+        addDeduction("missing-pr-description", 25, "PR description is missing.");
+    }
+    else if (summary.pullRequestDescription === "thin") {
+        addDeduction("thin-pr-description", 15, "PR description is too thin for confident review.");
+    }
+    else if (summary.pullRequestDescription === "unavailable") {
+        addDeduction("no-pr-context", 10, "PR description was not available to the scanner.");
+    }
+    const needsVerificationEvidence = findings.some((finding) => [
+        "change-size",
+        "sensitive-path",
+        "missing-tests",
+        "dependency-added",
+        "workflow-permission-change",
+        "mcp-credential-risk"
+    ].includes(finding.ruleId));
+    if (needsVerificationEvidence && !summary.verificationEvidence) {
+        addDeduction("missing-verification", 20, "No test or manual verification evidence was found.");
+    }
+    if ((summary.sensitiveFilesChanged > 0 || summary.filesChanged >= 5) && !summary.reproductionEvidence) {
+        addDeduction("missing-reproduction-context", 15, "No reproduction, before/after, or expected/actual context was found.");
+    }
+    for (const finding of findings) {
+        if (finding.ruleId.startsWith("secret-detected")) {
+            addDeduction("secret-detected", 40, "Possible committed secret detected.");
+        }
+        else if (finding.ruleId === "workflow-permission-change") {
+            addDeduction("workflow-permission-change", 25, "Workflow permission changes need deliberate review.");
+        }
+        else if (finding.ruleId === "mcp-credential-risk") {
+            addDeduction("mcp-credential-risk", 25, "MCP configuration expands local execution or credential risk.");
+        }
+        else if (finding.ruleId === "change-size") {
+            addDeduction(finding.severity === "high" ? "large-review-surface" : "broad-review-surface", finding.severity === "high" ? 20 : 10, finding.severity === "high"
+                ? "The PR is large enough that normal review is likely unreliable."
+                : "The PR has a broad review surface.");
+        }
+        else if (finding.ruleId === "sensitive-path") {
+            addDeduction(`sensitive-path-${finding.severity}`, finding.severity === "high" ? 20 : 10, "Sensitive files changed and need focused review.");
+        }
+        else if (finding.ruleId === "dependency-added") {
+            addDeduction("dependency-change", 10, "Dependency manifest changed.");
+        }
+        else if (finding.ruleId === "missing-tests") {
+            addDeduction("missing-tests", finding.severity === "medium" ? 20 : 12, "Code changed without test changes or verification notes.");
+        }
+    }
+    const strengths = collectEvidenceStrengths(summary);
+    const value = clampScore(100 - [...deductions.values()].reduce((sum, item) => sum + item.points, 0));
+    return {
+        value,
+        grade: gradeEvidenceScore(value),
+        strengths,
+        deductions: [...deductions.entries()].map(([reasonId, item]) => ({
+            reasonId,
+            message: item.message,
+            points: item.points
+        }))
+    };
+}
+function collectEvidenceStrengths(summary) {
+    const strengths = [];
+    if (summary.pullRequestDescription === "present") {
+        strengths.push("PR description provides review context.");
+    }
+    if (summary.verificationEvidence) {
+        strengths.push("Verification evidence was found.");
+    }
+    if (summary.reproductionEvidence) {
+        strengths.push("Reproduction or before/after context was found.");
+    }
+    if (summary.testFilesChanged > 0) {
+        strengths.push("Test files changed with the PR.");
+    }
+    if (summary.filesChanged > 0 && summary.sensitiveFilesChanged === 0) {
+        strengths.push("No configured sensitive files changed.");
+    }
+    return strengths;
+}
+function gradeEvidenceScore(value) {
+    if (value >= 85) {
+        return "strong";
+    }
+    if (value >= 70) {
+        return "adequate";
+    }
+    if (value >= 50) {
+        return "thin";
+    }
+    return "risky";
+}
+function calculateReviewDecision(risk, evidenceScore, findings) {
+    const hasBlockingSecurityFinding = findings.some((finding) => finding.ruleId.startsWith("secret-detected") ||
+        finding.ruleId === "workflow-permission-change" ||
+        finding.ruleId === "mcp-credential-risk");
+    if (hasBlockingSecurityFinding || evidenceScore.value < 50 || risk === "high") {
+        return "block-merge";
+    }
+    if (evidenceScore.value < 70 || findings.some((finding) => finding.ruleId === "missing-tests" || finding.ruleId === "thin-pr-description")) {
+        return "needs-evidence";
+    }
+    if (risk === "medium") {
+        return "review-carefully";
+    }
+    return "ready";
+}
+function clampScore(value) {
+    return Math.max(0, Math.min(100, value));
 }
 function dedupeFindings(findings) {
     const seen = new Set();

@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.3
+      - uses: linsk27/proof-pr@v0.1.4
         with:
           fail-on: high
           comment: "true"
@@ -189,7 +189,9 @@ GitHub Action 安装成功后，你会在 PR 页面看到：
 
 - Actions 中出现 `ProofPR` workflow。
 - PR 评论区出现 `ProofPR 审查报告`。
-- 报告里有 `风险等级`、`证据概览`、`风险发现` 三块内容。
+- 报告里有 `风险等级`、`证据评分`、`Review 门禁`、`证据概览`、`风险发现`。
+
+其中 `证据评分` 是 0-100 分，用来判断 PR 是否提供了足够 review 证据；`Review 门禁` 会给出下一步建议，例如正常 review、要求补充证据，或在风险处理前不建议合并。
 
 如果没有出现评论，先检查 workflow 权限是否包含：
 

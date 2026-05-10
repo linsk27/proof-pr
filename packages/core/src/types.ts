@@ -4,6 +4,10 @@ export type FindingSeverity = "info" | RiskLevel;
 
 export type ReportLocale = "en" | "zh-CN";
 
+export type EvidenceScoreGrade = "strong" | "adequate" | "thin" | "risky";
+
+export type ReviewDecision = "ready" | "review-carefully" | "needs-evidence" | "block-merge";
+
 export interface ProofPRConfig {
   locale: ReportLocale;
   riskThreshold: RiskLevel;
@@ -67,8 +71,23 @@ export interface ScanSummary {
   reproductionEvidence: boolean;
 }
 
+export interface EvidenceScoreDetail {
+  reasonId: string;
+  message: string;
+  points: number;
+}
+
+export interface EvidenceScore {
+  value: number;
+  grade: EvidenceScoreGrade;
+  strengths: string[];
+  deductions: EvidenceScoreDetail[];
+}
+
 export interface ScanResult {
   risk: RiskLevel;
+  evidenceScore: EvidenceScore;
+  reviewDecision: ReviewDecision;
   summary: ScanSummary;
   findings: Finding[];
 }

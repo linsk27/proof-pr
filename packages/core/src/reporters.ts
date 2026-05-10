@@ -68,6 +68,8 @@ function renderEnglishMarkdownReport(result: ScanResult): string {
     "# ProofPR Review",
     "",
     `Risk: **${result.risk}**`,
+    `Evidence score: **${result.evidenceScore.value}/100 (${formatEvidenceGrade(result.evidenceScore.grade, "en")})**`,
+    `Review gate: **${formatReviewDecision(result.reviewDecision, "en")}**`,
     "",
     "## Evidence",
     "",
@@ -81,6 +83,8 @@ function renderEnglishMarkdownReport(result: ScanResult): string {
     `- Reproduction context: ${formatBoolean(result.summary.reproductionEvidence)}`,
     ""
   ];
+
+  appendEvidenceScoreSection(lines, result, "en");
 
   if (result.findings.length === 0) {
     lines.push("## Findings", "", "No review-risk findings detected by the enabled rules.", "");
@@ -109,6 +113,8 @@ function renderChineseMarkdownReport(result: ScanResult): string {
     "# ProofPR 审查报告",
     "",
     `风险等级：**${translateRisk(result.risk)}**`,
+    `证据评分：**${result.evidenceScore.value}/100（${formatEvidenceGrade(result.evidenceScore.grade, "zh-CN")}）**`,
+    `Review 门禁：**${formatReviewDecision(result.reviewDecision, "zh-CN")}**`,
     "",
     "## 证据概览",
     "",
@@ -122,6 +128,8 @@ function renderChineseMarkdownReport(result: ScanResult): string {
     `- 复现上下文：${formatChineseBoolean(result.summary.reproductionEvidence)}`,
     ""
   ];
+
+  appendEvidenceScoreSection(lines, result, "zh-CN");
 
   if (result.findings.length === 0) {
     lines.push("## 风险发现", "", "启用的规则没有发现需要优先关注的 review 风险。", "");
@@ -142,6 +150,36 @@ function renderChineseMarkdownReport(result: ScanResult): string {
   );
 
   return lines.join("\n");
+}
+
+function appendEvidenceScoreSection(lines: string[], result: ScanResult, locale: ReportLocale): void {
+  lines.push(locale === "zh-CN" ? "## 证据评分细节" : "## Evidence Score", "");
+
+  if (result.evidenceScore.strengths.length > 0) {
+    for (const strength of result.evidenceScore.strengths) {
+      lines.push(
+        locale === "zh-CN"
+          ? `- 证据优势：${translateScoreMessage(strength)}`
+          : `- Strength: ${strength}`
+      );
+    }
+  } else {
+    lines.push(locale === "zh-CN" ? "- 证据优势：暂无明显优势信号。" : "- Strength: No strong evidence signals detected.");
+  }
+
+  if (result.evidenceScore.deductions.length > 0) {
+    for (const deduction of result.evidenceScore.deductions) {
+      lines.push(
+        locale === "zh-CN"
+          ? `- 扣分项：-${deduction.points}，${translateDeduction(deduction.reasonId, deduction.message)}`
+          : `- Deduction: -${deduction.points}, ${deduction.message}`
+      );
+    }
+  } else {
+    lines.push(locale === "zh-CN" ? "- 扣分项：无。" : "- Deduction: none.");
+  }
+
+  lines.push("");
 }
 
 function formatEnglishFinding(finding: Finding): string {
@@ -353,6 +391,66 @@ function translateSeverity(severity: string): string {
 
 function translateDescriptionState(state: string): string {
   return { unavailable: "不可用", missing: "缺失", thin: "过薄", present: "充足" }[state] ?? state;
+}
+
+function formatEvidenceGrade(grade: string, locale: ReportLocale): string {
+  if (locale === "zh-CN") {
+    return {
+      strong: "证据充分",
+      adequate: "基本充分",
+      thin: "证据偏薄",
+      risky: "证据不足"
+    }[grade] ?? grade;
+  }
+
+  return grade;
+}
+
+function formatReviewDecision(decision: string, locale: ReportLocale): string {
+  if (locale === "zh-CN") {
+    return {
+      ready: "可以进入常规 review",
+      "review-carefully": "带着重点进入 review",
+      "needs-evidence": "先要求补充证据",
+      "block-merge": "处理风险前不建议合并"
+    }[decision] ?? decision;
+  }
+
+  return {
+    ready: "Ready for normal review",
+    "review-carefully": "Review with focused attention",
+    "needs-evidence": "Ask for evidence before deep review",
+    "block-merge": "Block merge until risks are handled"
+  }[decision] ?? decision;
+}
+
+function translateScoreMessage(message: string): string {
+  return {
+    "PR description provides review context.": "PR 描述提供了 review 上下文。",
+    "Verification evidence was found.": "检测到测试或手动验证证据。",
+    "Reproduction or before/after context was found.": "检测到复现步骤或 before/after 上下文。",
+    "Test files changed with the PR.": "PR 同时修改了测试文件。",
+    "No configured sensitive files changed.": "没有改动已配置的敏感文件。"
+  }[message] ?? message;
+}
+
+function translateDeduction(reasonId: string, fallback: string): string {
+  return {
+    "missing-pr-description": "PR 描述缺失。",
+    "thin-pr-description": "PR 描述过薄，不足以支撑可靠 review。",
+    "no-pr-context": "扫描时没有可用的 PR 描述上下文。",
+    "missing-verification": "没有检测到测试或手动验证证据。",
+    "missing-reproduction-context": "没有检测到复现步骤、before/after 或预期/实际上下文。",
+    "secret-detected": "检测到疑似已提交 secret。",
+    "workflow-permission-change": "Workflow 权限变化需要重点审查。",
+    "mcp-credential-risk": "MCP 配置扩大了本地执行面或凭证风险。",
+    "large-review-surface": "PR 规模过大，常规 review 可靠性会下降。",
+    "broad-review-surface": "PR review 面积偏大。",
+    "sensitive-path-high": "高敏感文件发生变更，需要重点 review。",
+    "sensitive-path-medium": "敏感文件发生变更，需要重点 review。",
+    "dependency-change": "依赖清单发生变更。",
+    "missing-tests": "代码发生变更，但缺少测试变更或验证说明。"
+  }[reasonId] ?? fallback;
 }
 
 function formatBoolean(value: boolean): "yes" | "no" {

@@ -2,7 +2,7 @@
 
 ProofPR 的命令行工具。
 
-ProofPR 帮助维护者在投入深入 review 之前，先检查 PR 的证据、范围和安全风险。
+ProofPR 帮助维护者在投入深入 review 之前，先检查 PR 的证据、范围和安全风险。报告会输出风险等级、0-100 证据评分，以及 Review 门禁建议。
 
 ## 它什么时候运行？
 
@@ -24,7 +24,7 @@ npx proof-pr@latest scan --base origin/main --pr-body-file pr-body.md --format j
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.3
+- uses: linsk27/proof-pr@v0.1.4
   with:
     fail-on: high
 ```

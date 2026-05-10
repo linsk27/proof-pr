@@ -45,7 +45,7 @@ const program = new Command();
 program
   .name("proof-pr")
   .description("Review pull request evidence, scope, and safety before maintainers spend time on it.")
-  .version("0.1.3");
+  .version("0.1.4");
 
 program
   .command("scan", { isDefault: true })
@@ -199,7 +199,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.3
+      - uses: linsk27/proof-pr@v0.1.4
         with:
           fail-on: ${failOn}
           comment: "true"

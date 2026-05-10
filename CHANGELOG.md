@@ -1,5 +1,12 @@
 # 变更记录
 
+## 0.1.4 - 2026-05-10
+
+- 新增 Evidence Score：每份报告输出 0-100 证据评分，并列出证据优势和扣分项。
+- 新增 Review Gate：根据风险等级、证据评分和安全 finding 给维护者下一步动作建议。
+- JSON 输出新增 `evidenceScore` 和 `reviewDecision` 字段。
+- README 和文档补充 ProofPR 作为“PR 证据门禁”的定位、评分逻辑和使用价值。
+
 ## 0.1.3 - 2026-05-10
 
 - 新增简体中文 Markdown 报告：`.proofpr.yml` 支持 `locale: zh-CN`，CLI 支持 `--locale zh-CN`。

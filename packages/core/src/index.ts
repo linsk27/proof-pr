@@ -6,11 +6,15 @@ export { scanDiff } from "./scan.js";
 export type {
   ChangeLine,
   DiffFile,
+  EvidenceScore,
+  EvidenceScoreDetail,
+  EvidenceScoreGrade,
   Finding,
   FindingSeverity,
   ProofPRConfig,
   PullRequestContext,
   ReportLocale,
+  ReviewDecision,
   RiskLevel,
   ScanResult,
   ScanSummary

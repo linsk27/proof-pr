@@ -14,6 +14,8 @@ index 0000000..1111111
 `);
 
     expect(result.risk).toBe("high");
+    expect(result.reviewDecision).toBe("block-merge");
+    expect(result.evidenceScore.value).toBeLessThan(70);
     expect(result.findings.some((finding) => finding.ruleId.startsWith("secret-detected"))).toBe(true);
   });
 
@@ -28,6 +30,8 @@ index 0000000..1111111 100644
 `);
 
     expect(result.findings.some((finding) => finding.ruleId === "missing-tests")).toBe(true);
+    expect(result.reviewDecision).toBe("needs-evidence");
+    expect(result.evidenceScore.deductions.some((deduction) => deduction.reasonId === "missing-tests")).toBe(true);
   });
 
   it("accepts PR body verification evidence when test files did not change", () => {
@@ -50,6 +54,7 @@ index 0000000..1111111 100644
 
     expect(result.findings.some((finding) => finding.ruleId === "missing-tests")).toBe(false);
     expect(result.summary.verificationEvidence).toBe(true);
+    expect(result.evidenceScore.strengths).toContain("Verification evidence was found.");
   });
 
   it("recognizes Chinese PR verification and reproduction evidence", () => {
@@ -150,6 +155,8 @@ index 0000000..1111111 100644
 
     expect(result.risk).toBe("low");
     expect(result.findings).toHaveLength(0);
+    expect(result.evidenceScore.value).toBeGreaterThanOrEqual(85);
+    expect(result.reviewDecision).toBe("ready");
   });
 
   it("renders a Simplified Chinese Markdown report", () => {
@@ -165,6 +172,8 @@ index 0000000..1111111 100644
 
     expect(report).toContain("# ProofPR 审查报告");
     expect(report).toContain("风险等级");
+    expect(report).toContain("证据评分");
+    expect(report).toContain("Review 门禁");
     expect(report).toContain("风险发现");
   });
 });

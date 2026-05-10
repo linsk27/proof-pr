@@ -7,14 +7,14 @@
 
 看证据，不看感觉。
 
-ProofPR 是一个面向开源维护者的 **PR 证据检查器 / PR 风险扫描器**。它可以作为 GitHub Action 自动运行，在每个 Pull Request 中生成一份风险报告，帮助维护者快速判断这个 PR 是否值得深入 review。
+ProofPR 是一个面向开源维护者的 **PR 证据检查器 / PR 风险扫描器**。它可以作为 GitHub Action 自动运行，在每个 Pull Request 中生成风险等级、证据评分和 Review 门禁建议，帮助维护者快速判断这个 PR 是否值得深入 review。
 
 它不会猜代码是不是 AI 写的。它只检查一件更可靠的事：**这个贡献有没有足够的测试、复现、权限、依赖和安全证据。**
 
 ## 发布状态
 
-- GitHub Release：[`v0.1.3`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.3)
-- npm：[`proof-pr@0.1.3`](https://www.npmjs.com/package/proof-pr)
+- GitHub Release：[`v0.1.4`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.4)
+- npm：[`proof-pr@0.1.4`](https://www.npmjs.com/package/proof-pr)
 - 直接运行：`npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN`
 
 ## 真实运行截图
@@ -56,6 +56,23 @@ ProofPR 会扫描 PR diff 和 PR 描述，生成 `low`、`medium`、`high` 风�
 | CI 权限 | 标记 GitHub Actions 写权限、OIDC 权限变化 |
 | MCP 风险 | 标记 MCP command、args、env、credential 风险 |
 
+## 核心输出
+
+ProofPR 报告不只给一个风险等级，还会给维护者一个更容易行动的结论：
+
+- `风险等级`：`low`、`medium`、`high`，表示这个 PR 的风险强度。
+- `证据评分`：`0-100`，表示这个 PR 提供的 review 证据是否充分。
+- `Review 门禁`：告诉维护者下一步该正常 review、重点 review、要求补证据，还是先阻止合并。
+
+证据评分会因为这些问题被扣分：
+
+- PR 描述为空或过薄。
+- 没有测试、截图、手动验证或 CI 说明。
+- 没有复现步骤、before/after、预期/实际结果。
+- PR 面积过大。
+- 改动敏感路径、依赖、workflow 权限、MCP 配置。
+- 疑似提交 secret 或 token。
+
 ## 三步安装到你的 GitHub 仓库
 
 这是目前最推荐的使用方式。
@@ -86,7 +103,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.3
+      - uses: linsk27/proof-pr@v0.1.4
         with:
           fail-on: high
           comment: "true"
@@ -237,12 +254,14 @@ proof-pr scan --base origin/main --fail-on medium
 ProofPR 报告主要看三块：
 
 1. `Risk`：整体风险等级，可能是 `low`、`medium`、`high`。
-2. `Evidence`：文件数量、增删行数、测试文件变化、敏感文件变化、PR 描述质量。
-3. `Findings`：具体风险点和维护者应该重点 review 的地方。
+2. `Evidence score` / `证据评分`：0-100 分，分数越高，说明 PR 越适合进入正常 review。
+3. `Review gate` / `Review 门禁`：给维护者的下一步动作建议。
+4. `Evidence`：文件数量、增删行数、测试文件变化、敏感文件变化、PR 描述质量。
+5. `Findings`：具体风险点和维护者应该重点 review 的地方。
 
 ## 当前开发进度
 
-当前版本：`v0.1.3`
+当前版本：`v0.1.4`
 
 已经完成：
 
