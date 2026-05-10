@@ -42,7 +42,7 @@ const program = new Command();
 program
   .name("proof-pr")
   .description("Review pull request evidence, scope, and safety before maintainers spend time on it.")
-  .version("0.1.0");
+  .version("0.1.2");
 
 program
   .command("scan", { isDefault: true })

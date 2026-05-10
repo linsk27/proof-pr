@@ -17,7 +17,7 @@ npx proof-pr scan --base origin/main --pr-body-file pr-body.md --format json
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.1
+- uses: linsk27/proof-pr@v0.1.2
   with:
     fail-on: high
 ```

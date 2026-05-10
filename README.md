@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.1
+      - uses: linsk27/proof-pr@v0.1.2
         with:
           fail-on: high
           comment: "true"
@@ -166,7 +166,7 @@ ProofPR 报告主要看三块：
 
 ## 当前开发进度
 
-当前版本：`v0.1.1`
+当前版本：`v0.1.2`
 
 已经完成：
 
