@@ -154,6 +154,18 @@ Review 门禁把风险等级和证据评分合并成一个维护者动作建议�
 
 这一步是 ProofPR 和普通扫描器的核心区别：它不是只告诉你“哪里有风险”，还告诉维护者“下一步应该怎么处理这个 PR”。
 
+## Review 行动清单
+
+Review 行动清单会把 finding 和证据评分转换成可执行 checklist，例如：
+
+- 要求补充测试或手动验证证据。
+- 要求补充复现步骤或 before/after 上下文。
+- 要求拆分 PR 或提供逐文件 review map。
+- 要求解释 workflow 权限变更。
+- 要求轮换并移除疑似暴露的 secret。
+
+如果 finding 指向具体文件，ProofPR 还会生成重点文件列表，帮助维护者决定第一轮应该先看哪里。
+
 ## 中文和编码
 
 ProofPR 支持中文 Markdown 报告：

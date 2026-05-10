@@ -14,7 +14,11 @@ export type {
   ProofPRConfig,
   PullRequestContext,
   ReportLocale,
+  ReviewAction,
+  ReviewActionPriority,
   ReviewDecision,
+  ReviewFocusFile,
+  ReviewPlan,
   RiskLevel,
   ScanResult,
   ScanSummary

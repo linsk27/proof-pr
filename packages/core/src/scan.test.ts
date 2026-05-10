@@ -32,6 +32,7 @@ index 0000000..1111111 100644
     expect(result.findings.some((finding) => finding.ruleId === "missing-tests")).toBe(true);
     expect(result.reviewDecision).toBe("needs-evidence");
     expect(result.evidenceScore.deductions.some((deduction) => deduction.reasonId === "missing-tests")).toBe(true);
+    expect(result.reviewPlan.actionItems.some((action) => action.actionId === "add-verification-evidence")).toBe(true);
   });
 
   it("accepts PR body verification evidence when test files did not change", () => {
@@ -102,6 +103,7 @@ index 0000000..1111111 100644
 
     expect(result.findings.some((finding) => finding.ruleId === "thin-pr-description")).toBe(true);
     expect(result.findings.some((finding) => finding.ruleId === "missing-reproduction-context")).toBe(true);
+    expect(result.reviewPlan.focusFiles.some((file) => file.path === ".github/workflows/release.yml")).toBe(true);
   });
 
   it("does not treat package scripts as dependency additions", () => {
@@ -174,6 +176,7 @@ index 0000000..1111111 100644
     expect(report).toContain("风险等级");
     expect(report).toContain("证据评分");
     expect(report).toContain("Review 门禁");
+    expect(report).toContain("Review 行动清单");
     expect(report).toContain("风险发现");
   });
 });

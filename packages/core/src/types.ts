@@ -8,6 +8,8 @@ export type EvidenceScoreGrade = "strong" | "adequate" | "thin" | "risky";
 
 export type ReviewDecision = "ready" | "review-carefully" | "needs-evidence" | "block-merge";
 
+export type ReviewActionPriority = "low" | "medium" | "high";
+
 export interface ProofPRConfig {
   locale: ReportLocale;
   riskThreshold: RiskLevel;
@@ -84,10 +86,31 @@ export interface EvidenceScore {
   deductions: EvidenceScoreDetail[];
 }
 
+export interface ReviewAction {
+  actionId: string;
+  title: string;
+  detail: string;
+  priority: ReviewActionPriority;
+  relatedRuleIds: string[];
+}
+
+export interface ReviewFocusFile {
+  path: string;
+  reasonId: string;
+  reason: string;
+  priority: ReviewActionPriority;
+}
+
+export interface ReviewPlan {
+  actionItems: ReviewAction[];
+  focusFiles: ReviewFocusFile[];
+}
+
 export interface ScanResult {
   risk: RiskLevel;
   evidenceScore: EvidenceScore;
   reviewDecision: ReviewDecision;
+  reviewPlan: ReviewPlan;
   summary: ScanSummary;
   findings: Finding[];
 }

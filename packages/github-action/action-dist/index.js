@@ -50581,6 +50581,7 @@ function renderEnglishMarkdownReport(result) {
         ""
     ];
     appendEvidenceScoreSection(lines, result, "en");
+    appendReviewPlanSection(lines, result, "en");
     if (result.findings.length === 0) {
         lines.push("## Findings", "", "No review-risk findings detected by the enabled rules.", "");
         return lines.join("\n");
@@ -50614,6 +50615,7 @@ function renderChineseMarkdownReport(result) {
         ""
     ];
     appendEvidenceScoreSection(lines, result, "zh-CN");
+    appendReviewPlanSection(lines, result, "zh-CN");
     if (result.findings.length === 0) {
         lines.push("## 风险发现", "", "启用的规则没有发现需要优先关注的 review 风险。", "");
         return lines.join("\n");
@@ -50646,6 +50648,28 @@ function appendEvidenceScoreSection(lines, result, locale) {
     }
     else {
         lines.push(locale === "zh-CN" ? "- 扣分项：无。" : "- Deduction: none.");
+    }
+    lines.push("");
+}
+function appendReviewPlanSection(lines, result, locale) {
+    lines.push(locale === "zh-CN" ? "## Review 行动清单" : "## Review Plan", "");
+    if (result.reviewPlan.actionItems.length > 0) {
+        for (const action of result.reviewPlan.actionItems) {
+            lines.push(locale === "zh-CN"
+                ? `- [ ] ${translateReviewActionTitle(action.actionId, action.title)}（${formatPriority(action.priority, locale)}）：${translateReviewActionDetail(action.actionId, action.detail)}`
+                : `- [ ] ${action.title} (${formatPriority(action.priority, locale)}): ${action.detail}`);
+        }
+    }
+    else {
+        lines.push(locale === "zh-CN" ? "- [ ] 没有额外行动项。" : "- [ ] No additional action items.");
+    }
+    if (result.reviewPlan.focusFiles.length > 0) {
+        lines.push("", locale === "zh-CN" ? "重点文件：" : "Focus files:");
+        for (const file of result.reviewPlan.focusFiles) {
+            lines.push(locale === "zh-CN"
+                ? `- \`${file.path}\`（${formatPriority(file.priority, locale)}）：${translateFocusReason(file.reasonId, file.reason)}`
+                : `- \`${file.path}\` (${formatPriority(file.priority, locale)}): ${file.reason}`);
+        }
     }
     lines.push("");
 }
@@ -50849,6 +50873,56 @@ function formatReviewDecision(decision, locale) {
         "needs-evidence": "Ask for evidence before deep review",
         "block-merge": "Block merge until risks are handled"
     }[decision] ?? decision;
+}
+function formatPriority(priority, locale) {
+    if (locale === "zh-CN") {
+        return { low: "低优先级", medium: "中优先级", high: "高优先级" }[priority] ?? priority;
+    }
+    return `${priority} priority`;
+}
+function translateReviewActionTitle(actionId, fallback) {
+    return {
+        "block-merge-until-resolved": "风险处理前不要合并",
+        "ask-for-evidence-before-review": "深入 review 前先要求补充证据",
+        "review-with-focus": "带着重点清单进行 review",
+        "normal-review": "进入常规 review",
+        "improve-pr-description": "要求补充更清楚的 PR 描述",
+        "add-verification-evidence": "要求补充测试或手动验证证据",
+        "add-reproduction-context": "要求补充复现或 before/after 上下文",
+        "rotate-secret": "轮换并移除暴露的凭证",
+        "justify-workflow-permissions": "要求说明 workflow 权限最小化理由",
+        "review-mcp-execution-surface": "审查 MCP 命令、参数和凭证处理",
+        "request-review-map-or-split": "要求拆分 PR 或提供逐文件 review map",
+        "verify-dependency-change": "核查依赖来源和 lockfile 影响",
+        "assign-sensitive-file-review": "安排敏感文件重点 review"
+    }[actionId] ?? fallback;
+}
+function translateReviewActionDetail(actionId, fallback) {
+    return {
+        "block-merge-until-resolved": "在高风险 finding 被解释、降低或移除前，把这个 PR 视为不可合并。",
+        "ask-for-evidence-before-review": "要求测试、截图、复现步骤或更清楚的 PR 描述，再投入详细 review。",
+        "review-with-focus": "优先使用下面的风险发现和重点文件作为第一轮 review map。",
+        "normal-review": "当前证据足够支撑维护者进行常规 review。",
+        "improve-pr-description": "贡献者应说明为什么改、改了什么、如何验证，以及是否有发布或兼容性风险。",
+        "add-verification-evidence": "要求测试输出、CI 链接、截图，或简短的手动验证说明。",
+        "add-reproduction-context": "PR 应包含复现步骤、预期/实际行为，或相关 before/after 截图。",
+        "rotate-secret": "在 secret 从 PR 中移除并完成轮换前，不要合并。",
+        "justify-workflow-permissions": "确认写权限或 OIDC 是否必要，并检查不可信 PR 是否能触发该 workflow。",
+        "review-mcp-execution-surface": "检查 MCP 配置是否提交凭证，或意外扩大本地执行面。",
+        "request-review-map-or-split": "要求贡献者拆分无关改动，或标出最需要重点 review 的文件。",
+        "verify-dependency-change": "检查包名、维护者、许可证、安装脚本，以及 lockfile 是否符合预期依赖变化。",
+        "assign-sensitive-file-review": "合并前由维护者有意识地检查敏感文件改动。"
+    }[actionId] ?? fallback;
+}
+function translateFocusReason(reasonId, fallback) {
+    return {
+        "change-size": "review 面积相关 finding",
+        "sensitive-path": "敏感路径发生变更",
+        "dependency-added": "依赖清单发生变更",
+        "workflow-permission-change": "workflow 权限发生变更",
+        "mcp-credential-risk": "MCP 配置存在执行面或凭证风险",
+        "missing-tests": "代码改动缺少测试或验证证据"
+    }[reasonId] ?? fallback;
 }
 function translateScoreMessage(message) {
     return {
@@ -51422,10 +51496,12 @@ function scanDiff(diffText, options = {}) {
     const summary = summarizeDiffFiles(files, config, options.pullRequest);
     const risk = calculateRisk(findings);
     const evidenceScore = calculateEvidenceScore(summary, findings);
+    const reviewDecision = calculateReviewDecision(risk, evidenceScore, findings);
     return {
         risk,
         evidenceScore,
-        reviewDecision: calculateReviewDecision(risk, evidenceScore, findings),
+        reviewDecision,
+        reviewPlan: buildReviewPlan(reviewDecision, findings, evidenceScore),
         summary,
         findings
     };
@@ -51561,6 +51637,205 @@ function calculateReviewDecision(risk, evidenceScore, findings) {
 }
 function clampScore(value) {
     return Math.max(0, Math.min(100, value));
+}
+function buildReviewPlan(reviewDecision, findings, evidenceScore) {
+    const actionItems = dedupeReviewActions([
+        ...reviewDecisionActions(reviewDecision),
+        ...evidenceScoreActions(evidenceScore),
+        ...findings.flatMap((finding) => reviewActionsForFinding(finding))
+    ]);
+    const focusFiles = dedupeFocusFiles(findings
+        .filter((finding) => finding.path)
+        .map((finding) => ({
+        path: finding.path,
+        reasonId: finding.ruleId,
+        reason: finding.title,
+        priority: finding.severity === "high" ? "high" : finding.severity === "medium" ? "medium" : "low"
+    })));
+    return {
+        actionItems: actionItems.slice(0, 8),
+        focusFiles: focusFiles.slice(0, 8)
+    };
+}
+function reviewDecisionActions(reviewDecision) {
+    if (reviewDecision === "block-merge") {
+        return [
+            {
+                actionId: "block-merge-until-resolved",
+                title: "Block merge until the flagged risks are handled.",
+                detail: "Treat this PR as not ready for merge until the high-risk findings are explained, reduced, or removed.",
+                priority: "high",
+                relatedRuleIds: []
+            }
+        ];
+    }
+    if (reviewDecision === "needs-evidence") {
+        return [
+            {
+                actionId: "ask-for-evidence-before-review",
+                title: "Ask for missing evidence before deep review.",
+                detail: "Request tests, screenshots, reproduction steps, or a clearer PR description before spending detailed review time.",
+                priority: "medium",
+                relatedRuleIds: []
+            }
+        ];
+    }
+    if (reviewDecision === "review-carefully") {
+        return [
+            {
+                actionId: "review-with-focus",
+                title: "Review with a focused checklist.",
+                detail: "Use the findings and focus files below as the first-pass review map.",
+                priority: "medium",
+                relatedRuleIds: []
+            }
+        ];
+    }
+    return [
+        {
+            actionId: "normal-review",
+            title: "Proceed with normal review.",
+            detail: "The PR has enough evidence for a standard maintainer review pass.",
+            priority: "low",
+            relatedRuleIds: []
+        }
+    ];
+}
+function evidenceScoreActions(evidenceScore) {
+    return evidenceScore.deductions.flatMap((deduction) => {
+        if (deduction.reasonId === "missing-pr-description" ||
+            deduction.reasonId === "thin-pr-description" ||
+            deduction.reasonId === "no-pr-context") {
+            return [
+                {
+                    actionId: "improve-pr-description",
+                    title: "Ask for a clearer PR description.",
+                    detail: "The contributor should explain why the change is needed, what changed, how it was verified, and any rollout or compatibility risk.",
+                    priority: "medium",
+                    relatedRuleIds: ["thin-pr-description"]
+                }
+            ];
+        }
+        if (deduction.reasonId === "missing-verification" || deduction.reasonId === "missing-tests") {
+            return [
+                {
+                    actionId: "add-verification-evidence",
+                    title: "Ask for test or manual verification evidence.",
+                    detail: "Require test output, CI links, screenshots, or a short manual verification note before approving.",
+                    priority: "medium",
+                    relatedRuleIds: ["missing-tests"]
+                }
+            ];
+        }
+        if (deduction.reasonId === "missing-reproduction-context") {
+            return [
+                {
+                    actionId: "add-reproduction-context",
+                    title: "Ask for reproduction or before/after context.",
+                    detail: "The PR should include steps to reproduce, expected and actual behavior, or before/after screenshots where relevant.",
+                    priority: "medium",
+                    relatedRuleIds: ["missing-reproduction-context"]
+                }
+            ];
+        }
+        return [];
+    });
+}
+function reviewActionsForFinding(finding) {
+    if (finding.ruleId.startsWith("secret-detected")) {
+        return [
+            {
+                actionId: "rotate-secret",
+                title: "Rotate and remove the exposed credential.",
+                detail: "Do not merge until the secret is removed from the PR and any exposed value has been rotated.",
+                priority: "high",
+                relatedRuleIds: [finding.ruleId]
+            }
+        ];
+    }
+    if (finding.ruleId === "workflow-permission-change") {
+        return [
+            {
+                actionId: "justify-workflow-permissions",
+                title: "Require a least-privilege explanation for workflow permissions.",
+                detail: "Confirm whether write permissions or OIDC are necessary and whether untrusted PRs can reach this workflow.",
+                priority: "high",
+                relatedRuleIds: [finding.ruleId]
+            }
+        ];
+    }
+    if (finding.ruleId === "mcp-credential-risk") {
+        return [
+            {
+                actionId: "review-mcp-execution-surface",
+                title: "Review MCP commands, args, and credential handling.",
+                detail: "Check that MCP config does not commit secrets and does not unexpectedly expand local execution surface.",
+                priority: "high",
+                relatedRuleIds: [finding.ruleId]
+            }
+        ];
+    }
+    if (finding.ruleId === "change-size") {
+        return [
+            {
+                actionId: "request-review-map-or-split",
+                title: "Request a smaller PR or a file-by-file review map.",
+                detail: "Ask the contributor to split unrelated changes or identify the files that need the closest review.",
+                priority: finding.severity === "high" ? "high" : "medium",
+                relatedRuleIds: [finding.ruleId]
+            }
+        ];
+    }
+    if (finding.ruleId === "dependency-added") {
+        return [
+            {
+                actionId: "verify-dependency-change",
+                title: "Verify dependency provenance and lockfile impact.",
+                detail: "Check package name, maintainer, license, install scripts, and whether the lockfile matches the intended dependency change.",
+                priority: "medium",
+                relatedRuleIds: [finding.ruleId]
+            }
+        ];
+    }
+    if (finding.ruleId === "sensitive-path") {
+        return [
+            {
+                actionId: "assign-sensitive-file-review",
+                title: "Assign focused review for sensitive files.",
+                detail: "Have a maintainer deliberately inspect the sensitive file changes before approval.",
+                priority: finding.severity === "high" ? "high" : "medium",
+                relatedRuleIds: [finding.ruleId]
+            }
+        ];
+    }
+    return [];
+}
+function dedupeReviewActions(actions) {
+    const seen = new Set();
+    const unique = [];
+    for (const action of actions.sort((left, right) => priorityRank(right.priority) - priorityRank(left.priority))) {
+        if (seen.has(action.actionId)) {
+            continue;
+        }
+        seen.add(action.actionId);
+        unique.push(action);
+    }
+    return unique;
+}
+function dedupeFocusFiles(files) {
+    const seen = new Set();
+    const unique = [];
+    for (const file of files.sort((left, right) => priorityRank(right.priority) - priorityRank(left.priority))) {
+        if (seen.has(file.path)) {
+            continue;
+        }
+        seen.add(file.path);
+        unique.push(file);
+    }
+    return unique;
+}
+function priorityRank(priority) {
+    return { low: 1, medium: 2, high: 3 }[priority];
 }
 function dedupeFindings(findings) {
     const seen = new Set();

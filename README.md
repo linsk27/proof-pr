@@ -63,6 +63,8 @@ ProofPR 报告不只给一个风险等级，还会给维护者一个更容易行
 - `风险等级`：`low`、`medium`、`high`，表示这个 PR 的风险强度。
 - `证据评分`：`0-100`，表示这个 PR 提供的 review 证据是否充分。
 - `Review 门禁`：告诉维护者下一步该正常 review、重点 review、要求补证据，还是先阻止合并。
+- `Review 行动清单`：给出可勾选的维护者动作，例如要求补测试、拆分 PR、核查依赖或阻止合并。
+- `重点文件`：列出最应该优先查看的文件和原因。
 
 证据评分会因为这些问题被扣分：
 
@@ -256,8 +258,9 @@ ProofPR 报告主要看三块：
 1. `Risk`：整体风险等级，可能是 `low`、`medium`、`high`。
 2. `Evidence score` / `证据评分`：0-100 分，分数越高，说明 PR 越适合进入正常 review。
 3. `Review gate` / `Review 门禁`：给维护者的下一步动作建议。
-4. `Evidence`：文件数量、增删行数、测试文件变化、敏感文件变化、PR 描述质量。
-5. `Findings`：具体风险点和维护者应该重点 review 的地方。
+4. `Review Plan` / `Review 行动清单`：可以直接照着执行的维护者 checklist。
+5. `Evidence`：文件数量、增删行数、测试文件变化、敏感文件变化、PR 描述质量。
+6. `Findings`：具体风险点和维护者应该重点 review 的地方。
 
 ## 当前开发进度
 
@@ -299,6 +302,7 @@ ProofPR 报告主要看三块：
 - [配置说明](docs/configuration.md)
 - [规则说明](docs/rules.md)
 - [实现原理](docs/how-it-works.md)
+- [路线图](docs/roadmap.md)
 - [贡献指南](CONTRIBUTING.md)
 - [安全政策](SECURITY.md)
 - [变更记录](CHANGELOG.md)
@@ -326,6 +330,8 @@ pnpm release:check
 
 - npm 发布自动化。
 - GitHub Check annotations。
+- 规则预设。
+- GitHub Marketplace。
 - SARIF 上传示例。
 - Issue 复现质量检查模式。
 - 规则插件系统。

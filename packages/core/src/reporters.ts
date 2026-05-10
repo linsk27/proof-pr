@@ -85,6 +85,7 @@ function renderEnglishMarkdownReport(result: ScanResult): string {
   ];
 
   appendEvidenceScoreSection(lines, result, "en");
+  appendReviewPlanSection(lines, result, "en");
 
   if (result.findings.length === 0) {
     lines.push("## Findings", "", "No review-risk findings detected by the enabled rules.", "");
@@ -130,6 +131,7 @@ function renderChineseMarkdownReport(result: ScanResult): string {
   ];
 
   appendEvidenceScoreSection(lines, result, "zh-CN");
+  appendReviewPlanSection(lines, result, "zh-CN");
 
   if (result.findings.length === 0) {
     lines.push("## 风险发现", "", "启用的规则没有发现需要优先关注的 review 风险。", "");
@@ -177,6 +179,35 @@ function appendEvidenceScoreSection(lines: string[], result: ScanResult, locale:
     }
   } else {
     lines.push(locale === "zh-CN" ? "- 扣分项：无。" : "- Deduction: none.");
+  }
+
+  lines.push("");
+}
+
+function appendReviewPlanSection(lines: string[], result: ScanResult, locale: ReportLocale): void {
+  lines.push(locale === "zh-CN" ? "## Review 行动清单" : "## Review Plan", "");
+
+  if (result.reviewPlan.actionItems.length > 0) {
+    for (const action of result.reviewPlan.actionItems) {
+      lines.push(
+        locale === "zh-CN"
+          ? `- [ ] ${translateReviewActionTitle(action.actionId, action.title)}（${formatPriority(action.priority, locale)}）：${translateReviewActionDetail(action.actionId, action.detail)}`
+          : `- [ ] ${action.title} (${formatPriority(action.priority, locale)}): ${action.detail}`
+      );
+    }
+  } else {
+    lines.push(locale === "zh-CN" ? "- [ ] 没有额外行动项。" : "- [ ] No additional action items.");
+  }
+
+  if (result.reviewPlan.focusFiles.length > 0) {
+    lines.push("", locale === "zh-CN" ? "重点文件：" : "Focus files:");
+    for (const file of result.reviewPlan.focusFiles) {
+      lines.push(
+        locale === "zh-CN"
+          ? `- \`${file.path}\`（${formatPriority(file.priority, locale)}）：${translateFocusReason(file.reasonId, file.reason)}`
+          : `- \`${file.path}\` (${formatPriority(file.priority, locale)}): ${file.reason}`
+      );
+    }
   }
 
   lines.push("");
@@ -422,6 +453,61 @@ function formatReviewDecision(decision: string, locale: ReportLocale): string {
     "needs-evidence": "Ask for evidence before deep review",
     "block-merge": "Block merge until risks are handled"
   }[decision] ?? decision;
+}
+
+function formatPriority(priority: string, locale: ReportLocale): string {
+  if (locale === "zh-CN") {
+    return { low: "低优先级", medium: "中优先级", high: "高优先级" }[priority] ?? priority;
+  }
+
+  return `${priority} priority`;
+}
+
+function translateReviewActionTitle(actionId: string, fallback: string): string {
+  return {
+    "block-merge-until-resolved": "风险处理前不要合并",
+    "ask-for-evidence-before-review": "深入 review 前先要求补充证据",
+    "review-with-focus": "带着重点清单进行 review",
+    "normal-review": "进入常规 review",
+    "improve-pr-description": "要求补充更清楚的 PR 描述",
+    "add-verification-evidence": "要求补充测试或手动验证证据",
+    "add-reproduction-context": "要求补充复现或 before/after 上下文",
+    "rotate-secret": "轮换并移除暴露的凭证",
+    "justify-workflow-permissions": "要求说明 workflow 权限最小化理由",
+    "review-mcp-execution-surface": "审查 MCP 命令、参数和凭证处理",
+    "request-review-map-or-split": "要求拆分 PR 或提供逐文件 review map",
+    "verify-dependency-change": "核查依赖来源和 lockfile 影响",
+    "assign-sensitive-file-review": "安排敏感文件重点 review"
+  }[actionId] ?? fallback;
+}
+
+function translateReviewActionDetail(actionId: string, fallback: string): string {
+  return {
+    "block-merge-until-resolved": "在高风险 finding 被解释、降低或移除前，把这个 PR 视为不可合并。",
+    "ask-for-evidence-before-review": "要求测试、截图、复现步骤或更清楚的 PR 描述，再投入详细 review。",
+    "review-with-focus": "优先使用下面的风险发现和重点文件作为第一轮 review map。",
+    "normal-review": "当前证据足够支撑维护者进行常规 review。",
+    "improve-pr-description": "贡献者应说明为什么改、改了什么、如何验证，以及是否有发布或兼容性风险。",
+    "add-verification-evidence": "要求测试输出、CI 链接、截图，或简短的手动验证说明。",
+    "add-reproduction-context": "PR 应包含复现步骤、预期/实际行为，或相关 before/after 截图。",
+    "rotate-secret": "在 secret 从 PR 中移除并完成轮换前，不要合并。",
+    "justify-workflow-permissions": "确认写权限或 OIDC 是否必要，并检查不可信 PR 是否能触发该 workflow。",
+    "review-mcp-execution-surface": "检查 MCP 配置是否提交凭证，或意外扩大本地执行面。",
+    "request-review-map-or-split": "要求贡献者拆分无关改动，或标出最需要重点 review 的文件。",
+    "verify-dependency-change": "检查包名、维护者、许可证、安装脚本，以及 lockfile 是否符合预期依赖变化。",
+    "assign-sensitive-file-review": "合并前由维护者有意识地检查敏感文件改动。"
+  }[actionId] ?? fallback;
+}
+
+function translateFocusReason(reasonId: string, fallback: string): string {
+  return {
+    "change-size": "review 面积相关 finding",
+    "sensitive-path": "敏感路径发生变更",
+    "dependency-added": "依赖清单发生变更",
+    "workflow-permission-change": "workflow 权限发生变更",
+    "mcp-credential-risk": "MCP 配置存在执行面或凭证风险",
+    "missing-tests": "代码改动缺少测试或验证证据"
+  }[reasonId] ?? fallback;
 }
 
 function translateScoreMessage(message: string): string {
