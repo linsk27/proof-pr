@@ -46,6 +46,33 @@ jobs:
 
 提交这个文件后，打开一个 PR。ProofPR 会在 PR 中自动生成报告评论。
 
+## 它什么时候运行？
+
+ProofPR 的 GitHub Action 默认监听的是 PR 事件，不是普通分支 push。
+
+- 新建分支并推送到 GitHub：不会立刻生成报告。
+- 打开 Pull Request：会生成第一份报告。
+- PR 打开后继续推送新提交：会重新检测，并更新同一条报告评论。
+- 关闭后重新打开 PR：会重新检测。
+
+这由 workflow 中的配置控制：
+
+```yaml
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+```
+
+## 在哪里看报告？
+
+安装成功后，主要看三个地方：
+
+- PR 页面 `Conversation`：这里会出现 `ProofPR 审查报告` 评论。
+- 仓库 `Actions` 页面：这里可以看到 `ProofPR` workflow 的运行日志和 job summary。
+- PR 顶部的 checks 状态：如果风险达到 `fail-on` 阈值，检查项会失败，提醒维护者先处理风险。
+
+默认示例使用 `fail-on: high`，所以只有整体风险为 `high` 时才会阻止检查通过。这个失败不是说代码一定有 bug，而是说 PR 需要更认真地 review。
+
 ## 方式二：添加配置文件
 
 配置文件不是必须的，但建议添加。
@@ -161,8 +188,8 @@ proof-pr scan --base origin/main --fail-on medium
 GitHub Action 安装成功后，你会在 PR 页面看到：
 
 - Actions 中出现 `ProofPR` workflow。
-- PR 评论区出现 `ProofPR Review`。
-- 报告里有 `Risk`、`Evidence`、`Findings` 三块内容。
+- PR 评论区出现 `ProofPR 审查报告`。
+- 报告里有 `风险等级`、`证据概览`、`风险发现` 三块内容。
 
 如果没有出现评论，先检查 workflow 权限是否包含：
 

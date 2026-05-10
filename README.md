@@ -35,6 +35,12 @@ ProofPR 是一个面向开源维护者的 **PR 证据检查器 / PR 风险扫描
 - 想在 GitHub Actions 中增加 PR 质量门禁的团队。
 - 关注 secrets、CI 权限、MCP 配置、依赖风险的工程团队。
 
+## 它解决什么问题
+
+维护者最贵的成本不是“点开 PR”，而是花时间理解一个 PR 是否值得深入 review。尤其在 AI 辅助开发越来越普遍后，PR 可能看起来很完整，但缺少测试、复现、验证说明，或者偷偷改了 CI 权限、依赖、secret 相关文件。
+
+ProofPR 的作用是把这些信号提前整理出来，让维护者先看证据，再决定怎么 review。它不是代码审计平台，也不替代人工 review；它更像一个 PR 进入人工 review 前的质量门禁。
+
 ## 它会检查什么
 
 ProofPR 会扫描 PR diff 和 PR 描述，生成 `low`、`medium`、`high` 风险等级。
@@ -89,6 +95,39 @@ jobs:
 ### 3. 打开一个 PR
 
 ProofPR 会自动运行，并在 PR 评论区生成 `ProofPR Review` 报告。
+
+## 什么时候会自动检测？
+
+默认 GitHub Action 只在 Pull Request 事件中运行：
+
+- 新建分支并 `push`：不会立刻生成报告。
+- 用这个分支打开 PR：会自动生成报告。
+- PR 已经打开后继续 `push` 新提交：会再次检测，并更新同一条 ProofPR 评论。
+- 关闭后重新打开 PR：也会重新检测。
+
+对应的 workflow 配置是：
+
+```yaml
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+```
+
+如果你只是想在本地手动检查，不需要开 PR，可以直接运行：
+
+```bash
+npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
+```
+
+## 在哪里看报告？
+
+安装到 GitHub 仓库后，报告会出现在三个地方：
+
+1. PR 页面评论区：打开 `Pull requests`，进入某个 PR，在 `Conversation` 里看 `ProofPR 审查报告`。
+2. Actions 页面：进入仓库的 `Actions`，点击 `ProofPR` workflow，可以看运行日志和 job summary。
+3. PR 检查状态：如果风险达到 `fail-on` 阈值，GitHub Check 会失败，用来提醒维护者合并前必须处理风险。
+
+默认配置里 `fail-on: high` 表示只有整体风险达到 `high` 时才会让 workflow 失败。失败不代表代码一定错了，它代表这个 PR 需要维护者重点审查。
 
 ## 中文报告
 

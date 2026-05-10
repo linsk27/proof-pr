@@ -59,6 +59,18 @@ GitHub Action 会读取当前 PR 信息：
 - 如果 `comment: true`，就在 PR 评论区创建或更新 `ProofPR Review` 评论。
 - 如果风险达到 `fail-on` 阈值，就让 workflow 失败。
 
+默认 workflow 监听这些 PR 事件：
+
+```yaml
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+```
+
+因此普通分支 push 不会单独生成报告。只有打开 PR、向已打开的 PR 分支继续推送、或重新打开 PR 时，GitHub Action 才会运行。这个设计是为了让报告围绕 review 场景出现，而不是让每一次分支推送都产生噪音。
+
+报告可以在 PR 评论区、GitHub Actions job summary 和 PR checks 状态里看到。同一个 PR 多次运行时，ProofPR 会更新已有评论，而不是每次新建一条评论。
+
 ## diff 解析
 
 核心包会解析 unified diff：
@@ -158,6 +170,18 @@ GitHub Action 的 PR 评论里带有隐藏 marker：
 - 更适合作为 CI 门禁。
 
 后续可以加入可选 AI summary，但核心扫描会继续保持确定性。
+
+## 项目价值
+
+ProofPR 的价值不在于“自动判断代码好坏”，而在于帮助维护者把 review 前置问题标准化：
+
+- PR 是否太大，是否应该拆分。
+- 是否触碰了 CI、依赖、secret、MCP 等高风险区域。
+- 是否有测试、复现步骤、before/after 或手动验证说明。
+- 是否存在疑似凭证泄露。
+- 是否应该让检查失败，提醒维护者先处理风险再合并。
+
+这对开源项目尤其有用，因为维护者时间有限，外部贡献质量差异很大。ProofPR 让维护者先看到结构化证据，再决定投入多少 review 时间。
 
 ## 安全边界
 

@@ -4,6 +4,12 @@ ProofPR 的命令行工具。
 
 ProofPR 帮助维护者在投入深入 review 之前，先检查 PR 的证据、范围和安全风险。
 
+## 它什么时候运行？
+
+作为 GitHub Action 使用时，ProofPR 默认在 PR 打开、PR 分支更新、PR 重新打开时运行。普通分支 push 不会单独生成报告。
+
+报告会出现在 PR 评论区、GitHub Actions job summary 和 PR checks 状态里。
+
 ## 使用
 
 可以直接通过 npm 使用：
