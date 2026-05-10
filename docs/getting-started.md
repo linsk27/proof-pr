@@ -2,6 +2,8 @@
 
 这份文档只讲怎么安装和怎么跑起来。
 
+如果你想看完整图文流程，先看 [从 0 到 1 安装和验证 ProofPR](zero-to-one.md)。
+
 ![ProofPR 真实 PR 评论截图](screenshots/proofpr-demo-pr-comment.png)
 
 ## 你应该选哪种方式？

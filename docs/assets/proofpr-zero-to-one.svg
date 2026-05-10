@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="420" viewBox="0 0 1180 420" role="img" aria-labelledby="title desc">
+  <title id="title">ProofPR 从 0 到 1 使用流程</title>
+  <desc id="desc">展示从安装 GitHub Action 到查看报告的完整步骤。</desc>
+  <rect width="1180" height="420" rx="18" fill="#f8fafc"/>
+  <text x="48" y="58" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="30" font-weight="700" fill="#0f172a">从 0 到 1 接入 ProofPR</text>
+  <text x="48" y="90" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="16" fill="#475569">安装一次，以后每个 Pull Request 自动生成证据报告。</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#64748b"/>
+    </marker>
+    <style>
+      .step { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; }
+      .num { fill: #2563eb; font-family: Arial, 'Microsoft YaHei', sans-serif; font-size: 18px; font-weight: 700; }
+      .title { fill: #0f172a; font-family: Arial, 'Microsoft YaHei', sans-serif; font-size: 18px; font-weight: 700; }
+      .body { fill: #475569; font-family: Arial, 'Microsoft YaHei', sans-serif; font-size: 14px; }
+      .code { fill: #0f172a; font-family: Consolas, 'Microsoft YaHei', monospace; font-size: 13px; }
+    </style>
+  </defs>
+
+  <g transform="translate(48 130)">
+    <rect class="step" width="190" height="190" rx="14"/>
+    <circle cx="28" cy="30" r="17" fill="#dbeafe"/>
+    <text class="num" x="22" y="36">1</text>
+    <text class="title" x="24" y="72">创建 workflow</text>
+    <text class="body" x="24" y="104">添加 GitHub Action</text>
+    <text class="code" x="24" y="132">.github/workflows/</text>
+    <text class="code" x="24" y="154">proofpr.yml</text>
+  </g>
+
+  <line x1="248" y1="225" x2="308" y2="225" stroke="#64748b" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <g transform="translate(318 130)">
+    <rect class="step" width="190" height="190" rx="14"/>
+    <circle cx="28" cy="30" r="17" fill="#dcfce7"/>
+    <text class="num" x="22" y="36" fill="#16a34a">2</text>
+    <text class="title" x="24" y="72">选择预设</text>
+    <text class="body" x="24" y="104">开源维护推荐</text>
+    <text class="code" x="24" y="132">preset:</text>
+    <text class="code" x="24" y="154">open-source-maintainer</text>
+  </g>
+
+  <line x1="518" y1="225" x2="578" y2="225" stroke="#64748b" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <g transform="translate(588 130)">
+    <rect class="step" width="190" height="190" rx="14"/>
+    <circle cx="28" cy="30" r="17" fill="#fef3c7"/>
+    <text class="num" x="22" y="36" fill="#d97706">3</text>
+    <text class="title" x="24" y="72">打开 PR</text>
+    <text class="body" x="24" y="104">opened / synchronize</text>
+    <text class="body" x="24" y="132">事件触发扫描</text>
+    <text class="body" x="24" y="160">普通 push 不刷屏</text>
+  </g>
+
+  <line x1="788" y1="225" x2="848" y2="225" stroke="#64748b" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <g transform="translate(858 130)">
+    <rect class="step" width="250" height="190" rx="14"/>
+    <circle cx="28" cy="30" r="17" fill="#fee2e2"/>
+    <text class="num" x="22" y="36" fill="#dc2626">4</text>
+    <text class="title" x="24" y="72">查看结果</text>
+    <text class="body" x="24" y="104">PR 评论 + job summary</text>
+    <text class="body" x="24" y="132">Annotations 定位文件行</text>
+    <text class="body" x="24" y="160">可选 SARIF / Code Scanning</text>
+  </g>
+
+  <rect x="48" y="350" width="1060" height="34" rx="8" fill="#e2e8f0"/>
+  <text x="70" y="372" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="14" fill="#334155">核心思路：先看证据，再投入 review。ProofPR 不替代人工审查，只把风险和缺失证据提前整理出来。</text>
+</svg>

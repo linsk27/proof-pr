@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="520" viewBox="0 0 1180 520" role="img" aria-labelledby="title desc">
+  <title id="title">ProofPR 报告结构</title>
+  <desc id="desc">展示 ProofPR 报告中的风险、证据评分、Review 门禁、行动清单和风险发现。</desc>
+  <rect width="1180" height="520" rx="18" fill="#0f172a"/>
+  <rect x="34" y="34" width="1112" height="452" rx="16" fill="#f8fafc"/>
+  <text x="66" y="80" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#0f172a">ProofPR 报告怎么读？</text>
+  <text x="66" y="112" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="15" fill="#475569">先看结论，再看行动，再看具体 finding。</text>
+
+  <defs>
+    <style>
+      .panel { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; }
+      .h { font-family: Arial, 'Microsoft YaHei', sans-serif; font-size: 18px; font-weight: 700; fill: #0f172a; }
+      .t { font-family: Arial, 'Microsoft YaHei', sans-serif; font-size: 14px; fill: #475569; }
+      .mono { font-family: Consolas, 'Microsoft YaHei', monospace; font-size: 13px; fill: #334155; }
+    </style>
+  </defs>
+
+  <g transform="translate(66 145)">
+    <rect class="panel" width="320" height="120" rx="14"/>
+    <text class="h" x="22" y="38">1. Risk</text>
+    <text class="mono" x="22" y="66">low / medium / high</text>
+    <text class="t" x="22" y="94">这次 PR 整体风险有多高。</text>
+  </g>
+
+  <g transform="translate(430 145)">
+    <rect class="panel" width="320" height="120" rx="14"/>
+    <text class="h" x="22" y="38">2. Evidence score</text>
+    <text class="mono" x="22" y="66">0 - 100</text>
+    <text class="t" x="22" y="94">证据是否足够支撑 review。</text>
+  </g>
+
+  <g transform="translate(794 145)">
+    <rect class="panel" width="320" height="120" rx="14"/>
+    <text class="h" x="22" y="38">3. Review gate</text>
+    <text class="mono" x="22" y="66">ready / needs-evidence</text>
+    <text class="t" x="22" y="94">维护者下一步应该怎么做。</text>
+  </g>
+
+  <g transform="translate(66 300)">
+    <rect class="panel" width="502" height="130" rx="14"/>
+    <text class="h" x="22" y="38">4. Review Plan</text>
+    <text class="t" x="22" y="66">可勾选的行动清单：</text>
+    <text class="mono" x="22" y="94">[ ] 要求补充测试或手动验证证据</text>
+    <text class="mono" x="22" y="118">[ ] 审查 MCP command、args、env</text>
+  </g>
+
+  <g transform="translate(612 300)">
+    <rect class="panel" width="502" height="130" rx="14"/>
+    <text class="h" x="22" y="38">5. Findings</text>
+    <text class="t" x="22" y="66">具体风险点和重点文件：</text>
+    <text class="mono" x="22" y="94">mcp-credential-risk  line 7</text>
+    <text class="mono" x="22" y="118">workflow-permission-change</text>
+  </g>
+
+  <text x="66" y="468" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="14" fill="#64748b">理解顺序：Risk / Score / Gate 决定是否值得 review，Review Plan / Findings 决定先看哪里。</text>
+</svg>

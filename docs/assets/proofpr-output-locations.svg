@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="470" viewBox="0 0 1180 470" role="img" aria-labelledby="title desc">
+  <title id="title">ProofPR 输出位置</title>
+  <desc id="desc">展示 ProofPR 报告会出现在 PR 评论、Actions、annotations 和 Code Scanning 中。</desc>
+  <rect width="1180" height="470" rx="18" fill="#ffffff"/>
+  <rect x="20" y="20" width="1140" height="430" rx="16" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="52" y="64" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#0f172a">报告出现在哪里？</text>
+  <text x="52" y="96" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="15" fill="#475569">安装到 GitHub 仓库后，同一次扫描可以进入多个维护者常看的位置。</text>
+
+  <defs>
+    <style>
+      .box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; }
+      .label { font-family: Arial, 'Microsoft YaHei', sans-serif; font-size: 18px; font-weight: 700; fill: #0f172a; }
+      .text { font-family: Arial, 'Microsoft YaHei', sans-serif; font-size: 14px; fill: #475569; }
+      .small { font-family: Consolas, 'Microsoft YaHei', monospace; font-size: 13px; fill: #334155; }
+    </style>
+  </defs>
+
+  <g transform="translate(52 140)">
+    <rect class="box" width="250" height="230" rx="14"/>
+    <rect x="18" y="18" width="214" height="38" rx="8" fill="#dbeafe"/>
+    <text class="label" x="30" y="44">PR 评论区</text>
+    <text class="text" x="24" y="86">Conversation 里出现</text>
+    <text class="small" x="24" y="112">ProofPR 审查报告</text>
+    <line x1="24" y1="134" x2="226" y2="134" stroke="#e2e8f0"/>
+    <text class="text" x="24" y="164">适合维护者快速扫一眼：</text>
+    <text class="text" x="24" y="190">风险、评分、行动清单。</text>
+  </g>
+
+  <g transform="translate(326 140)">
+    <rect class="box" width="250" height="230" rx="14"/>
+    <rect x="18" y="18" width="214" height="38" rx="8" fill="#dcfce7"/>
+    <text class="label" x="30" y="44">Actions Summary</text>
+    <text class="text" x="24" y="86">每次 workflow 运行都有</text>
+    <text class="small" x="24" y="112">job summary</text>
+    <line x1="24" y1="134" x2="226" y2="134" stroke="#e2e8f0"/>
+    <text class="text" x="24" y="164">适合排查：</text>
+    <text class="text" x="24" y="190">本次扫描输入和输出。</text>
+  </g>
+
+  <g transform="translate(600 140)">
+    <rect class="box" width="250" height="230" rx="14"/>
+    <rect x="18" y="18" width="214" height="38" rx="8" fill="#fef3c7"/>
+    <text class="label" x="30" y="44">Annotations</text>
+    <text class="text" x="24" y="86">在 workflow annotations</text>
+    <text class="text" x="24" y="112">和 PR 文件视图中定位</text>
+    <line x1="24" y1="134" x2="226" y2="134" stroke="#e2e8f0"/>
+    <text class="text" x="24" y="164">适合跳到具体文件：</text>
+    <text class="small" x="24" y="190">line 7: API_TOKEN</text>
+  </g>
+
+  <g transform="translate(874 140)">
+    <rect class="box" width="250" height="230" rx="14"/>
+    <rect x="18" y="18" width="214" height="38" rx="8" fill="#fee2e2"/>
+    <text class="label" x="30" y="44">Code Scanning</text>
+    <text class="text" x="24" y="86">可选上传 SARIF</text>
+    <text class="small" x="24" y="112">sarif-output: proofpr.sarif</text>
+    <line x1="24" y1="134" x2="226" y2="134" stroke="#e2e8f0"/>
+    <text class="text" x="24" y="164">适合团队安全看板：</text>
+    <text class="text" x="24" y="190">统一管理风险 finding。</text>
+  </g>
+</svg>
