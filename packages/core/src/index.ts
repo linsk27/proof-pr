@@ -1,4 +1,4 @@
-export { loadConfig, parseConfig, riskMeetsThreshold, riskRank } from "./config.js";
+export { loadConfig, parseConfig, parseLocale, riskMeetsThreshold, riskRank } from "./config.js";
 export { parseUnifiedDiff } from "./diff.js";
 export { analyzeEvidence } from "./evidence.js";
 export { renderMarkdownReport, renderSarifReport, getReportMarker } from "./reporters.js";
@@ -10,6 +10,7 @@ export type {
   FindingSeverity,
   ProofPRConfig,
   PullRequestContext,
+  ReportLocale,
   RiskLevel,
   ScanResult,
   ScanSummary

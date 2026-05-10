@@ -3,6 +3,30 @@ import { analyzeEvidence } from "./evidence.js";
 import { matchesAny, isCodePath, isDependencyManifest, isMcpConfigPath, isTestPath, isWorkflowPath } from "./path-utils.js";
 import { detectSecrets } from "./secrets.js";
 
+const PACKAGE_JSON_NON_DEPENDENCY_KEYS = new Set([
+  "author",
+  "bin",
+  "bugs",
+  "description",
+  "engines",
+  "exports",
+  "files",
+  "homepage",
+  "keywords",
+  "license",
+  "main",
+  "module",
+  "name",
+  "packageManager",
+  "private",
+  "publishConfig",
+  "repository",
+  "scripts",
+  "type",
+  "types",
+  "version"
+]);
+
 export function analyzeDiffFiles(
   files: DiffFile[],
   config: ProofPRConfig,
@@ -210,8 +234,20 @@ function analyzeDependencyChanges(files: DiffFile[], config: ProofPRConfig): Fin
 
 function isDependencyLikeAddition(path: string, line: string): boolean {
   if (path.endsWith("package.json")) {
-    return /^"[@A-Za-z0-9_.-]+"\s*:\s*"(?:\^|~|>=?|<=?|\d|workspace:|npm:|file:|link:|portal:|git\+|https?:|github:)[^"]*"/.test(
-      line
+    const match = /^"(?<key>[@A-Za-z0-9_.-]+)"\s*:\s*"(?<value>[^"]*)"/.exec(line);
+
+    if (!match?.groups) {
+      return false;
+    }
+
+    const { key, value } = match.groups;
+
+    if (!key || !value || PACKAGE_JSON_NON_DEPENDENCY_KEYS.has(key)) {
+      return false;
+    }
+
+    return /^(?:\^|~|>=?|<=?|\d|workspace:|npm:|file:|link:|portal:|git\+|https?:|github:)/.test(
+      value
     );
   }
 

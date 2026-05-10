@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.2
+      - uses: linsk27/proof-pr@v0.1.3
         with:
           fail-on: high
           comment: "true"
@@ -59,6 +59,8 @@ jobs:
 写入：
 
 ```yaml
+locale: zh-CN
+
 riskThreshold: high
 
 sensitivePaths:
@@ -91,14 +93,14 @@ comment:
 
 ```bash
 npx proof-pr init
-proof-pr scan --base origin/main --head HEAD
+npx proof-pr scan --base origin/main --head HEAD --locale zh-CN
 ```
 
 也可以全局安装：
 
 ```bash
 npm install -g proof-pr
-proof-pr scan --base origin/main --head HEAD
+proof-pr scan --base origin/main --head HEAD --locale zh-CN
 ```
 
 也可以从源码运行：
@@ -108,7 +110,7 @@ git clone https://github.com/linsk27/proof-pr.git
 cd proof-pr
 pnpm install
 pnpm build
-node packages/cli/dist/index.js scan --base origin/main --head HEAD
+node packages/cli/dist/index.js scan --base origin/main --head HEAD --locale zh-CN
 ```
 
 ## 常用命令
@@ -129,6 +131,11 @@ proof-pr scan
 
 ```bash
 proof-pr scan --base origin/main --head HEAD
+```
+
+输出中文报告：
+```bash
+proof-pr scan --base origin/main --head HEAD --locale zh-CN
 ```
 
 输出 JSON：

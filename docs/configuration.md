@@ -3,6 +3,8 @@
 ProofPR 默认读取 `.proofpr.yml`。
 
 ```yaml
+locale: zh-CN
+
 riskThreshold: high
 
 ignorePaths:
@@ -30,6 +32,19 @@ dependencies:
 
 comment:
   enabled: true
+```
+
+## `locale`
+
+控制 Markdown 报告语言。
+
+- `en`：英文，默认值。
+- `zh-CN`：简体中文，适合中文仓库、中文团队和中文 PR 评论。
+
+CLI 也可以临时指定：
+
+```bash
+proof-pr scan --base origin/main --head HEAD --locale zh-CN
 ```
 
 ## `riskThreshold`

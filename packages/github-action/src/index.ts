@@ -30,7 +30,7 @@ async function run(): Promise<void> {
       }
     : undefined;
   const result = scanDiff(diffText, { config, pullRequest });
-  const markdown = renderMarkdownReport(result);
+  const markdown = renderMarkdownReport(result, config.locale);
 
   core.setOutput("risk", result.risk);
   core.setOutput("findings", String(result.findings.length));

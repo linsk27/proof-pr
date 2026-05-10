@@ -6,10 +6,12 @@ import { promisify } from "node:util";
 import { Command, InvalidArgumentError } from "commander";
 import {
   loadConfig,
+  parseLocale,
   renderMarkdownReport,
   renderSarifReport,
   riskMeetsThreshold,
   scanDiff,
+  type ReportLocale,
   type RiskLevel
 } from "@proof-pr/core";
 
@@ -27,6 +29,7 @@ interface ScanCommandOptions {
   prBodyFile?: string;
   config: string;
   format: OutputFormat;
+  locale?: ReportLocale;
   failOn: FailLevel;
 }
 
@@ -42,7 +45,7 @@ const program = new Command();
 program
   .name("proof-pr")
   .description("Review pull request evidence, scope, and safety before maintainers spend time on it.")
-  .version("0.1.2");
+  .version("0.1.3");
 
 program
   .command("scan", { isDefault: true })
@@ -55,6 +58,7 @@ program
   .option("--pr-body-file <path>", "Read a pull request body from a Markdown file.")
   .option("--config <path>", "Path to .proofpr.yml.", ".proofpr.yml")
   .option("--format <format>", "Output format: markdown, json, or sarif.", parseFormat, "markdown")
+  .option("--locale <locale>", "Report language: en or zh-CN.")
   .option("--fail-on <level>", "Exit with code 1 on risk level: low, medium, high, or never.", parseFailLevel, "never")
   .action(async (options: ScanCommandOptions) => {
     const diffText = options.diffFile
@@ -68,7 +72,8 @@ program
         ? { title: options.prTitle, body: prBody }
         : undefined;
     const result = scanDiff(diffText, { config, pullRequest });
-    const output = renderOutput(result, options.format);
+    const locale = parseLocale(options.locale, config.locale);
+    const output = renderOutput(result, options.format, locale);
 
     process.stdout.write(`${output}\n`);
 
@@ -140,7 +145,9 @@ async function pathExists(path: string): Promise<boolean> {
 }
 
 function renderConfigTemplate(): string {
-  return `riskThreshold: high
+  return `locale: zh-CN
+
+riskThreshold: high
 
 sensitivePaths:
   - ".github/workflows/**"
@@ -192,14 +199,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.1
+      - uses: linsk27/proof-pr@v0.1.3
         with:
           fail-on: ${failOn}
           comment: "true"
 `;
 }
 
-function renderOutput(result: ReturnType<typeof scanDiff>, format: OutputFormat): string {
+function renderOutput(result: ReturnType<typeof scanDiff>, format: OutputFormat, locale: ReportLocale): string {
   if (format === "json") {
     return JSON.stringify(result, null, 2);
   }
@@ -208,7 +215,7 @@ function renderOutput(result: ReturnType<typeof scanDiff>, format: OutputFormat)
     return renderSarifReport(result);
   }
 
-  return renderMarkdownReport(result);
+  return renderMarkdownReport(result, locale);
 }
 
 function parseFormat(value: string): OutputFormat {

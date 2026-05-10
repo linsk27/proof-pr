@@ -73,7 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.2
+      - uses: linsk27/proof-pr@v0.1.3
         with:
           fail-on: high
           comment: "true"
@@ -82,6 +82,22 @@ jobs:
 ### 3. 打开一个 PR
 
 ProofPR 会自动运行，并在 PR 评论区生成 `ProofPR Review` 报告。
+
+## 中文报告
+
+如果希望 CLI 输出和 GitHub PR 评论都使用中文，在仓库根目录的 `.proofpr.yml` 中加入：
+
+```yaml
+locale: zh-CN
+```
+
+也可以只在本地命令里临时指定：
+
+```bash
+npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
+```
+
+如果你在 Windows PowerShell 里看到中文变成 `????` 或乱码，通常是终端编码问题，不是 ProofPR 没识别内容。建议使用 Windows Terminal / PowerShell 7，或先执行 `chcp 65001` 再运行命令。GitHub Actions 的 Ubuntu 环境默认是 UTF-8，一般不会出现这个问题。
 
 ## 可选配置
 
@@ -94,6 +110,8 @@ ProofPR 会自动运行，并在 PR 评论区生成 `ProofPR Review` 报告。
 示例：
 
 ```yaml
+locale: zh-CN
+
 riskThreshold: high
 
 sensitivePaths:
@@ -126,14 +144,14 @@ comment:
 
 ```bash
 npx proof-pr init
-proof-pr scan --base origin/main --head HEAD
+npx proof-pr scan --base origin/main --head HEAD --locale zh-CN
 ```
 
 全局安装：
 
 ```bash
 npm install -g proof-pr
-proof-pr scan --base origin/main --head HEAD
+proof-pr scan --base origin/main --head HEAD --locale zh-CN
 ```
 
 从源码运行：
@@ -143,7 +161,7 @@ git clone https://github.com/linsk27/proof-pr.git
 cd proof-pr
 pnpm install
 pnpm build
-node packages/cli/dist/index.js scan --base origin/main --head HEAD
+node packages/cli/dist/index.js scan --base origin/main --head HEAD --locale zh-CN
 ```
 
 CLI 真实输出截图：
@@ -156,6 +174,7 @@ CLI 真实输出截图：
 proof-pr init
 proof-pr scan
 proof-pr scan --base origin/main --head HEAD
+proof-pr scan --base origin/main --head HEAD --locale zh-CN
 proof-pr scan --base origin/main --format json
 proof-pr scan --base origin/main --pr-body-file pr-body.md
 proof-pr scan --base origin/main --fail-on medium
@@ -177,7 +196,7 @@ ProofPR 报告主要看三块：
 
 ## 当前开发进度
 
-当前版本：`v0.1.2`
+当前版本：`v0.1.3`
 
 已经完成：
 
@@ -185,13 +204,14 @@ ProofPR 报告主要看三块：
 - PR 评论报告和 GitHub job summary。
 - 本地 CLI 扫描 git diff。
 - Markdown、JSON、SARIF 输出。
+- 中文报告输出：`.proofpr.yml` 配置 `locale: zh-CN`，或 CLI 使用 `--locale zh-CN`。
 - PR title/body 证据分析。
 - 改动规模、敏感路径、缺少测试、secrets、依赖、workflow 权限、MCP 配置风险规则。
+- npm 包发布和 CLI 安装体验。
 - GitHub Release，附带 CLI tarball。
 
 还没完成：
 
-- npm 安装体验和发布自动化优化。
 - GitHub Check annotations。
 - Issue 质量检查模式。
 - 规则插件系统。

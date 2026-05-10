@@ -88,6 +88,13 @@ GitHub Action 会读取当前 PR 信息：
 - `workflow-permission-change`：检查 GitHub Actions 是否新增写权限或 OIDC 权限。
 - `mcp-credential-risk`：检查 MCP 配置中 command、args、env、token、secret 等高风险字段。
 
+其中 `change-size` 的默认阈值是：
+
+- 变更文件数大于等于 10，或变更行数大于等于 250：触发 `medium`。
+- 变更文件数大于等于 20，或变更行数大于等于 800：触发 `high`。
+
+敏感路径、依赖、workflow 权限、MCP 和 secret 规则会基于路径、added line、正则和 glob 做确定性匹配。它们不调用大模型，也不会猜测作者是谁。
+
 ## 风险评分
 
 ProofPR 会把规则 finding 汇总为整体风险：
@@ -99,6 +106,28 @@ ProofPR 会把规则 finding 汇总为整体风险：
 - 没有明显风险时为 `low`。
 
 这个评分逻辑故意保持简单，方便维护者理解和调整。
+
+## 中文和编码
+
+ProofPR 支持中文 Markdown 报告：
+
+```yaml
+locale: zh-CN
+```
+
+或在 CLI 中使用：
+
+```bash
+proof-pr scan --base origin/main --head HEAD --locale zh-CN
+```
+
+如果 Windows PowerShell 里出现 `????` 或中文乱码，通常是终端或脚本写入 GitHub API 时没有按 UTF-8 处理。ProofPR 的源码和报告内容使用 UTF-8；建议使用 Windows Terminal / PowerShell 7，或在命令前执行：
+
+```powershell
+chcp 65001
+```
+
+在 GitHub Actions 的 Ubuntu runner 中，默认环境通常已经是 UTF-8。
 
 ## 报告输出
 

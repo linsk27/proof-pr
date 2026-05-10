@@ -1,12 +1,14 @@
 import { readFile } from "node:fs/promises";
 import YAML from "yaml";
 import { z } from "zod";
-import type { ProofPRConfig, RiskLevel } from "./types.js";
+import type { ProofPRConfig, ReportLocale, RiskLevel } from "./types.js";
 
 const riskLevelSchema = z.enum(["low", "medium", "high"]);
+const localeSchema = z.enum(["en", "zh-CN"]);
 
 const configSchema = z
   .object({
+    locale: localeSchema.default("en"),
     riskThreshold: riskLevelSchema.default("high"),
     ignorePaths: z.array(z.string()).default([]),
     sensitivePaths: z
@@ -77,6 +79,11 @@ export function riskMeetsThreshold(risk: RiskLevel, threshold: RiskLevel | "neve
 
 export function riskRank(risk: RiskLevel): number {
   return { low: 1, medium: 2, high: 3 }[risk];
+}
+
+export function parseLocale(value: unknown, fallback: ReportLocale = "en"): ReportLocale {
+  const result = localeSchema.safeParse(value);
+  return result.success ? result.data : fallback;
 }
 
 function isMissingFileError(error: unknown): boolean {

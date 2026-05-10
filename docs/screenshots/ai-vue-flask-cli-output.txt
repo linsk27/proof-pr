@@ -1,32 +1,31 @@
-﻿<!-- proof-pr-report -->
-# ProofPR Review
+<!-- proof-pr-report -->
+# ProofPR 审查报告
 
-Risk: **medium**
+风险等级：**中**
 
-## Evidence
+## 证据概览
 
-- Files changed: 4
-- Additions: 114
-- Deletions: 180
-- Test files changed: 0
-- Sensitive files changed: 0
-- PR description: present
-- Verification evidence: yes
-- Reproduction context: yes
+- 改动文件数：4
+- 新增行数：114
+- 删除行数：180
+- 测试文件改动数：0
+- 敏感文件改动数：0
+- PR 描述质量：充足
+- 验证证据：有
+- 复现上下文：有
 
-## Findings
+## 风险发现
 
-### Broad review surface
-- Rule: `change-size`
-- Severity: `medium`
-- Detail: This change touches 4 files and 294 changed lines.
-- Evidence:
-  - `files: 4`
-  - `changed lines: 294`
-- Recommendation: Ask the contributor to explain the scope boundaries and identify the files that need the closest review.
+### review 面积偏大
+- 规则：`change-size`
+- 严重程度：`中`
+- 详情：该改动涉及 4 个文件、294 行变更。
+- 证据：
+  - `文件数：4`
+  - `变更行数：294`
+- 建议：建议要求贡献者解释改动边界，并标出最需要重点 review 的文件。
 
-## Maintainer Focus
+## 维护者关注点
 
-- Request a smaller PR or a file-by-file review guide.
-
+- 要求拆分 PR，或提供逐文件 review 指南。
 

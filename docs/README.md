@@ -19,6 +19,12 @@ CLI 输出截图来自本机 `AI-Vue3-python-flask-Blog` 项目，使用 `npx pr
 
 ![ProofPR 真实 CLI 输出截图](screenshots/ai-vue-flask-cli-output.png)
 
+中文报告可以通过 `.proofpr.yml` 配置：
+
+```yaml
+locale: zh-CN
+```
+
 ## 示意图
 
 下面这些 SVG 是说明流程和界面的示意图，不是真实截图：

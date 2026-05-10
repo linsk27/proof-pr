@@ -1,5 +1,12 @@
 # 变更记录
 
+## 0.1.3 - 2026-05-10
+
+- 新增简体中文 Markdown 报告：`.proofpr.yml` 支持 `locale: zh-CN`，CLI 支持 `--locale zh-CN`。
+- GitHub Action 会根据仓库配置输出中文 PR 评论和 job summary。
+- `proof-pr init` 默认生成中文报告配置。
+- 文档补充中文使用方式、Windows 终端乱码说明和确定性风险评估原理。
+
 ## 0.1.2 - 2026-05-10
 
 - 修复 CLI `--version` 输出仍显示 `0.1.0` 的问题。

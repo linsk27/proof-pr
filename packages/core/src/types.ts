@@ -2,7 +2,10 @@ export type RiskLevel = "low" | "medium" | "high";
 
 export type FindingSeverity = "info" | RiskLevel;
 
+export type ReportLocale = "en" | "zh-CN";
+
 export interface ProofPRConfig {
+  locale: ReportLocale;
   riskThreshold: RiskLevel;
   ignorePaths: string[];
   sensitivePaths: string[];

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { renderMarkdownReport } from "./reporters.js";
 import { scanDiff } from "./scan.js";
 
 describe("scanDiff", () => {
@@ -51,6 +52,31 @@ index 0000000..1111111 100644
     expect(result.summary.verificationEvidence).toBe(true);
   });
 
+  it("recognizes Chinese PR verification and reproduction evidence", () => {
+    const result = scanDiff(
+      `diff --git a/src/auth.ts b/src/auth.ts
+index 0000000..1111111 100644
+--- a/src/auth.ts
++++ b/src/auth.ts
+@@ -1 +1,2 @@
+ export function auth() {}
++export function logout() {}
+`,
+      {
+        pullRequest: {
+          title: "修复退出登录流程",
+          body:
+            "本次改动修复退出登录后的跳转问题。验证方式：本地运行单元测试并手动检查页面跳转。复现步骤：登录后点击退出登录，对比修改前后的跳转结果。预期结果：用户回到登录页。实际结果：已经符合预期。"
+        }
+      }
+    );
+
+    expect(result.summary.pullRequestDescription).toBe("present");
+    expect(result.summary.verificationEvidence).toBe(true);
+    expect(result.summary.reproductionEvidence).toBe(true);
+    expect(result.findings.some((finding) => finding.ruleId === "missing-tests")).toBe(false);
+  });
+
   it("flags missing PR context for sensitive changes", () => {
     const result = scanDiff(
       `diff --git a/.github/workflows/release.yml b/.github/workflows/release.yml
@@ -86,6 +112,19 @@ index 0000000..1111111 100644
     expect(result.findings.some((finding) => finding.ruleId === "dependency-added")).toBe(false);
   });
 
+  it("does not treat package metadata version changes as dependency additions", () => {
+    const result = scanDiff(`diff --git a/package.json b/package.json
+index 0000000..1111111 100644
+--- a/package.json
++++ b/package.json
+@@ -1 +1,2 @@
+ {
++  "version": "0.1.3"
+`);
+
+    expect(result.findings.some((finding) => finding.ruleId === "dependency-added")).toBe(false);
+  });
+
   it("flags package dependency additions", () => {
     const result = scanDiff(`diff --git a/package.json b/package.json
 index 0000000..1111111 100644
@@ -111,5 +150,21 @@ index 0000000..1111111 100644
 
     expect(result.risk).toBe("low");
     expect(result.findings).toHaveLength(0);
+  });
+
+  it("renders a Simplified Chinese Markdown report", () => {
+    const result = scanDiff(`diff --git a/src/auth.ts b/src/auth.ts
+index 0000000..1111111 100644
+--- a/src/auth.ts
++++ b/src/auth.ts
+@@ -1 +1,2 @@
+ export function auth() {}
++export function logout() {}
+`);
+    const report = renderMarkdownReport(result, "zh-CN");
+
+    expect(report).toContain("# ProofPR 审查报告");
+    expect(report).toContain("风险等级");
+    expect(report).toContain("风险发现");
   });
 });
