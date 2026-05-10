@@ -13,9 +13,9 @@ ProofPR 是一个面向开源维护者的 **PR 证据检查器 / PR 风险扫描
 
 ## 发布状态
 
-- GitHub Release：[`v0.1.4`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.4)
-- npm 最新公开包：[`proof-pr@0.1.3`](https://www.npmjs.com/package/proof-pr)
-- `main` 分支：已准备 `0.1.5`，包含 Review Plan、规则预设、GitHub annotations、SARIF 输出、真实案例库和 Marketplace 材料，暂未打 tag / 发布 npm。
+- GitHub tag：[`v0.1.5`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.5)
+- npm 最新公开包：[`proof-pr@0.1.5`](https://www.npmjs.com/package/proof-pr)
+- `v0.1.5` 包含 Review Plan、规则预设、GitHub annotations、SARIF 输出、真实案例库和 Marketplace 材料。
 - 直接运行：`npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN`
 
 ## 真实运行截图
@@ -108,15 +108,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.4
-        with:
-          fail-on: high
-          comment: "true"
-```
-
-`v0.1.5` 发布后可以开启 annotations：
-
-```yaml
       - uses: linsk27/proof-pr@v0.1.5
         with:
           fail-on: high
@@ -240,7 +231,7 @@ pnpm build
 node packages/cli/dist/index.js init --preset security-strict
 ```
 
-下一次 npm 发版后可直接使用：
+也可以直接使用 npm 公开包：
 
 ```bash
 npx proof-pr@latest init --preset open-source-maintainer
@@ -308,7 +299,7 @@ ProofPR 报告主要看三块：
 
 ## 当前开发进度
 
-当前 GitHub Action 发布版：`v0.1.4`。`main` 分支已准备 `0.1.5`，npm 最新公开包暂时是 `0.1.3`。
+当前版本：`v0.1.5`，npm 最新公开包是 `proof-pr@0.1.5`。
 
 已经完成：
 
@@ -329,7 +320,7 @@ ProofPR 报告主要看三块：
 
 还没完成：
 
-- `v0.1.5` 正式 tag / npm 发布。
+- GitHub Release 页面发布说明自动化修复。
 - Issue 质量检查模式。
 - 规则插件系统。
 

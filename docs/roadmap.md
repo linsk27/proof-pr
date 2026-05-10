@@ -20,14 +20,14 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 
 ## 短期方向
 
-1. 发布 `v0.1.5`
-   打 tag、确认 GitHub Release、发布 npm 包，并更新 README 的发布状态。
-
-2. GitHub Marketplace 上架
+1. GitHub Marketplace 上架
    代码侧材料已准备好，下一步需要仓库所有者在 GitHub 网页上确认发布。
 
-3. 真实截图刷新
+2. 真实截图刷新
    用 `v0.1.5` 的 annotations / SARIF 能力重新跑一个 demo PR，补充新版效果图。
+
+3. GitHub Release 页面发布说明自动化
+   当前 npm 已发布，后续要让 release workflow 在 npm 失败时也能创建 GitHub Release 页面。
 
 ## 中期方向
 
@@ -49,4 +49,4 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 
 ## 下一版优先级
 
-下一步优先发布 `v0.1.5`，然后用真实 demo PR 更新截图和 Marketplace 页面。代码能力已经比 MVP 更完整，后续重点应该转向传播、案例和低门槛安装体验。
+下一步优先用真实 demo PR 更新截图和 Marketplace 页面。代码能力已经比 MVP 更完整，后续重点应该转向传播、案例和低门槛安装体验。

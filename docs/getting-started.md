@@ -38,15 +38,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.4
-        with:
-          fail-on: high
-          comment: "true"
-```
-
-`v0.1.5` 发布后推荐使用：
-
-```yaml
       - uses: linsk27/proof-pr@v0.1.5
         with:
           fail-on: high
@@ -160,7 +151,7 @@ node packages/cli/dist/index.js scan --base origin/main --head HEAD --locale zh-
 proof-pr init
 ```
 
-如果你的仓库更关注安全、MCP 或依赖风险，下一次 npm 发版后可以换成：
+如果你的仓库更关注安全、MCP 或依赖风险，可以换成：
 
 ```bash
 proof-pr init --preset security-strict

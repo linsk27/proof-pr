@@ -24,7 +24,9 @@ pnpm release:check
 - 发布命令：`npm publish --access public --provenance`。
 - 需要仓库 secret：`NPM_TOKEN`。
 
-如果没有配置 `NPM_TOKEN`，GitHub Release 可以创建，但 npm 发布步骤会失败。
+GitHub Release 会先创建；随后 workflow 会检查该版本是否已经存在于 npm。只有 npm 还没有该版本时，才会执行发布步骤。
+
+如果没有配置 `NPM_TOKEN`，GitHub Release 仍然可以创建，但 npm 发布步骤会失败。
 
 ## 正式发布命令
 
@@ -41,6 +43,15 @@ git push origin v0.1.5
 npm view proof-pr version
 npx proof-pr@latest --version
 ```
+
+## `v0.1.5` 发布状态
+
+`v0.1.5` 已经完成：
+
+- Git tag：`v0.1.5`
+- npm：`proof-pr@0.1.5`
+
+本次 npm 发布使用本机临时 token 完成，token 已从本机 npm 配置移除。
 
 ## 发布后文档更新
 

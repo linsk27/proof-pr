@@ -13,9 +13,9 @@
 
 ## 当前发布
 
-- GitHub Release：[`v0.1.4`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.4)
-- npm 最新公开包：[`proof-pr@0.1.3`](https://www.npmjs.com/package/proof-pr)
-- `main` 分支已准备 `0.1.5`，包含 Review Plan、规则预设、GitHub annotations、SARIF、真实案例库和 Marketplace 材料。
+- GitHub tag：[`v0.1.5`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.5)
+- npm 最新公开包：[`proof-pr@0.1.5`](https://www.npmjs.com/package/proof-pr)
+- `v0.1.5` 包含 Review Plan、规则预设、GitHub annotations、SARIF、真实案例库和 Marketplace 材料。
 
 ## 真实运行截图
 
