@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   release:
@@ -21,10 +22,16 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
+          registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
       - run: pnpm release:check
       - name: Pack CLI
         run: pnpm --filter proof-pr exec npm pack
+      - name: Publish CLI to npm
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm --filter proof-pr exec npm publish --access public --provenance
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:

@@ -9,6 +9,7 @@ ProofPR 帮助维护者在投入深入 review 之前，先检查 PR 的证据、
 作为 GitHub Action 使用时，ProofPR 默认在 PR 打开、PR 分支更新、PR 重新打开时运行。普通分支 push 不会单独生成报告。
 
 报告会出现在 PR 评论区、GitHub Actions job summary 和 PR checks 状态里。
+`v0.1.5` 起还可以输出 GitHub annotations，并通过 `sarif-output` 写出 SARIF 文件。
 
 ## 使用
 
@@ -27,9 +28,11 @@ npx proof-pr@latest scan --base origin/main --pr-body-file pr-body.md --format j
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.4
+- uses: linsk27/proof-pr@v0.1.5
   with:
     fail-on: high
+    comment: "true"
+    annotations: "true"
 ```
 
 完整文档见仓库 README：

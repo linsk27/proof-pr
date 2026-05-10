@@ -1,11 +1,15 @@
 # 变更记录
 
-## Unreleased
+## 0.1.5 - 2026-05-10
 
 - 新增 Review Plan：报告会生成维护者行动清单和重点文件列表。
 - 新增规则预设：`open-source-maintainer`、`security-strict`、`ai-generated-pr`、`mcp-security`、`dependency-careful`。
 - `proof-pr init` 支持 `--preset`，初始化配置时可直接选择审查策略。
-- 文档补充规则预设、报告查看位置、运行时机和项目定位说明。
+- GitHub Action 新增 `annotations` 输入，默认输出 workflow annotations。
+- GitHub Action 新增 `sarif-output` 输入，可写出 SARIF 文件并接入 GitHub Code Scanning。
+- Release workflow 支持 tag 发布时自动发布 npm 包。
+- 新增真实案例库、SARIF 示例、Marketplace 上架说明和示例 workflow。
+- 文档补充规则预设、报告查看位置、运行时机、项目定位和发布状态说明。
 
 ## 0.1.4 - 2026-05-10
 

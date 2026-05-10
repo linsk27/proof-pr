@@ -97,3 +97,25 @@ preset: security-strict
 ## `comment`
 
 控制支持评论的集成是否发布报告评论。
+
+## GitHub Action 输入项
+
+除了 `.proofpr.yml`，GitHub Action 还支持这些 workflow 输入：
+
+| 输入项 | 默认值 | 说明 |
+| --- | --- | --- |
+| `github-token` | `${{ github.token }}` | 读取 PR diff、发布评论、更新评论。 |
+| `config-path` | `.proofpr.yml` | 配置文件路径。 |
+| `fail-on` | `high` | 达到哪个风险等级时让 workflow 失败，可选 `low`、`medium`、`high`、`never`。 |
+| `comment` | `true` | 是否创建或更新 PR 评论。 |
+| `annotations` | `true` | `v0.1.5` 起可用，是否输出 GitHub workflow annotations。 |
+| `sarif-output` | 空 | `v0.1.5` 起可用，写出 SARIF 文件路径，例如 `proofpr.sarif`。 |
+
+Action 输出项：
+
+| 输出项 | 说明 |
+| --- | --- |
+| `risk` | 整体风险等级。 |
+| `findings` | finding 数量。 |
+| `evidence-score` | 0-100 证据评分。 |
+| `review-decision` | Review 门禁结论。 |

@@ -1,4 +1,6 @@
 import { execFile } from "node:child_process";
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
 import { promisify } from "node:util";
 import * as core from "@actions/core";
 import * as github from "@actions/github";
@@ -6,8 +8,10 @@ import {
   getReportMarker,
   loadConfig,
   renderMarkdownReport,
+  renderSarifReport,
   riskMeetsThreshold,
   scanDiff,
+  type Finding,
   type RiskLevel
 } from "@proof-pr/core";
 
@@ -20,6 +24,8 @@ async function run(): Promise<void> {
   const configPath = core.getInput("config-path", { required: false }) || ".proofpr.yml";
   const failOn = parseFailLevel(core.getInput("fail-on", { required: false }) || "high");
   const shouldComment = parseBoolean(core.getInput("comment", { required: false }) || "true");
+  const shouldAnnotate = parseBoolean(core.getInput("annotations", { required: false }) || "true");
+  const sarifOutput = core.getInput("sarif-output", { required: false });
 
   const config = await loadConfig(configPath);
   const diffText = await readDiff(token);
@@ -34,7 +40,17 @@ async function run(): Promise<void> {
 
   core.setOutput("risk", result.risk);
   core.setOutput("findings", String(result.findings.length));
+  core.setOutput("evidence-score", String(result.evidenceScore.value));
+  core.setOutput("review-decision", result.reviewDecision);
   await core.summary.addRaw(markdown).write();
+
+  if (shouldAnnotate) {
+    publishAnnotations(result.findings);
+  }
+
+  if (sarifOutput) {
+    await writeSarifReport(sarifOutput, renderSarifReport(result));
+  }
 
   if (shouldComment && token && github.context.payload.pull_request) {
     await upsertPullRequestComment(token, markdown);
@@ -43,6 +59,76 @@ async function run(): Promise<void> {
   if (riskMeetsThreshold(result.risk, failOn)) {
     core.setFailed(`ProofPR risk ${result.risk} meets fail-on threshold ${failOn}.`);
   }
+}
+
+async function writeSarifReport(path: string, body: string): Promise<void> {
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, body, "utf8");
+  core.info(`ProofPR SARIF report written to ${path}.`);
+}
+
+function publishAnnotations(findings: Finding[]): void {
+  const maxAnnotations = 50;
+
+  for (const finding of findings.slice(0, maxAnnotations)) {
+    const properties = annotationProperties(finding);
+    const message = annotationMessage(finding);
+
+    if (finding.severity === "high") {
+      core.error(message, properties);
+    } else if (finding.severity === "medium") {
+      core.warning(message, properties);
+    } else {
+      core.notice(message, properties);
+    }
+  }
+
+  if (findings.length > maxAnnotations) {
+    core.notice(
+      `ProofPR emitted the first ${maxAnnotations} annotations and skipped ${findings.length - maxAnnotations} additional finding(s).`
+    );
+  }
+}
+
+function annotationProperties(finding: Finding): core.AnnotationProperties {
+  const lineNumber = extractLineNumber(finding.evidence);
+  const properties: core.AnnotationProperties = {
+    title: `${finding.title} (${finding.ruleId})`
+  };
+
+  if (finding.path) {
+    properties.file = finding.path;
+  }
+
+  if (lineNumber) {
+    properties.startLine = lineNumber;
+    properties.endLine = lineNumber;
+  }
+
+  return properties;
+}
+
+function annotationMessage(finding: Finding): string {
+  const parts = [`${finding.ruleId}: ${finding.message}`];
+
+  if (finding.recommendation) {
+    parts.push(`Recommendation: ${finding.recommendation}`);
+  }
+
+  return parts.join(" ");
+}
+
+function extractLineNumber(evidence: string[] | undefined): number | undefined {
+  for (const item of evidence ?? []) {
+    const match = /^line (?<line>\d+):/.exec(item);
+    const line = match?.groups?.line ? Number(match.groups.line) : undefined;
+
+    if (line && Number.isInteger(line)) {
+      return line;
+    }
+  }
+
+  return undefined;
 }
 
 async function readDiff(token: string): Promise<string> {

@@ -42689,14 +42689,16 @@ var __webpack_exports__ = {};
 
 ;// CONCATENATED MODULE: external "node:child_process"
 const external_node_child_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:child_process");
+;// CONCATENATED MODULE: external "node:fs/promises"
+const promises_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:fs/promises");
+;// CONCATENATED MODULE: external "node:path"
+const external_node_path_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:path");
 // EXTERNAL MODULE: external "node:util"
 var external_node_util_ = __nccwpck_require__(7975);
 // EXTERNAL MODULE: ../../node_modules/.pnpm/@actions+core@1.11.1/node_modules/@actions/core/lib/core.js
 var lib_core = __nccwpck_require__(4442);
 // EXTERNAL MODULE: ../../node_modules/.pnpm/@actions+github@6.0.1/node_modules/@actions/github/lib/github.js
 var github = __nccwpck_require__(5251);
-;// CONCATENATED MODULE: external "node:fs/promises"
-const promises_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:fs/promises");
 // EXTERNAL MODULE: ../../node_modules/.pnpm/yaml@2.8.4/node_modules/yaml/dist/index.js
 var dist = __nccwpck_require__(6381);
 ;// CONCATENATED MODULE: ../../node_modules/.pnpm/zod@4.4.3/node_modules/zod/v4/core/core.js
@@ -51506,9 +51508,7 @@ function analyzeDependencyChanges(files, config) {
     }
     const findings = [];
     for (const file of files.filter((candidate) => isDependencyManifest(candidate.path))) {
-        const addedDependencyLines = file.addedLines
-            .map((line) => line.value.trim())
-            .filter((line) => isDependencyLikeAddition(file.path, line));
+        const addedDependencyLines = file.addedLines.filter((line) => isDependencyLikeAddition(file.path, line.value.trim()));
         if (addedDependencyLines.length === 0) {
             continue;
         }
@@ -51518,7 +51518,7 @@ function analyzeDependencyChanges(files, config) {
             message: `${file.path} adds or changes dependency-like entries.`,
             severity: "medium",
             path: file.path,
-            evidence: addedDependencyLines.slice(0, 5),
+            evidence: addedDependencyLines.slice(0, 5).map(formatEvidenceLine),
             recommendation: "Verify package names, licenses, provenance, and whether the lockfile matches the intended dependency change."
         });
     }
@@ -51550,9 +51550,7 @@ function isDependencyLikeAddition(path, line) {
 function analyzeWorkflowPermissions(files) {
     const findings = [];
     for (const file of files.filter((candidate) => isWorkflowPath(candidate.path))) {
-        const permissionLines = file.addedLines
-            .map((line) => line.value.trim())
-            .filter((line) => /permissions:|contents:\s*write|packages:\s*write|id-token:\s*write|pull-requests:\s*write/.test(line));
+        const permissionLines = file.addedLines.filter((line) => /permissions:|contents:\s*write|packages:\s*write|id-token:\s*write|pull-requests:\s*write/.test(line.value.trim()));
         if (permissionLines.length === 0) {
             continue;
         }
@@ -51562,7 +51560,7 @@ function analyzeWorkflowPermissions(files) {
             message: `${file.path} adds or changes GitHub Actions permissions.`,
             severity: "high",
             path: file.path,
-            evidence: permissionLines.slice(0, 5),
+            evidence: permissionLines.slice(0, 5).map(formatEvidenceLine),
             recommendation: "Check whether the workflow really needs write or token permissions and whether untrusted pull requests can reach it."
         });
     }
@@ -51571,9 +51569,7 @@ function analyzeWorkflowPermissions(files) {
 function analyzeMcpConfigs(files) {
     const findings = [];
     for (const file of files.filter((candidate) => isMcpConfigPath(candidate.path))) {
-        const riskyLines = file.addedLines
-            .map((line) => line.value.trim())
-            .filter((line) => /env|token|secret|password|api[_-]?key|command|args/i.test(line));
+        const riskyLines = file.addedLines.filter((line) => /env|token|secret|password|api[_-]?key|command|args/i.test(line.value.trim()));
         if (riskyLines.length === 0) {
             continue;
         }
@@ -51583,11 +51579,15 @@ function analyzeMcpConfigs(files) {
             message: `${file.path} adds MCP configuration lines related to commands or credentials.`,
             severity: "high",
             path: file.path,
-            evidence: riskyLines.slice(0, 5),
+            evidence: riskyLines.slice(0, 5).map(formatEvidenceLine),
             recommendation: "Avoid committing credentials in MCP config. Review command and args values as local execution surface."
         });
     }
     return findings;
+}
+function formatEvidenceLine(line) {
+    const value = line.value.trim();
+    return line.lineNumber ? `line ${line.lineNumber}: ${value}` : value;
 }
 function sensitivePathSeverity(path) {
     if (matchesAny(path, [
@@ -51981,12 +51981,16 @@ function dedupeFindings(findings) {
 
 
 
+
+
 const execFileAsync = (0,external_node_util_.promisify)(external_node_child_process_namespaceObject.execFile);
 async function run() {
     const token = lib_core.getInput("github-token", { required: false });
     const configPath = lib_core.getInput("config-path", { required: false }) || ".proofpr.yml";
     const failOn = parseFailLevel(lib_core.getInput("fail-on", { required: false }) || "high");
     const shouldComment = parseBoolean(lib_core.getInput("comment", { required: false }) || "true");
+    const shouldAnnotate = parseBoolean(lib_core.getInput("annotations", { required: false }) || "true");
+    const sarifOutput = lib_core.getInput("sarif-output", { required: false });
     const config = await loadConfig(configPath);
     const diffText = await readDiff(token);
     const pullRequest = github.context.payload.pull_request
@@ -51999,13 +52003,76 @@ async function run() {
     const markdown = renderMarkdownReport(result, config.locale);
     lib_core.setOutput("risk", result.risk);
     lib_core.setOutput("findings", String(result.findings.length));
+    lib_core.setOutput("evidence-score", String(result.evidenceScore.value));
+    lib_core.setOutput("review-decision", result.reviewDecision);
     await lib_core.summary.addRaw(markdown).write();
+    if (shouldAnnotate) {
+        publishAnnotations(result.findings);
+    }
+    if (sarifOutput) {
+        await writeSarifReport(sarifOutput, renderSarifReport(result));
+    }
     if (shouldComment && token && github.context.payload.pull_request) {
         await upsertPullRequestComment(token, markdown);
     }
     if (riskMeetsThreshold(result.risk, failOn)) {
         lib_core.setFailed(`ProofPR risk ${result.risk} meets fail-on threshold ${failOn}.`);
     }
+}
+async function writeSarifReport(path, body) {
+    await (0,promises_namespaceObject.mkdir)((0,external_node_path_namespaceObject.dirname)(path), { recursive: true });
+    await (0,promises_namespaceObject.writeFile)(path, body, "utf8");
+    lib_core.info(`ProofPR SARIF report written to ${path}.`);
+}
+function publishAnnotations(findings) {
+    const maxAnnotations = 50;
+    for (const finding of findings.slice(0, maxAnnotations)) {
+        const properties = annotationProperties(finding);
+        const message = annotationMessage(finding);
+        if (finding.severity === "high") {
+            lib_core.error(message, properties);
+        }
+        else if (finding.severity === "medium") {
+            lib_core.warning(message, properties);
+        }
+        else {
+            lib_core.notice(message, properties);
+        }
+    }
+    if (findings.length > maxAnnotations) {
+        lib_core.notice(`ProofPR emitted the first ${maxAnnotations} annotations and skipped ${findings.length - maxAnnotations} additional finding(s).`);
+    }
+}
+function annotationProperties(finding) {
+    const lineNumber = extractLineNumber(finding.evidence);
+    const properties = {
+        title: `${finding.title} (${finding.ruleId})`
+    };
+    if (finding.path) {
+        properties.file = finding.path;
+    }
+    if (lineNumber) {
+        properties.startLine = lineNumber;
+        properties.endLine = lineNumber;
+    }
+    return properties;
+}
+function annotationMessage(finding) {
+    const parts = [`${finding.ruleId}: ${finding.message}`];
+    if (finding.recommendation) {
+        parts.push(`Recommendation: ${finding.recommendation}`);
+    }
+    return parts.join(" ");
+}
+function extractLineNumber(evidence) {
+    for (const item of evidence ?? []) {
+        const match = /^line (?<line>\d+):/.exec(item);
+        const line = match?.groups?.line ? Number(match.groups.line) : undefined;
+        if (line && Number.isInteger(line)) {
+            return line;
+        }
+    }
+    return undefined;
 }
 async function readDiff(token) {
     const pullRequest = github.context.payload.pull_request;

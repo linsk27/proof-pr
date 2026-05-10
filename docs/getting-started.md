@@ -44,6 +44,16 @@ jobs:
           comment: "true"
 ```
 
+`v0.1.5` 发布后推荐使用：
+
+```yaml
+      - uses: linsk27/proof-pr@v0.1.5
+        with:
+          fail-on: high
+          comment: "true"
+          annotations: "true"
+```
+
 提交这个文件后，打开一个 PR。ProofPR 会在 PR 中自动生成报告评论。
 
 ## 它什么时候运行？
@@ -70,6 +80,7 @@ on:
 - PR 页面 `Conversation`：这里会出现 `ProofPR 审查报告` 评论。
 - 仓库 `Actions` 页面：这里可以看到 `ProofPR` workflow 的运行日志和 job summary。
 - PR 顶部的 checks 状态：如果风险达到 `fail-on` 阈值，检查项会失败，提醒维护者先处理风险。
+- GitHub annotations：`v0.1.5` 起会把 finding 输出为 workflow annotations，方便在 PR 文件视图里定位。
 
 默认示例使用 `fail-on: high`，所以只有整体风险为 `high` 时才会阻止检查通过。这个失败不是说代码一定有 bug，而是说 PR 需要更认真地 review。
 

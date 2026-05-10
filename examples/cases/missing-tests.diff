@@ -1,0 +1,13 @@
+diff --git a/src/auth.ts b/src/auth.ts
+index 0000000..1111111 100644
+--- a/src/auth.ts
++++ b/src/auth.ts
+@@ -1 +1,8 @@
+ export function auth() {}
++export function logout(sessionId: string) {
++  if (!sessionId) {
++    return false;
++  }
++
++  return true;
++}

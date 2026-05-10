@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseConfig } from "./config.js";
-import { renderMarkdownReport } from "./reporters.js";
+import { renderMarkdownReport, renderSarifReport } from "./reporters.js";
 import { scanDiff } from "./scan.js";
 
 describe("scanDiff", () => {
@@ -154,6 +154,11 @@ index 0000000..1111111 100644
     expect(result.findings.some((finding) => finding.ruleId === "thin-pr-description")).toBe(true);
     expect(result.findings.some((finding) => finding.ruleId === "missing-reproduction-context")).toBe(true);
     expect(result.reviewPlan.focusFiles.some((file) => file.path === ".github/workflows/release.yml")).toBe(true);
+    expect(
+      result.findings
+        .find((finding) => finding.ruleId === "workflow-permission-change")
+        ?.evidence?.some((item) => item.startsWith("line 2:"))
+    ).toBe(true);
   });
 
   it("does not treat package scripts as dependency additions", () => {
@@ -228,5 +233,21 @@ index 0000000..1111111 100644
     expect(report).toContain("Review 门禁");
     expect(report).toContain("Review 行动清单");
     expect(report).toContain("风险发现");
+  });
+
+  it("renders SARIF locations for file findings", () => {
+    const result = scanDiff(`diff --git a/.env b/.env
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/.env
+@@ -0,0 +1 @@
++OPENAI_API_KEY=sk-projabcdefghijklmnopqrstuvwxyz123456
+`);
+    const sarif = JSON.parse(renderSarifReport(result)) as {
+      runs: Array<{ results: Array<{ locations?: Array<{ physicalLocation: { artifactLocation: { uri: string } } }> }> }>;
+    };
+
+    expect(sarif.runs[0]?.results[0]?.locations?.[0]?.physicalLocation.artifactLocation.uri).toBe(".env");
   });
 });

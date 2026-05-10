@@ -18,6 +18,26 @@ inputs:
     description: Whether to create or update a pull request comment.
     required: false
     default: "true"
+  annotations:
+    description: Whether to emit GitHub workflow annotations for findings.
+    required: false
+    default: "true"
+  sarif-output:
+    description: Optional path to write a SARIF report for GitHub Code Scanning upload.
+    required: false
+    default: ""
+outputs:
+  risk:
+    description: Overall ProofPR risk level.
+  findings:
+    description: Number of ProofPR findings.
+  evidence-score:
+    description: Evidence score from 0 to 100.
+  review-decision:
+    description: Review gate decision.
 runs:
   using: node20
   main: packages/github-action/action-dist/index.js
+branding:
+  icon: shield
+  color: blue

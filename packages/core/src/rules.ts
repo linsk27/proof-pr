@@ -1,4 +1,4 @@
-import type { DiffFile, Finding, ProofPRConfig, PullRequestContext, ScanSummary } from "./types.js";
+import type { ChangeLine, DiffFile, Finding, ProofPRConfig, PullRequestContext, ScanSummary } from "./types.js";
 import { analyzeEvidence } from "./evidence.js";
 import { matchesAny, isCodePath, isDependencyManifest, isMcpConfigPath, isTestPath, isWorkflowPath } from "./path-utils.js";
 import { detectSecrets } from "./secrets.js";
@@ -209,9 +209,9 @@ function analyzeDependencyChanges(files: DiffFile[], config: ProofPRConfig): Fin
   const findings: Finding[] = [];
 
   for (const file of files.filter((candidate) => isDependencyManifest(candidate.path))) {
-    const addedDependencyLines = file.addedLines
-      .map((line) => line.value.trim())
-      .filter((line) => isDependencyLikeAddition(file.path, line));
+    const addedDependencyLines = file.addedLines.filter((line) =>
+      isDependencyLikeAddition(file.path, line.value.trim())
+    );
 
     if (addedDependencyLines.length === 0) {
       continue;
@@ -223,7 +223,7 @@ function analyzeDependencyChanges(files: DiffFile[], config: ProofPRConfig): Fin
       message: `${file.path} adds or changes dependency-like entries.`,
       severity: "medium",
       path: file.path,
-      evidence: addedDependencyLines.slice(0, 5),
+      evidence: addedDependencyLines.slice(0, 5).map(formatEvidenceLine),
       recommendation:
         "Verify package names, licenses, provenance, and whether the lockfile matches the intended dependency change."
     });
@@ -272,9 +272,9 @@ function analyzeWorkflowPermissions(files: DiffFile[]): Finding[] {
   const findings: Finding[] = [];
 
   for (const file of files.filter((candidate) => isWorkflowPath(candidate.path))) {
-    const permissionLines = file.addedLines
-      .map((line) => line.value.trim())
-      .filter((line) => /permissions:|contents:\s*write|packages:\s*write|id-token:\s*write|pull-requests:\s*write/.test(line));
+    const permissionLines = file.addedLines.filter((line) =>
+      /permissions:|contents:\s*write|packages:\s*write|id-token:\s*write|pull-requests:\s*write/.test(line.value.trim())
+    );
 
     if (permissionLines.length === 0) {
       continue;
@@ -286,7 +286,7 @@ function analyzeWorkflowPermissions(files: DiffFile[]): Finding[] {
       message: `${file.path} adds or changes GitHub Actions permissions.`,
       severity: "high",
       path: file.path,
-      evidence: permissionLines.slice(0, 5),
+      evidence: permissionLines.slice(0, 5).map(formatEvidenceLine),
       recommendation:
         "Check whether the workflow really needs write or token permissions and whether untrusted pull requests can reach it."
     });
@@ -299,9 +299,9 @@ function analyzeMcpConfigs(files: DiffFile[]): Finding[] {
   const findings: Finding[] = [];
 
   for (const file of files.filter((candidate) => isMcpConfigPath(candidate.path))) {
-    const riskyLines = file.addedLines
-      .map((line) => line.value.trim())
-      .filter((line) => /env|token|secret|password|api[_-]?key|command|args/i.test(line));
+    const riskyLines = file.addedLines.filter((line) =>
+      /env|token|secret|password|api[_-]?key|command|args/i.test(line.value.trim())
+    );
 
     if (riskyLines.length === 0) {
       continue;
@@ -313,13 +313,18 @@ function analyzeMcpConfigs(files: DiffFile[]): Finding[] {
       message: `${file.path} adds MCP configuration lines related to commands or credentials.`,
       severity: "high",
       path: file.path,
-      evidence: riskyLines.slice(0, 5),
+      evidence: riskyLines.slice(0, 5).map(formatEvidenceLine),
       recommendation:
         "Avoid committing credentials in MCP config. Review command and args values as local execution surface."
     });
   }
 
   return findings;
+}
+
+function formatEvidenceLine(line: ChangeLine): string {
+  const value = line.value.trim();
+  return line.lineNumber ? `line ${line.lineNumber}: ${value}` : value;
 }
 
 function sensitivePathSeverity(path: string): "medium" | "high" {

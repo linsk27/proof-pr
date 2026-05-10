@@ -15,7 +15,7 @@
 
 - GitHub Release：[`v0.1.4`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.4)
 - npm 最新公开包：[`proof-pr@0.1.3`](https://www.npmjs.com/package/proof-pr)
-- `main` 分支继续开发下一版，包含 Review Plan 和规则预设。
+- `main` 分支已准备 `0.1.5`，包含 Review Plan、规则预设、GitHub annotations、SARIF、真实案例库和 Marketplace 材料。
 
 ## 真实运行截图
 
@@ -41,6 +41,10 @@ preset: open-source-maintainer
 - [PR 评论示意图](assets/proofpr-pr-comment.svg)
 - [CLI 输出示意图](assets/proofpr-cli-output.svg)
 - [工作流示意图](assets/proofpr-flow.svg)
+- [真实案例库](cases.md)
+- [SARIF / Code Scanning](sarif-code-scanning.md)
+- [GitHub Marketplace 安装说明](marketplace.md)
+- [发布流程](release.md)
 
 ## 当前定位
 
@@ -52,6 +56,8 @@ ProofPR 是一个给开源维护者使用的 PR 证据门禁。它关注的是�
 - 证据评分：用 0-100 分衡量 review 证据是否充分。
 - Review 门禁：给维护者下一步动作建议。
 - Review 行动清单：给维护者一组可勾选的处理步骤。
+- GitHub annotations：在 PR 文件视图和 Actions 中标出 finding。
+- SARIF：上传到 GitHub Code Scanning。
 
 核心关键词：
 

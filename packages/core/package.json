@@ -1,6 +1,6 @@
 {
   "name": "@proof-pr/core",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Core rule engine for ProofPR.",
   "license": "MIT",
   "type": "module",
@@ -25,6 +25,8 @@
     "ai-generated-code",
     "secrets-scanning",
     "github-actions-security",
+    "sarif",
+    "code-scanning",
     "mcp"
   ],
   "main": "./dist/index.js",

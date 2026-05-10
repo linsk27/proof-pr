@@ -15,7 +15,7 @@ ProofPR 是一个面向开源维护者的 **PR 证据检查器 / PR 风险扫描
 
 - GitHub Release：[`v0.1.4`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.4)
 - npm 最新公开包：[`proof-pr@0.1.3`](https://www.npmjs.com/package/proof-pr)
-- `main` 分支：正在继续开发下一版，已包含 Review Plan 和规则预设，暂未发布新的 npm 版本。
+- `main` 分支：已准备 `0.1.5`，包含 Review Plan、规则预设、GitHub annotations、SARIF 输出、真实案例库和 Marketplace 材料，暂未打 tag / 发布 npm。
 - 直接运行：`npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN`
 
 ## 真实运行截图
@@ -66,6 +66,8 @@ ProofPR 报告不只给一个风险等级，还会给维护者一个更容易行
 - `Review 门禁`：告诉维护者下一步该正常 review、重点 review、要求补证据，还是先阻止合并。
 - `Review 行动清单`：给出可勾选的维护者动作，例如要求补测试、拆分 PR、核查依赖或阻止合并。
 - `重点文件`：列出最应该优先查看的文件和原因。
+- `GitHub annotations`：在 Actions / PR Files changed 中标出风险 finding。
+- `SARIF`：可上传到 GitHub Code Scanning，接入统一安全看板。
 
 证据评分会因为这些问题被扣分：
 
@@ -112,6 +114,16 @@ jobs:
           comment: "true"
 ```
 
+`v0.1.5` 发布后可以开启 annotations：
+
+```yaml
+      - uses: linsk27/proof-pr@v0.1.5
+        with:
+          fail-on: high
+          comment: "true"
+          annotations: "true"
+```
+
 ### 3. 打开一个 PR
 
 ProofPR 会自动运行，并在 PR 评论区生成 `ProofPR Review` 报告。
@@ -141,11 +153,13 @@ npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 
 ## 在哪里看报告？
 
-安装到 GitHub 仓库后，报告会出现在三个地方：
+安装到 GitHub 仓库后，报告会出现在这些地方：
 
 1. PR 页面评论区：打开 `Pull requests`，进入某个 PR，在 `Conversation` 里看 `ProofPR 审查报告`。
 2. Actions 页面：进入仓库的 `Actions`，点击 `ProofPR` workflow，可以看运行日志和 job summary。
 3. PR 检查状态：如果风险达到 `fail-on` 阈值，GitHub Check 会失败，用来提醒维护者合并前必须处理风险。
+4. GitHub annotations：`v0.1.5` 起会在 workflow annotations / PR 文件视图里标出具体 finding。
+5. Code Scanning：如果配置 `sarif-output` 并上传 SARIF，可以在 `Security` -> `Code scanning` 中查看。
 
 默认配置里 `fail-on: high` 表示只有整体风险达到 `high` 时才会让 workflow 失败。失败不代表代码一定错了，它代表这个 PR 需要维护者重点审查。
 
@@ -294,7 +308,7 @@ ProofPR 报告主要看三块：
 
 ## 当前开发进度
 
-当前 GitHub Action 发布版：`v0.1.4`。`main` 分支还包含下一版开发中的能力，npm 最新公开包暂时是 `0.1.3`。
+当前 GitHub Action 发布版：`v0.1.4`。`main` 分支已准备 `0.1.5`，npm 最新公开包暂时是 `0.1.3`。
 
 已经完成：
 
@@ -306,12 +320,16 @@ ProofPR 报告主要看三块：
 - PR title/body 证据分析。
 - 改动规模、敏感路径、缺少测试、secrets、依赖、workflow 权限、MCP 配置风险规则。
 - 规则预设：`open-source-maintainer`、`security-strict`、`ai-generated-pr`、`mcp-security`、`dependency-careful`。
+- GitHub annotations：把 finding 输出到 Actions 注解。
+- SARIF 输出：CLI 支持 `--format sarif`，Action 支持 `sarif-output`。
+- 真实案例库：提供可复现 diff 样例。
+- Marketplace 准备材料：`action.yml` branding、上架说明和推荐文案。
 - npm 包发布和 CLI 安装体验。
 - GitHub Release，附带 CLI tarball。
 
 还没完成：
 
-- GitHub Check annotations。
+- `v0.1.5` 正式 tag / npm 发布。
 - Issue 质量检查模式。
 - 规则插件系统。
 
@@ -333,6 +351,10 @@ ProofPR 报告主要看三块：
 - [配置说明](docs/configuration.md)
 - [规则说明](docs/rules.md)
 - [实现原理](docs/how-it-works.md)
+- [真实案例库](docs/cases.md)
+- [SARIF / Code Scanning](docs/sarif-code-scanning.md)
+- [GitHub Marketplace 安装说明](docs/marketplace.md)
+- [发布流程](docs/release.md)
 - [路线图](docs/roadmap.md)
 - [贡献指南](CONTRIBUTING.md)
 - [安全政策](SECURITY.md)
@@ -340,7 +362,7 @@ ProofPR 报告主要看三块：
 
 ## 搜索关键词
 
-GitHub Action、Pull Request、PR review、PR triage、code review、maintainer tools、open source maintainer、AI coding、AI-generated PR、MCP security、secrets scanning、GitHub Actions security、dependency review、TypeScript CLI。
+GitHub Action、Pull Request、PR review、PR triage、code review、maintainer tools、open source maintainer、AI coding、AI-generated PR、MCP security、secrets scanning、GitHub Actions security、dependency review、SARIF、Code Scanning、GitHub annotations、GitHub Marketplace、TypeScript CLI。
 
 ## 开发
 
@@ -360,9 +382,6 @@ pnpm release:check
 ## 路线图
 
 - npm 发布自动化。
-- GitHub Check annotations。
-- GitHub Marketplace。
-- SARIF 上传示例。
 - Issue 复现质量检查模式。
 - 规则插件系统。
 - 可选 AI 摘要 provider。

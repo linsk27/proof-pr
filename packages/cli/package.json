@@ -1,6 +1,6 @@
 {
   "name": "proof-pr",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "CLI for ProofPR, a maintainer-focused pull request evidence scanner.",
   "license": "MIT",
   "type": "module",
@@ -27,6 +27,8 @@
     "secrets-scanning",
     "github-actions-security",
     "dependency-review",
+    "sarif",
+    "code-scanning",
     "ai-coding",
     "ai-generated-code",
     "mcp",

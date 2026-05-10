@@ -25,7 +25,7 @@ Pull Request / git diff
 计算风险等级、证据评分和 Review 门禁
         |
         v
-输出 Markdown / JSON / SARIF
+输出 Markdown / JSON / SARIF / annotations
         |
         v
 CLI 输出或 GitHub PR 评论
@@ -60,6 +60,8 @@ GitHub Action 会读取当前 PR 信息：
 
 - 写入 GitHub job summary。
 - 如果 `comment: true`，就在 PR 评论区创建或更新 `ProofPR Review` 评论。
+- 如果 `annotations: true`，把 finding 输出成 GitHub workflow annotations。
+- 如果配置 `sarif-output`，写出 SARIF 文件，供 Code Scanning 上传。
 - 如果风险达到 `fail-on` 阈值，就让 workflow 失败。
 
 默认 workflow 监听这些 PR 事件：

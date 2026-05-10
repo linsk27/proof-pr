@@ -12,36 +12,32 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 - Review Gate：维护者下一步动作建议。
 - Review Plan：可勾选行动清单和重点文件。
 - 规则预设：`open-source-maintainer`、`security-strict`、`ai-generated-pr`、`mcp-security`、`dependency-careful`。
+- GitHub Check annotations：在 workflow annotations / PR 文件视图标出风险 finding。
+- SARIF / Code Scanning：CLI 可输出 SARIF，Action 可写出 `sarif-output`。
+- 真实案例库：提供可复现的 diff 样例。
+- Marketplace 准备：补充 action branding、安装说明和上架文案。
 - 内置规则：改动规模、敏感路径、缺少测试、PR 描述、复现上下文、secret、依赖、workflow 权限、MCP 配置。
 
 ## 短期方向
 
-1. GitHub Check annotations
-   在 PR Files changed 页面直接标出高风险文件，让维护者不用只看评论。
+1. 发布 `v0.1.5`
+   打 tag、确认 GitHub Release、发布 npm 包，并更新 README 的发布状态。
 
-2. GitHub Marketplace
-   上架 GitHub Marketplace，降低安装门槛，并提升项目可信度。
+2. GitHub Marketplace 上架
+   代码侧材料已准备好，下一步需要仓库所有者在 GitHub 网页上确认发布。
 
-3. 真实案例库
-   文档展示典型 PR 场景：
-   - 大 PR
-   - 缺少测试
-   - workflow 权限变化
-   - 疑似 secret
-   - MCP 配置风险
+3. 真实截图刷新
+   用 `v0.1.5` 的 annotations / SARIF 能力重新跑一个 demo PR，补充新版效果图。
 
 ## 中期方向
 
 1. Issue 质量检查
    扫描 issue 是否包含复现步骤、环境信息、预期/实际结果。
 
-2. SARIF / Code Scanning 集成
-   将高风险 finding 输出到 GitHub Code Scanning。
-
-3. 规则插件系统
+2. 规则插件系统
    允许项目自定义组织内部规则。
 
-4. 可选 AI 摘要
+3. 可选 AI 摘要
    核心评分继续保持确定性，AI 只做可选摘要和措辞优化。
 
 ## 与其他工具的区别
@@ -53,4 +49,4 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 
 ## 下一版优先级
 
-下一版优先做 GitHub Check annotations、真实案例库和 GitHub Marketplace 安装体验。这些能力最容易让用户感受到“安装后马上有用”，也更适合后续扩大开源传播。
+下一步优先发布 `v0.1.5`，然后用真实 demo PR 更新截图和 Marketplace 页面。代码能力已经比 MVP 更完整，后续重点应该转向传播、案例和低门槛安装体验。
