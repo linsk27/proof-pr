@@ -9,10 +9,10 @@ ProofPR 帮助维护者在投入深入 review 之前，先检查 PR 的证据、
 可以直接通过 npm 使用：
 
 ```bash
-npx proof-pr init
-npx proof-pr scan --base origin/main --head HEAD
-npx proof-pr scan --base origin/main --head HEAD --locale zh-CN
-npx proof-pr scan --base origin/main --pr-body-file pr-body.md --format json
+npx proof-pr@latest init
+npx proof-pr@latest scan --base origin/main --head HEAD
+npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
+npx proof-pr@latest scan --base origin/main --pr-body-file pr-body.md --format json
 ```
 
 ## GitHub Action

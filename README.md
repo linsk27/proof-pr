@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/linsk27/proof-pr/actions/workflows/ci.yml/badge.svg)](https://github.com/linsk27/proof-pr/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/linsk27/proof-pr)](https://github.com/linsk27/proof-pr/releases)
+[![npm](https://img.shields.io/npm/v/proof-pr)](https://www.npmjs.com/package/proof-pr)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 看证据，不看感觉。
@@ -10,12 +11,18 @@ ProofPR 是一个面向开源维护者的 **PR 证据检查器 / PR 风险扫描
 
 它不会猜代码是不是 AI 写的。它只检查一件更可靠的事：**这个贡献有没有足够的测试、复现、权限、依赖和安全证据。**
 
+## 发布状态
+
+- GitHub Release：[`v0.1.3`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.3)
+- npm：[`proof-pr@0.1.3`](https://www.npmjs.com/package/proof-pr)
+- 直接运行：`npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN`
+
 ## 真实运行截图
 
 下面两张图来自真实运行结果，不是手绘 mock：
 
 - PR 评论截图来自 [demo PR #1](https://github.com/linsk27/proof-pr/pull/1)，由 GitHub Action 真实生成。
-- CLI 输出截图来自本机 `AI-Vue3-python-flask-Blog` 项目，使用 `npx proof-pr@latest scan --base HEAD~5 --head HEAD` 真实扫描生成。
+- CLI 输出截图来自本机 `AI-Vue3-python-flask-Blog` 项目，使用 `npx proof-pr@latest scan --base HEAD~5 --head HEAD --locale zh-CN` 真实扫描生成。
 
 ![ProofPR 真实 PR 评论截图](docs/screenshots/proofpr-demo-pr-comment.png)
 
@@ -143,8 +150,8 @@ comment:
 从 npm 直接使用：
 
 ```bash
-npx proof-pr init
-npx proof-pr scan --base origin/main --head HEAD --locale zh-CN
+npx proof-pr@latest init
+npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 ```
 
 全局安装：
@@ -259,7 +266,7 @@ pnpm release:check
 
 ## 路线图
 
-- 发布 `proof-pr` CLI 到 npm。
+- npm 发布自动化。
 - GitHub Check annotations。
 - SARIF 上传示例。
 - Issue 复现质量检查模式。

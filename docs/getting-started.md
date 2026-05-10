@@ -92,8 +92,8 @@ comment:
 可以直接通过 npm 使用：
 
 ```bash
-npx proof-pr init
-npx proof-pr scan --base origin/main --head HEAD --locale zh-CN
+npx proof-pr@latest init
+npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 ```
 
 也可以全局安装：

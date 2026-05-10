@@ -6,6 +6,7 @@
 - GitHub Action 会根据仓库配置输出中文 PR 评论和 job summary。
 - `proof-pr init` 默认生成中文报告配置。
 - 文档补充中文使用方式、Windows 终端乱码说明和确定性风险评估原理。
+- 发布 `proof-pr@0.1.3` 到 npm，并在 README 中补充 npm 发布状态。
 
 ## 0.1.2 - 2026-05-10
 

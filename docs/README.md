@@ -9,13 +9,18 @@
 - [规则说明](rules.md)：每条内置规则会检查什么、为什么触发。
 - [实现原理](how-it-works.md)：ProofPR 如何解析 diff、执行规则、评分并输出报告。
 
+## 当前发布
+
+- GitHub Release：[`v0.1.3`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.3)
+- npm：[`proof-pr@0.1.3`](https://www.npmjs.com/package/proof-pr)
+
 ## 真实运行截图
 
 PR 评论截图来自 [demo PR #1](https://github.com/linsk27/proof-pr/pull/1)，由 GitHub Action 真实生成：
 
 ![ProofPR 真实 PR 评论截图](screenshots/proofpr-demo-pr-comment.png)
 
-CLI 输出截图来自本机 `AI-Vue3-python-flask-Blog` 项目，使用 `npx proof-pr@latest scan --base HEAD~5 --head HEAD` 真实扫描生成：
+CLI 输出截图来自本机 `AI-Vue3-python-flask-Blog` 项目，使用 `npx proof-pr@latest scan --base HEAD~5 --head HEAD --locale zh-CN` 真实扫描生成：
 
 ![ProofPR 真实 CLI 输出截图](screenshots/ai-vue-flask-cli-output.png)
 
