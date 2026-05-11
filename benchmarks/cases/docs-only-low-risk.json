@@ -1,0 +1,11 @@
+{
+  "id": "docs-only-low-risk",
+  "title": "Documentation-only changes should remain low risk",
+  "category": "low-risk",
+  "diffFile": "../../examples/cases/docs-only.diff",
+  "expect": {
+    "risk": "low",
+    "reviewDecision": "ready",
+    "absentFindings": ["missing-tests", "sensitive-path", "dependency-added", "evidence-contract:*"]
+  }
+}

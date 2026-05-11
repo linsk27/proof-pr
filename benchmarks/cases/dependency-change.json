@@ -1,0 +1,11 @@
+{
+  "id": "dependency-change",
+  "title": "Dependency manifest changes should be visible to maintainers",
+  "category": "dependency",
+  "diffFile": "../../examples/cases/dependency-change.diff",
+  "expect": {
+    "risk": "high",
+    "reviewDecision": "block-merge",
+    "findings": ["dependency-added"]
+  }
+}

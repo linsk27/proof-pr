@@ -1,0 +1,18 @@
+{
+  "id": "security-strict-workflow-contract",
+  "title": "security-strict preset should require workflow permission rationale",
+  "category": "evidence-contract",
+  "diffFile": "../../examples/cases/workflow-permission.diff",
+  "config": {
+    "preset": "security-strict"
+  },
+  "pullRequest": {
+    "title": "Update release workflow",
+    "body": "Update release workflow permissions."
+  },
+  "expect": {
+    "risk": "high",
+    "reviewDecision": "block-merge",
+    "findings": ["evidence-contract:workflow-permission-rationale", "workflow-permission-change"]
+  }
+}

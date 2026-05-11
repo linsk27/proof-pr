@@ -1,6 +1,7 @@
 {
   "id": "evidence-contract-satisfied",
   "title": "UI evidence contracts should pass when screenshot and verification are present",
+  "category": "evidence-contract",
   "diffFile": "../../examples/cases/ui-change.diff",
   "config": {
     "evidence": {
@@ -16,9 +17,11 @@
   },
   "pullRequest": {
     "title": "Update button styling",
-    "body": "Verified with pnpm test. Screenshot attached with before/after UI comparison."
+    "body": "This updates the primary button spacing and color only. Verified with pnpm test. Screenshot attached with before/after UI comparison, and no behavior change is expected."
   },
   "expect": {
+    "risk": "low",
+    "reviewDecision": "ready",
     "absentFindings": ["evidence-contract:ui-screenshot"]
   }
 }

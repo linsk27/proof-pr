@@ -46,7 +46,7 @@ interface InitCommandOptions {
   force: boolean;
 }
 
-type BenchmarkOutputFormat = "text" | "json";
+type BenchmarkOutputFormat = "text" | "json" | "markdown";
 
 interface BenchmarkCommandOptions {
   cases: string;
@@ -56,6 +56,7 @@ interface BenchmarkCommandOptions {
 interface BenchmarkCase {
   id: string;
   title?: string;
+  category?: string;
   diffFile: string;
   config?: Partial<ProofPRConfig>;
   pullRequest?: {
@@ -73,6 +74,7 @@ interface BenchmarkCase {
 interface BenchmarkCaseResult {
   id: string;
   title?: string;
+  category: string;
   passed: boolean;
   failures: string[];
   actual: {
@@ -80,6 +82,29 @@ interface BenchmarkCaseResult {
     reviewDecision: ReviewDecision;
     findings: string[];
   };
+}
+
+interface BenchmarkSummary {
+  total: number;
+  passed: number;
+  failed: number;
+  passRate: number;
+  categories: Array<{
+    category: string;
+    total: number;
+    passed: number;
+    failed: number;
+    passRate: number;
+  }>;
+  findingCounts: Array<{
+    ruleId: string;
+    count: number;
+  }>;
+}
+
+interface BenchmarkReport {
+  summary: BenchmarkSummary;
+  results: BenchmarkCaseResult[];
 }
 
 const program = new Command();
@@ -153,17 +178,19 @@ program
   .command("benchmark")
   .description("Run ProofPR benchmark cases and compare expected risk/finding output.")
   .option("--cases <dir>", "Directory containing benchmark case JSON files.", "benchmarks/cases")
-  .option("--format <format>", "Output format: text or json.", parseBenchmarkFormat, "text")
+  .option("--format <format>", "Output format: text, markdown, or json.", parseBenchmarkFormat, "text")
   .action(async (options: BenchmarkCommandOptions) => {
-    const results = await runBenchmarks(options.cases);
+    const report = await runBenchmarks(options.cases);
 
     if (options.format === "json") {
-      process.stdout.write(`${JSON.stringify(results, null, 2)}\n`);
+      process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+    } else if (options.format === "markdown") {
+      process.stdout.write(renderBenchmarkMarkdown(report));
     } else {
-      process.stdout.write(renderBenchmarkText(results));
+      process.stdout.write(renderBenchmarkText(report));
     }
 
-    if (results.some((result) => !result.passed)) {
+    if (report.results.some((result) => !result.passed)) {
       process.exitCode = 1;
     }
   });
@@ -312,7 +339,7 @@ function renderOutput(result: ReturnType<typeof scanDiff>, format: OutputFormat,
   return renderMarkdownReport(result, locale);
 }
 
-async function runBenchmarks(casesDir: string): Promise<BenchmarkCaseResult[]> {
+async function runBenchmarks(casesDir: string): Promise<BenchmarkReport> {
   const root = resolve(casesDir);
   const entries = await readdir(root, { withFileTypes: true });
   const caseFiles = entries
@@ -356,6 +383,7 @@ async function runBenchmarks(casesDir: string): Promise<BenchmarkCaseResult[]> {
     results.push({
       id: testCase.id,
       title: testCase.title,
+      category: testCase.category ?? "uncategorized",
       passed: failures.length === 0,
       failures,
       actual: {
@@ -366,23 +394,140 @@ async function runBenchmarks(casesDir: string): Promise<BenchmarkCaseResult[]> {
     });
   }
 
-  return results;
+  return {
+    summary: summarizeBenchmarkResults(results),
+    results
+  };
 }
 
-function renderBenchmarkText(results: BenchmarkCaseResult[]): string {
+function summarizeBenchmarkResults(results: BenchmarkCaseResult[]): BenchmarkSummary {
   const passed = results.filter((result) => result.passed).length;
-  const lines = ["ProofPR benchmark", ""];
+  const categories = new Map<string, BenchmarkCaseResult[]>();
+  const findingCounts = new Map<string, number>();
 
   for (const result of results) {
-    lines.push(`${result.passed ? "PASS" : "FAIL"} ${result.id}${result.title ? ` - ${result.title}` : ""}`);
+    const categoryResults = categories.get(result.category) ?? [];
+    categoryResults.push(result);
+    categories.set(result.category, categoryResults);
+
+    for (const finding of new Set(result.actual.findings)) {
+      findingCounts.set(finding, (findingCounts.get(finding) ?? 0) + 1);
+    }
+  }
+
+  return {
+    total: results.length,
+    passed,
+    failed: results.length - passed,
+    passRate: ratio(passed, results.length),
+    categories: [...categories.entries()]
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([category, items]) => {
+        const categoryPassed = items.filter((item) => item.passed).length;
+        return {
+          category,
+          total: items.length,
+          passed: categoryPassed,
+          failed: items.length - categoryPassed,
+          passRate: ratio(categoryPassed, items.length)
+        };
+      }),
+    findingCounts: [...findingCounts.entries()]
+      .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+      .map(([ruleId, count]) => ({ ruleId, count }))
+  };
+}
+
+function renderBenchmarkText(report: BenchmarkReport): string {
+  const lines = [
+    "ProofPR benchmark",
+    "",
+    `Summary: ${report.summary.passed}/${report.summary.total} passed (${formatPercent(
+      report.summary.passRate
+    )})`,
+    ""
+  ];
+
+  lines.push("Categories:");
+  for (const category of report.summary.categories) {
+    lines.push(
+      `- ${category.category}: ${category.passed}/${category.total} passed (${formatPercent(
+        category.passRate
+      )})`
+    );
+  }
+
+  if (report.summary.findingCounts.length > 0) {
+    lines.push("", "Finding coverage:");
+    for (const item of report.summary.findingCounts) {
+      lines.push(`- ${item.ruleId}: ${item.count}`);
+    }
+  }
+
+  lines.push("");
+
+  for (const result of report.results) {
+    lines.push(
+      `${result.passed ? "PASS" : "FAIL"} ${result.id}${result.title ? ` - ${result.title}` : ""}`
+    );
 
     for (const failure of result.failures) {
       lines.push(`  - ${failure}`);
     }
   }
 
-  lines.push("", `Summary: ${passed}/${results.length} passed`, "");
+  lines.push("");
   return lines.join("\n");
+}
+
+function renderBenchmarkMarkdown(report: BenchmarkReport): string {
+  const lines = [
+    "# ProofPR Benchmark",
+    "",
+    `**Summary:** ${report.summary.passed}/${report.summary.total} passed (${formatPercent(
+      report.summary.passRate
+    )})`,
+    "",
+    "## Categories",
+    "",
+    "| Category | Passed | Total | Pass rate |",
+    "| --- | ---: | ---: | ---: |"
+  ];
+
+  for (const category of report.summary.categories) {
+    lines.push(
+      `| ${category.category} | ${category.passed} | ${category.total} | ${formatPercent(
+        category.passRate
+      )} |`
+    );
+  }
+
+  lines.push("", "## Finding Coverage", "", "| Rule | Cases |", "| --- | ---: |");
+
+  for (const item of report.summary.findingCounts) {
+    lines.push(`| \`${item.ruleId}\` | ${item.count} |`);
+  }
+
+  lines.push("", "## Cases", "", "| Result | Case | Category | Actual risk | Gate |", "| --- | --- | --- | --- | --- |");
+
+  for (const result of report.results) {
+    lines.push(
+      `| ${result.passed ? "PASS" : "FAIL"} | \`${result.id}\` | ${result.category} | ${
+        result.actual.risk
+      } | ${result.actual.reviewDecision} |`
+    );
+  }
+
+  lines.push("");
+  return lines.join("\n");
+}
+
+function ratio(value: number, total: number): number {
+  return total === 0 ? 0 : value / total;
+}
+
+function formatPercent(value: number): string {
+  return `${Math.round(value * 100)}%`;
 }
 
 function matchesFindingExpectation(actualFindings: string[], expected: string): boolean {
@@ -403,11 +548,11 @@ function parseFormat(value: string): OutputFormat {
 }
 
 function parseBenchmarkFormat(value: string): BenchmarkOutputFormat {
-  if (value === "text" || value === "json") {
+  if (value === "text" || value === "json" || value === "markdown") {
     return value;
   }
 
-  throw new InvalidArgumentError("benchmark format must be one of: text, json");
+  throw new InvalidArgumentError("benchmark format must be one of: text, markdown, json");
 }
 
 function parseFailLevel(value: string): FailLevel {

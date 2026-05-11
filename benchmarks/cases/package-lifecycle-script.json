@@ -1,6 +1,7 @@
 {
   "id": "package-lifecycle-script",
   "title": "Package lifecycle scripts should block merge until reviewed",
+  "category": "dependency",
   "diffFile": "../../examples/cases/package-lifecycle-script.diff",
   "expect": {
     "risk": "high",

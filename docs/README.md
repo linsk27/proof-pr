@@ -8,7 +8,7 @@
 2. [快速开始](getting-started.md)
 3. [配置说明](configuration.md)
 4. [规则说明](rules.md)
-5. [Benchmark 和准确性边界](../benchmarks/README.md)
+5. [Benchmark 和准确性边界](../benchmarks/README.md) / [当前报告](../benchmarks/report.md)
 6. [真实案例库](cases.md)
 7. [实现原理](how-it-works.md)
 

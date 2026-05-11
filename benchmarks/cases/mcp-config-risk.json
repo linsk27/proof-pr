@@ -1,0 +1,11 @@
+{
+  "id": "mcp-config-risk",
+  "title": "MCP command or credential surface should block merge",
+  "category": "agent-security",
+  "diffFile": "../../examples/cases/mcp-config-risk.diff",
+  "expect": {
+    "risk": "high",
+    "reviewDecision": "block-merge",
+    "findings": ["mcp-credential-risk"]
+  }
+}

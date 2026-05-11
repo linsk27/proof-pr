@@ -1,6 +1,7 @@
 {
   "id": "evidence-contract-missing",
   "title": "UI changes can require screenshot evidence through an evidence contract",
+  "category": "evidence-contract",
   "diffFile": "../../examples/cases/ui-change.diff",
   "config": {
     "evidence": {

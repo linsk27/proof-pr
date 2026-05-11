@@ -1,0 +1,11 @@
+{
+  "id": "workflow-permission",
+  "title": "Workflow permission changes should block merge until reviewed",
+  "category": "workflow-security",
+  "diffFile": "../../examples/cases/workflow-permission.diff",
+  "expect": {
+    "risk": "high",
+    "reviewDecision": "block-merge",
+    "findings": ["workflow-permission-change"]
+  }
+}

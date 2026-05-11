@@ -1,6 +1,7 @@
 {
   "id": "dependency-major-upgrade",
   "title": "Dependency major version upgrades should be visible to maintainers",
+  "category": "dependency",
   "diffFile": "../../examples/cases/dependency-major-upgrade.diff",
   "expect": {
     "risk": "high",

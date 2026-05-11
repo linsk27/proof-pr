@@ -1,0 +1,17 @@
+{
+  "id": "security-strict-workflow-contract-satisfied",
+  "title": "workflow evidence contract should pass when permission rationale is present",
+  "category": "evidence-contract",
+  "diffFile": "../../examples/cases/workflow-permission.diff",
+  "config": {
+    "preset": "security-strict"
+  },
+  "pullRequest": {
+    "title": "Update release workflow",
+    "body": "Verified release workflow in CI. Permission rationale: contents write is required only for release asset upload, follows least privilege, and untrusted PRs cannot trigger this workflow."
+  },
+  "expect": {
+    "findings": ["workflow-permission-change"],
+    "absentFindings": ["evidence-contract:workflow-permission-rationale"]
+  }
+}

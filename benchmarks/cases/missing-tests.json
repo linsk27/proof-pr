@@ -1,0 +1,11 @@
+{
+  "id": "missing-tests",
+  "title": "Code changes without tests or verification should ask for evidence",
+  "category": "evidence",
+  "diffFile": "../../examples/cases/missing-tests.diff",
+  "expect": {
+    "risk": "low",
+    "reviewDecision": "needs-evidence",
+    "findings": ["missing-tests"]
+  }
+}

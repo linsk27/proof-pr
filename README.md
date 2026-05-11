@@ -151,7 +151,7 @@ npx proof-pr@latest init --preset security-strict
 - [快速开始](docs/getting-started.md)
 - [配置说明](docs/configuration.md)
 - [规则说明](docs/rules.md)
-- [Benchmark](benchmarks/README.md)
+- [Benchmark](benchmarks/README.md) / [当前报告](benchmarks/report.md)
 - [真实案例库](docs/cases.md)
 - [实现原理](docs/how-it-works.md)
 - [SARIF / Code Scanning](docs/sarif-code-scanning.md)
