@@ -51,6 +51,7 @@ type BenchmarkOutputFormat = "text" | "json" | "markdown";
 interface BenchmarkCommandOptions {
   cases: string;
   format: BenchmarkOutputFormat;
+  output?: string;
 }
 
 interface BenchmarkCase {
@@ -179,15 +180,24 @@ program
   .description("Run ProofPR benchmark cases and compare expected risk/finding output.")
   .option("--cases <dir>", "Directory containing benchmark case JSON files.", "benchmarks/cases")
   .option("--format <format>", "Output format: text, markdown, or json.", parseBenchmarkFormat, "text")
+  .option("--output <path>", "Write benchmark output to a file instead of stdout.")
   .action(async (options: BenchmarkCommandOptions) => {
     const report = await runBenchmarks(options.cases);
+    let output: string;
 
     if (options.format === "json") {
-      process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+      output = `${JSON.stringify(report, null, 2)}\n`;
     } else if (options.format === "markdown") {
-      process.stdout.write(renderBenchmarkMarkdown(report));
+      output = renderBenchmarkMarkdown(report);
     } else {
-      process.stdout.write(renderBenchmarkText(report));
+      output = renderBenchmarkText(report);
+    }
+
+    if (options.output) {
+      await writeOutput(options.output, output);
+      process.stdout.write(`ProofPR benchmark report written to ${options.output}\n`);
+    } else {
+      process.stdout.write(output);
     }
 
     if (report.results.some((result) => !result.passed)) {
@@ -225,6 +235,11 @@ async function writeIfMissing(path: string, contents: string, force: boolean): P
     throw new Error(`${path} already exists. Pass --force to overwrite it.`);
   }
 
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, contents, "utf8");
+}
+
+async function writeOutput(path: string, contents: string): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, contents, "utf8");
 }

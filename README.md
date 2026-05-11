@@ -163,6 +163,7 @@ npx proof-pr@latest init --preset security-strict
 
 项目已经具备可用的 Action、CLI、npm 包、Release、annotations、SARIF、Evidence Contract、benchmark、案例库和中文文档。下一步更像“产品化”和“传播”工作：
 
+- 每次 CI 会运行 benchmark，并把报告写入 GitHub Actions Summary。
 - 刷新一组 `v0.1.6` 的真实截图，展示 annotations 和 Code Scanning。
 - 上架 GitHub Marketplace。
 - 增加 Issue 质量检查模式。

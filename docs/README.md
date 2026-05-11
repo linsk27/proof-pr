@@ -53,5 +53,6 @@ ProofPR 是一个给开源维护者使用的 PR 证据门禁。它关注的是�
 - Review 行动清单。
 - Evidence Contract。
 - Benchmark case。
+- CI benchmark report。
 - GitHub annotations。
 - SARIF / Code Scanning 输出。

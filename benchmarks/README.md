@@ -14,6 +14,12 @@ pnpm benchmark
 pnpm benchmark:report
 ```
 
+写到自定义路径：
+
+```bash
+node packages/cli/dist/index.js benchmark --cases benchmarks/cases --format markdown --output benchmark-report.md
+```
+
 或者直接使用 CLI：
 
 ```bash
@@ -29,6 +35,17 @@ node packages/cli/dist/index.js benchmark --cases benchmarks/cases --format mark
 - `expect`：期望风险等级、Review 门禁、应该出现或不应该出现的 finding。
 
 当前快照报告见 [report.md](report.md)。
+
+## CI 集成
+
+仓库 CI 会在每次 push / PR 中运行：
+
+```bash
+pnpm benchmark
+pnpm benchmark:report
+```
+
+如果任一 benchmark case 失败，CI 会失败。`benchmarks/report.md` 会被追加到 GitHub Actions Summary，方便 reviewer 在 CI 页面直接查看分类通过率和 finding 覆盖。
 
 输出示例：
 

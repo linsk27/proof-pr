@@ -16,7 +16,7 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 - SARIF / Code Scanning：CLI 可输出 SARIF，Action 可写出 `sarif-output`。
 - 真实案例库：提供可复现的 diff 样例。
 - Evidence Contract：仓库可以定义路径级证据要求。
-- Benchmark：用样本 case 验证规则命中、风险等级和 Review 门禁。
+- Benchmark：用样本 case 验证规则命中、风险等级和 Review 门禁，并在 CI 中自动运行。
 - Marketplace 准备：补充 action branding、安装说明和上架文案。
 - 内置规则：改动规模、敏感路径、缺少测试、PR 描述、复现上下文、secret、依赖、大版本升级、包生命周期脚本、workflow 权限、`pull_request_target`、MCP 配置。
 

@@ -22,3 +22,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+      - run: pnpm benchmark
+      - run: pnpm benchmark:report
+      - name: Publish benchmark summary
+        run: cat benchmarks/report.md >> "$GITHUB_STEP_SUMMARY"
