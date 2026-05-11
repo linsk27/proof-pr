@@ -14,8 +14,8 @@
 
 ## 当前发布
 
-- GitHub Release：[`v0.1.8`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.8)
-- npm：[`proof-pr@0.1.8`](https://www.npmjs.com/package/proof-pr)
+- GitHub Release：[`v0.1.9`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.9)
+- npm：[`proof-pr@0.1.9`](https://www.npmjs.com/package/proof-pr)
 - 核心能力：Review Plan、规则预设、Evidence Contract、GitHub annotations、SARIF、benchmark、真实案例库、依赖大版本升级检查、包生命周期脚本检查、`pull_request_target` / PR head checkout 检查、独立 HTML 可视化报告、Marketplace 准备材料。
 
 ## 图示和截图

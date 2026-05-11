@@ -4,6 +4,11 @@
 
 暂无。
 
+## 0.1.9 - 2026-05-11
+
+- 修复 CLI `--version` 仍显示旧版本的问题。
+- 更新 `proof-pr init` 生成的 GitHub Action 示例到 `v0.1.9`。
+
 ## 0.1.8 - 2026-05-11
 
 - 新增独立 HTML 可视化报告：CLI 支持 `--format html`，GitHub Action 支持 `html-output`。

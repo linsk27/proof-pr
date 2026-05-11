@@ -13,9 +13,9 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 
 ## 现在能用吗
 
-- GitHub Release：[`v0.1.8`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.8)
-- npm：[`proof-pr@0.1.8`](https://www.npmjs.com/package/proof-pr)
-- GitHub Action：`linsk27/proof-pr@v0.1.8`
+- GitHub Release：[`v0.1.9`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.9)
+- npm：[`proof-pr@0.1.9`](https://www.npmjs.com/package/proof-pr)
+- GitHub Action：`linsk27/proof-pr@v0.1.9`
 - 当前 benchmark：`14/14 passed`
 - 可视化报告：`--format html` / `html-output`
 
@@ -66,7 +66,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.8
+      - uses: linsk27/proof-pr@v0.1.9
         with:
           fail-on: high
           comment: "true"
@@ -202,7 +202,7 @@ evidence:
 如果想在 GitHub Action 里保存 HTML 面板：
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.8
+- uses: linsk27/proof-pr@v0.1.9
   with:
     html-output: proofpr-report.html
 - uses: actions/upload-artifact@v4
