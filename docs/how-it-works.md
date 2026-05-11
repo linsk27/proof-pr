@@ -115,7 +115,10 @@ preset: open-source-maintainer
 - `missing-reproduction-context`：缺少复现、预期/实际行为、before/after 说明时触发。
 - `secret-detected:*`：用正则检测常见 API key、GitHub token、数据库连接串和 secret 赋值。
 - `dependency-added`：检查依赖清单中的新增依赖或依赖变化。
+- `dependency-major-upgrade`：检查依赖是否跨越大版本边界。
+- `dependency-lifecycle-script`：检查 `package.json` 中安装或发布阶段会自动执行的包生命周期脚本。
 - `workflow-permission-change`：检查 GitHub Actions 是否新增写权限或 OIDC 权限。
+- `workflow-dangerous-trigger`：检查是否新增 `pull_request_target` 这类高权限 PR 触发器。
 - `mcp-credential-risk`：检查 MCP 配置中 command、args、env、token、secret 等高风险字段。
 
 其中 `change-size` 的默认阈值是：
@@ -151,7 +154,10 @@ ProofPR 会从 100 分开始，根据缺失的证据和触发的规则扣分：
 - 大型 PR：扣 10-20 分。
 - 敏感路径变更：扣 10-20 分。
 - 依赖清单变更：扣 10 分。
+- 依赖大版本升级：扣 15 分。
+- 包生命周期脚本风险：扣 25 分。
 - workflow 权限或 MCP 配置风险：扣 25 分。
+- `pull_request_target` 高权限触发器：扣 30 分。
 - 疑似提交 secret：扣 40 分。
 
 分数会映射为四档：

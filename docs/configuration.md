@@ -30,6 +30,7 @@ secrets:
 dependencies:
   flagNewPackages: true
   flagMajorUpgrades: true
+  flagLifecycleScripts: true
 
 comment:
   enabled: true
@@ -72,7 +73,7 @@ preset: security-strict
 
 ## `riskThreshold`
 
-配置感知型集成使用的默认风险阈值。GitHub Action 也提供了 `fail-on` 输入项。
+配置感知型集成使用的默认风险阈值。GitHub Action 如果没有显式传 `fail-on`，会使用这里的值。
 
 ## `ignorePaths`
 
@@ -94,6 +95,10 @@ preset: security-strict
 
 控制依赖清单检查。
 
+- `flagNewPackages`：标记新增依赖或依赖条目变化。
+- `flagMajorUpgrades`：标记跨大版本升级，例如 `18.x` 到 `19.x`。
+- `flagLifecycleScripts`：标记 `preinstall`、`postinstall`、`prepare` 等安装/发布阶段脚本。
+
 ## `comment`
 
 控制支持评论的集成是否发布报告评论。
@@ -106,7 +111,7 @@ preset: security-strict
 | --- | --- | --- |
 | `github-token` | `${{ github.token }}` | 读取 PR diff、发布评论、更新评论。 |
 | `config-path` | `.proofpr.yml` | 配置文件路径。 |
-| `fail-on` | `high` | 达到哪个风险等级时让 workflow 失败，可选 `low`、`medium`、`high`、`never`。 |
+| `fail-on` | 配置文件的 `riskThreshold` | 达到哪个风险等级时让 workflow 失败，可选 `low`、`medium`、`high`、`never`。 |
 | `comment` | `true` | 是否创建或更新 PR 评论。 |
 | `annotations` | `true` | `v0.1.5` 起可用，是否输出 GitHub workflow annotations。 |
 | `sarif-output` | 空 | `v0.1.5` 起可用，写出 SARIF 文件路径，例如 `proofpr.sarif`。 |

@@ -22,12 +22,13 @@ type FailLevel = RiskLevel | "never";
 async function run(): Promise<void> {
   const token = core.getInput("github-token", { required: false });
   const configPath = core.getInput("config-path", { required: false }) || ".proofpr.yml";
-  const failOn = parseFailLevel(core.getInput("fail-on", { required: false }) || "high");
+  const failOnInput = core.getInput("fail-on", { required: false });
   const shouldComment = parseBoolean(core.getInput("comment", { required: false }) || "true");
   const shouldAnnotate = parseBoolean(core.getInput("annotations", { required: false }) || "true");
   const sarifOutput = core.getInput("sarif-output", { required: false });
 
   const config = await loadConfig(configPath);
+  const failOn = parseFailLevel(failOnInput || config.riskThreshold);
   const diffText = await readDiff(token);
   const pullRequest = github.context.payload.pull_request
     ? {

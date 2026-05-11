@@ -200,6 +200,99 @@ index 0000000..1111111 100644
     expect(result.findings.some((finding) => finding.ruleId === "dependency-added")).toBe(true);
   });
 
+  it("flags dependency major version upgrades", () => {
+    const result = scanDiff(`diff --git a/package.json b/package.json
+index 0000000..1111111 100644
+--- a/package.json
++++ b/package.json
+@@ -1,3 +1,3 @@
+ {
+-  "react": "^18.2.0"
++  "react": "^19.0.0"
+ }
+`);
+
+    const finding = result.findings.find((item) => item.ruleId === "dependency-major-upgrade");
+
+    expect(finding).toBeDefined();
+    expect(finding?.evidence?.[0]).toContain("react ^18.2.0 -> ^19.0.0");
+    expect(
+      result.reviewPlan.actionItems.some(
+        (action) => action.actionId === "review-major-dependency-upgrade"
+      )
+    ).toBe(true);
+  });
+
+  it("can disable dependency major version upgrade checks", () => {
+    const result = scanDiff(
+      `diff --git a/package.json b/package.json
+index 0000000..1111111 100644
+--- a/package.json
++++ b/package.json
+@@ -1,3 +1,3 @@
+ {
+-  "react": "^18.2.0"
++  "react": "^19.0.0"
+ }
+`,
+      {
+        config: {
+          dependencies: {
+            flagNewPackages: true,
+            flagLifecycleScripts: true,
+            flagMajorUpgrades: false
+          }
+        }
+      }
+    );
+
+    expect(result.findings.some((finding) => finding.ruleId === "dependency-major-upgrade")).toBe(false);
+  });
+
+  it("flags package lifecycle scripts", () => {
+    const result = scanDiff(`diff --git a/package.json b/package.json
+index 0000000..1111111 100644
+--- a/package.json
++++ b/package.json
+@@ -1,3 +1,4 @@
+ {
+   "scripts": {
++    "postinstall": "node scripts/postinstall.js"
+   }
+ }
+`);
+
+    expect(result.risk).toBe("high");
+    expect(result.reviewDecision).toBe("block-merge");
+    expect(result.findings.some((finding) => finding.ruleId === "dependency-lifecycle-script")).toBe(true);
+    expect(
+      result.reviewPlan.actionItems.some(
+        (action) => action.actionId === "review-package-lifecycle-script"
+      )
+    ).toBe(true);
+  });
+
+  it("flags pull_request_target workflow triggers", () => {
+    const result = scanDiff(`diff --git a/.github/workflows/pr.yml b/.github/workflows/pr.yml
+index 0000000..1111111 100644
+--- a/.github/workflows/pr.yml
++++ b/.github/workflows/pr.yml
+@@ -1 +1,3 @@
+ name: pr
++on:
++  pull_request_target:
+`);
+
+    expect(result.risk).toBe("high");
+    expect(result.reviewDecision).toBe("block-merge");
+    expect(result.findings.some((finding) => finding.ruleId === "workflow-dangerous-trigger")).toBe(true);
+    expect(
+      result.reviewPlan.actionItems.some(
+        (action) => action.actionId === "review-privileged-pr-trigger"
+      )
+    ).toBe(true);
+  });
+
   it("keeps documentation-only changes low risk", () => {
     const result = scanDiff(`diff --git a/docs/usage.md b/docs/usage.md
 index 0000000..1111111 100644

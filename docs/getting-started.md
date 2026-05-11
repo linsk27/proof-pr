@@ -114,6 +114,7 @@ secrets:
 dependencies:
   flagNewPackages: true
   flagMajorUpgrades: true
+  flagLifecycleScripts: true
 
 comment:
   enabled: true

@@ -1,5 +1,13 @@
 # 变更记录
 
+## Unreleased
+
+- 新增 `dependency-major-upgrade`：识别依赖跨大版本升级。
+- 新增 `dependency-lifecycle-script`：识别 `package.json` 中可能在安装或发布阶段执行的包生命周期脚本。
+- 新增 `workflow-dangerous-trigger`：识别 GitHub Actions `pull_request_target` 高风险触发器。
+- GitHub Action 在未显式传 `fail-on` 时，会使用 `.proofpr.yml` 中的 `riskThreshold`。
+- 文档补充新增规则、配置项和风险评分说明。
+
 ## 0.1.5 - 2026-05-10
 
 - 新增 Review Plan：报告会生成维护者行动清单和重点文件列表。

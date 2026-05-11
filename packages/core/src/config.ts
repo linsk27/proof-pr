@@ -137,9 +137,10 @@ const configSchema = z
     dependencies: z
       .object({
         flagNewPackages: z.boolean().default(true),
-        flagMajorUpgrades: z.boolean().default(true)
+        flagMajorUpgrades: z.boolean().default(true),
+        flagLifecycleScripts: z.boolean().default(true)
       })
-      .default({ flagNewPackages: true, flagMajorUpgrades: true }),
+      .default({ flagNewPackages: true, flagMajorUpgrades: true, flagLifecycleScripts: true }),
     comment: z.object({ enabled: z.boolean().default(true) }).default({ enabled: true })
   });
 

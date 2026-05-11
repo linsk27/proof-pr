@@ -87,8 +87,9 @@ CLI 输出截图来自本机 `AI-Vue3-python-flask-Blog` 项目：
 | PR 描述质量 | 检查是否缺少动机、复现步骤、before/after、预期/实际结果。 |
 | 敏感路径 | 标记 `.github/workflows/**`、`.env*`、`mcp*.json`、依赖文件等高关注区域。 |
 | secrets | 检测疑似 API key、token、数据库连接串。 |
-| 依赖变化 | 标记新增依赖或依赖清单变化。 |
-| CI 权限 | 标记 GitHub Actions 写权限、OIDC 权限变化。 |
+| 依赖变化 | 标记新增依赖、依赖大版本升级和 lockfile 相关风险。 |
+| 包生命周期脚本 | 标记 `preinstall`、`postinstall`、`prepare` 等安装/发布阶段脚本。 |
+| CI 权限和触发器 | 标记 GitHub Actions 写权限、OIDC 权限和 `pull_request_target` 高风险触发器。 |
 | MCP 风险 | 标记 MCP command、args、env、credential 相关风险。 |
 
 ## 报告怎么看

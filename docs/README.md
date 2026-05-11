@@ -15,7 +15,7 @@
 
 - GitHub Release：[`v0.1.5`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.5)
 - npm：[`proof-pr@0.1.5`](https://www.npmjs.com/package/proof-pr)
-- 核心能力：Review Plan、规则预设、GitHub annotations、SARIF、真实案例库、Marketplace 准备材料。
+- 核心能力：Review Plan、规则预设、GitHub annotations、SARIF、真实案例库、依赖大版本升级检查、包生命周期脚本检查、Marketplace 准备材料。
 
 ## 图示和截图
 

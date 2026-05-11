@@ -11,9 +11,9 @@ inputs:
     required: false
     default: .proofpr.yml
   fail-on:
-    description: Lowest risk level that should fail the workflow. One of low, medium, high, never.
+    description: Lowest risk level that should fail the workflow. One of low, medium, high, never. Defaults to riskThreshold from .proofpr.yml.
     required: false
-    default: high
+    default: ""
   comment:
     description: Whether to create or update a pull request comment.
     required: false

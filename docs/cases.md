@@ -24,6 +24,9 @@ npx proof-pr@latest scan --diff-file examples/cases/missing-tests.diff --locale 
 | MCP 配置风险 | `examples/cases/mcp-config-risk.diff` | `sensitive-path` 和 `mcp-credential-risk`，提醒审查 command、args、env 和凭证处理。 |
 | 疑似 secret | `examples/cases/secret-leak.diff` | `secret-detected:*`，建议移除、轮换并改用 secret manager。 |
 | 依赖变更 | `examples/cases/dependency-change.diff` | `dependency-added`，建议审查包名、来源、许可证和 lockfile。 |
+| 依赖大版本升级 | `examples/cases/dependency-major-upgrade.diff` | `dependency-major-upgrade`，建议核查 changelog、迁移说明和测试覆盖。 |
+| 包生命周期脚本 | `examples/cases/package-lifecycle-script.diff` | `dependency-lifecycle-script`，建议审查安装或发布阶段是否会执行非预期代码。 |
+| 高风险 workflow 触发器 | `examples/cases/workflow-dangerous-trigger.diff` | `workflow-dangerous-trigger`，建议审查 `pull_request_target` 是否会用高权限执行不可信代码。 |
 
 ## 推荐 PR 描述模板
 

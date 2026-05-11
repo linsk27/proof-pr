@@ -34,6 +34,7 @@ export interface ProofPRConfig {
   dependencies: {
     flagNewPackages: boolean;
     flagMajorUpgrades: boolean;
+    flagLifecycleScripts: boolean;
   };
   comment: {
     enabled: boolean;

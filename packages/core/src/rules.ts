@@ -27,6 +27,12 @@ const PACKAGE_JSON_NON_DEPENDENCY_KEYS = new Set([
   "version"
 ]);
 
+interface ParsedDependencyLine {
+  name: string;
+  version: string;
+  line: ChangeLine;
+}
+
 export function analyzeDiffFiles(
   files: DiffFile[],
   config: ProofPRConfig,
@@ -41,6 +47,7 @@ export function analyzeDiffFiles(
   findings.push(...analyzePullRequestEvidence(activeFiles, pullRequest));
   findings.push(...analyzeDependencyChanges(activeFiles, config));
   findings.push(...analyzeWorkflowPermissions(activeFiles));
+  findings.push(...analyzeWorkflowDangerousTriggers(activeFiles));
   findings.push(...analyzeMcpConfigs(activeFiles));
 
   if (config.secrets.enabled) {
@@ -202,70 +209,191 @@ function analyzePullRequestEvidence(files: DiffFile[], pullRequest?: PullRequest
 }
 
 function analyzeDependencyChanges(files: DiffFile[], config: ProofPRConfig): Finding[] {
-  if (!config.dependencies.flagNewPackages) {
-    return [];
-  }
-
   const findings: Finding[] = [];
 
   for (const file of files.filter((candidate) => isDependencyManifest(candidate.path))) {
-    const addedDependencyLines = file.addedLines.filter((line) =>
-      isDependencyLikeAddition(file.path, line.value.trim())
-    );
+    if (config.dependencies.flagNewPackages) {
+      const addedDependencyLines = file.addedLines.filter((line) =>
+        isDependencyLikeAddition(file.path, line.value.trim())
+      );
 
-    if (addedDependencyLines.length === 0) {
-      continue;
+      if (addedDependencyLines.length > 0) {
+        findings.push({
+          ruleId: "dependency-added",
+          title: "Dependency manifest changed",
+          message: `${file.path} adds or changes dependency-like entries.`,
+          severity: "medium",
+          path: file.path,
+          evidence: addedDependencyLines.slice(0, 5).map(formatEvidenceLine),
+          recommendation:
+            "Verify package names, licenses, provenance, and whether the lockfile matches the intended dependency change."
+        });
+      }
     }
 
-    findings.push({
-      ruleId: "dependency-added",
-      title: "Dependency manifest changed",
-      message: `${file.path} adds or changes dependency-like entries.`,
-      severity: "medium",
-      path: file.path,
-      evidence: addedDependencyLines.slice(0, 5).map(formatEvidenceLine),
-      recommendation:
-        "Verify package names, licenses, provenance, and whether the lockfile matches the intended dependency change."
-    });
+    if (config.dependencies.flagMajorUpgrades) {
+      findings.push(...analyzeMajorDependencyUpgrades(file));
+    }
+
+    if (config.dependencies.flagLifecycleScripts) {
+      findings.push(...analyzeLifecycleScripts(file));
+    }
   }
 
   return findings;
 }
 
 function isDependencyLikeAddition(path: string, line: string): boolean {
+  return parseDependencyLine(path, { value: line }) !== undefined;
+}
+
+function analyzeMajorDependencyUpgrades(file: DiffFile): Finding[] {
+  const removedDependencies = new Map<string, ParsedDependencyLine>();
+
+  for (const line of file.removedLines) {
+    const parsed = parseDependencyLine(file.path, line);
+
+    if (parsed) {
+      removedDependencies.set(parsed.name, parsed);
+    }
+  }
+
+  const upgrades = file.addedLines
+    .map((line) => parseDependencyLine(file.path, line))
+    .filter((line): line is ParsedDependencyLine => Boolean(line))
+    .map((added) => ({ added, removed: removedDependencies.get(added.name) }))
+    .filter(
+      (change): change is { added: ParsedDependencyLine; removed: ParsedDependencyLine } =>
+        change.removed !== undefined && isMajorUpgrade(change.removed.version, change.added.version)
+    );
+
+  if (upgrades.length === 0) {
+    return [];
+  }
+
+  return [
+    {
+      ruleId: "dependency-major-upgrade",
+      title: "Dependency major version upgrade",
+      message: `${file.path} upgrades one or more dependencies across a major version boundary.`,
+      severity: "medium",
+      path: file.path,
+      evidence: upgrades.slice(0, 5).map(
+        ({ added, removed }) =>
+          `${added.line.lineNumber ? `line ${added.line.lineNumber}: ` : ""}${added.name} ${removed.version} -> ${
+            added.version
+          }`
+      ),
+      recommendation:
+        "Check changelogs, migration notes, peer dependency impact, and whether tests cover the upgraded package surface."
+    }
+  ];
+}
+
+function analyzeLifecycleScripts(file: DiffFile): Finding[] {
+  if (!file.path.endsWith("package.json")) {
+    return [];
+  }
+
+  const lifecycleLines = file.addedLines.filter((line) =>
+    /^"(?:preinstall|install|postinstall|prepare|prepublish|prepublishOnly)"\s*:/.test(line.value.trim())
+  );
+
+  if (lifecycleLines.length === 0) {
+    return [];
+  }
+
+  return [
+    {
+      ruleId: "dependency-lifecycle-script",
+      title: "Package lifecycle script changed",
+      message: `${file.path} adds or changes npm lifecycle scripts that may run during install or publish.`,
+      severity: "high",
+      path: file.path,
+      evidence: lifecycleLines.slice(0, 5).map(formatEvidenceLine),
+      recommendation:
+        "Review whether the lifecycle script is necessary, whether it downloads or executes remote code, and whether it can affect consumers during install."
+    }
+  ];
+}
+
+function parseDependencyLine(path: string, line: ChangeLine): ParsedDependencyLine | undefined {
+  const value = line.value.trim();
+
   if (path.endsWith("package.json")) {
-    const match = /^"(?<key>[@A-Za-z0-9_.-]+)"\s*:\s*"(?<value>[^"]*)"/.exec(line);
+    const match = /^"(?<key>[@A-Za-z0-9_.-]+)"\s*:\s*"(?<version>[^"]*)"/.exec(value);
 
     if (!match?.groups) {
-      return false;
+      return undefined;
     }
 
-    const { key, value } = match.groups;
+    const { key, version } = match.groups;
 
-    if (!key || !value || PACKAGE_JSON_NON_DEPENDENCY_KEYS.has(key)) {
-      return false;
+    if (!key || !version || PACKAGE_JSON_NON_DEPENDENCY_KEYS.has(key)) {
+      return undefined;
     }
 
-    return /^(?:\^|~|>=?|<=?|\d|workspace:|npm:|file:|link:|portal:|git\+|https?:|github:)/.test(
-      value
-    );
+    if (
+      !/^(?:\^|~|>=?|<=?|\d|workspace:|npm:|file:|link:|portal:|git\+|https?:|github:)/.test(
+        version
+      )
+    ) {
+      return undefined;
+    }
+
+    return { name: key, version, line };
   }
 
   if (path.endsWith("requirements.txt")) {
-    return /^[A-Za-z0-9_.-]+(?:\[.*\])?\s*(?:==|>=|<=|~=|>|<)\s*[^#\s]+/.test(line);
+    const match =
+      /^(?<name>[A-Za-z0-9_.-]+)(?:\[.*\])?\s*(?:==|>=|<=|~=|>|<)\s*(?<version>[^#\s]+)/.exec(
+        value
+      );
+    return match?.groups?.name && match.groups.version
+      ? { name: match.groups.name, version: match.groups.version, line }
+      : undefined;
   }
 
   if (path.endsWith("pyproject.toml") || path.endsWith("Cargo.toml")) {
-    return /^[A-Za-z0-9_.-]+\s*=\s*"(?:\^|~|>=?|<=?|\d|workspace:|path\s*=|git\s*=)[^"]*"/.test(
-      line
-    );
+    const match =
+      /^(?<name>[A-Za-z0-9_.-]+)\s*=\s*"(?<version>(?:\^|~|>=?|<=?|\d|workspace:|path\s*=|git\s*=)[^"]*)"/.exec(
+        value
+      );
+    return match?.groups?.name && match.groups.version
+      ? { name: match.groups.name, version: match.groups.version, line }
+      : undefined;
   }
 
   if (path.endsWith("go.mod")) {
-    return /^(?:require\s+)?[A-Za-z0-9_.\-/]+\s+v\d+\.\d+\.\d+/.test(line);
+    const match =
+      /^(?:require\s+)?(?<name>[A-Za-z0-9_.\-/]+)\s+(?<version>v\d+\.\d+\.\d+)/.exec(
+        value
+      );
+    return match?.groups?.name && match.groups.version
+      ? { name: match.groups.name, version: match.groups.version, line }
+      : undefined;
   }
 
-  return false;
+  return undefined;
+}
+
+function isMajorUpgrade(previousVersion: string, nextVersion: string): boolean {
+  const previousMajor = extractMajorVersion(previousVersion);
+  const nextMajor = extractMajorVersion(nextVersion);
+
+  return previousMajor !== undefined && nextMajor !== undefined && nextMajor > previousMajor;
+}
+
+function extractMajorVersion(version: string): number | undefined {
+  const normalized = version
+    .replace(/^workspace:/, "")
+    .replace(/^npm:[^@]+@/, "")
+    .replace(/^[~^<>=\s]+/, "")
+    .replace(/^v/, "");
+  const match = /(?<major>\d+)\.\d+\.\d+/.exec(normalized);
+  const major = match?.groups?.major ? Number(match.groups.major) : undefined;
+
+  return major !== undefined && Number.isInteger(major) ? major : undefined;
 }
 
 function analyzeWorkflowPermissions(files: DiffFile[]): Finding[] {
@@ -289,6 +417,33 @@ function analyzeWorkflowPermissions(files: DiffFile[]): Finding[] {
       evidence: permissionLines.slice(0, 5).map(formatEvidenceLine),
       recommendation:
         "Check whether the workflow really needs write or token permissions and whether untrusted pull requests can reach it."
+    });
+  }
+
+  return findings;
+}
+
+function analyzeWorkflowDangerousTriggers(files: DiffFile[]): Finding[] {
+  const findings: Finding[] = [];
+
+  for (const file of files.filter((candidate) => isWorkflowPath(candidate.path))) {
+    const triggerLines = file.addedLines.filter((line) =>
+      /\bpull_request_target\b/.test(line.value.trim())
+    );
+
+    if (triggerLines.length === 0) {
+      continue;
+    }
+
+    findings.push({
+      ruleId: "workflow-dangerous-trigger",
+      title: "Workflow uses pull_request_target",
+      message: `${file.path} adds pull_request_target, which runs with base repository context and can be risky for untrusted PRs.`,
+      severity: "high",
+      path: file.path,
+      evidence: triggerLines.slice(0, 5).map(formatEvidenceLine),
+      recommendation:
+        "Confirm the workflow does not check out or execute untrusted PR code with privileged tokens or write permissions."
     });
   }
 

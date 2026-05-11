@@ -30,9 +30,21 @@ ProofPR 的规则只回答一个维护者真正关心的问题：在深入 revie
 
 标记依赖清单中的新增依赖或依赖版本变更。
 
+## `dependency-major-upgrade`
+
+标记依赖跨越大版本边界的升级，例如 `react` 从 `18.x` 升到 `19.x`。这类变化通常需要核查 changelog、迁移说明、peer dependencies 和测试覆盖。
+
+## `dependency-lifecycle-script`
+
+标记 `package.json` 中新增或修改 `preinstall`、`install`、`postinstall`、`prepare`、`prepublish`、`prepublishOnly` 等包生命周期脚本。它们可能在安装或发布阶段自动执行代码，是供应链风险里很值得维护者提前看的信号。
+
 ## `workflow-permission-change`
 
 标记 GitHub Actions 权限变化，例如 `contents: write`、`packages: write`、`id-token: write` 或 `pull-requests: write`。
+
+## `workflow-dangerous-trigger`
+
+标记新增 `pull_request_target` 的 GitHub Actions workflow。这个触发器会在 base repository 上下文运行，如果同时执行不可信 PR 代码、使用高权限 token 或读取 secret，风险会很高。
 
 ## `mcp-credential-risk`
 

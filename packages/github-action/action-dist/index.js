@@ -50557,9 +50557,10 @@ const configSchema = object({
     secrets: object({ enabled: schemas_boolean().default(true) }).default({ enabled: true }),
     dependencies: object({
         flagNewPackages: schemas_boolean().default(true),
-        flagMajorUpgrades: schemas_boolean().default(true)
+        flagMajorUpgrades: schemas_boolean().default(true),
+        flagLifecycleScripts: schemas_boolean().default(true)
     })
-        .default({ flagNewPackages: true, flagMajorUpgrades: true }),
+        .default({ flagNewPackages: true, flagMajorUpgrades: true, flagLifecycleScripts: true }),
     comment: object({ enabled: schemas_boolean().default(true) }).default({ enabled: true })
 });
 function parseConfig(input) {
@@ -50866,6 +50867,21 @@ function maintainerFocus(findings, locale) {
                 ? "要求拆分 PR，或提供逐文件 review 指南。"
                 : "Request a smaller PR or a file-by-file review guide.");
         }
+        else if (finding.ruleId === "dependency-major-upgrade") {
+            focus.add(locale === "zh-CN"
+                ? "重点核查依赖大版本升级的迁移说明、兼容性和测试覆盖。"
+                : "Review dependency major upgrade migration notes, compatibility, and test coverage.");
+        }
+        else if (finding.ruleId === "dependency-lifecycle-script") {
+            focus.add(locale === "zh-CN"
+                ? "合并前审查包生命周期脚本是否会在安装或发布时执行非预期代码。"
+                : "Review package lifecycle scripts for unexpected install or publish-time execution.");
+        }
+        else if (finding.ruleId === "workflow-dangerous-trigger") {
+            focus.add(locale === "zh-CN"
+                ? "重点审查 pull_request_target 是否会用高权限 token 执行不可信 PR 代码。"
+                : "Review whether pull_request_target can execute untrusted PR code with privileged tokens.");
+        }
         else if (finding.ruleId === "mcp-credential-risk") {
             focus.add(locale === "zh-CN"
                 ? "重点审查 MCP command、args 和凭证处理方式。"
@@ -50927,11 +50943,32 @@ function translateFinding(finding) {
             recommendation: "请确认包名、许可证、来源可信度，以及 lockfile 是否匹配预期依赖变化。"
         };
     }
+    if (finding.ruleId === "dependency-major-upgrade") {
+        return {
+            title: "依赖发生大版本升级",
+            message: finding.path ? `${finding.path} 中有依赖跨越了大版本边界。` : finding.message,
+            recommendation: "请核查 changelog、迁移说明、peer dependencies 影响，以及测试是否覆盖升级后的关键路径。"
+        };
+    }
+    if (finding.ruleId === "dependency-lifecycle-script") {
+        return {
+            title: "包生命周期脚本发生变更",
+            message: finding.path ? `${finding.path} 新增或修改了安装/发布阶段可能自动执行的脚本。` : finding.message,
+            recommendation: "请确认该脚本是否必要，是否下载或执行远程代码，以及是否会影响安装该包的用户。"
+        };
+    }
     if (finding.ruleId === "workflow-permission-change") {
         return {
             title: "Workflow 权限发生变更",
             message: finding.path ? `${finding.path} 新增或修改了 GitHub Actions 权限。` : finding.message,
             recommendation: "请确认 workflow 是否真的需要写权限或 token 权限，并检查不可信 PR 是否能触达该 workflow。"
+        };
+    }
+    if (finding.ruleId === "workflow-dangerous-trigger") {
+        return {
+            title: "Workflow 使用了 pull_request_target",
+            message: finding.path ? `${finding.path} 新增了 pull_request_target 触发器。` : finding.message,
+            recommendation: "请确认该 workflow 不会用高权限 token、secret 或写权限执行不可信 PR 代码。"
         };
     }
     if (finding.ruleId === "mcp-credential-risk") {
@@ -51010,9 +51047,12 @@ function translateReviewActionTitle(actionId, fallback) {
         "add-reproduction-context": "要求补充复现或 before/after 上下文",
         "rotate-secret": "轮换并移除暴露的凭证",
         "justify-workflow-permissions": "要求说明 workflow 权限最小化理由",
+        "review-privileged-pr-trigger": "审查 pull_request_target 高权限触发器",
+        "review-package-lifecycle-script": "审查包生命周期脚本",
         "review-mcp-execution-surface": "审查 MCP 命令、参数和凭证处理",
         "request-review-map-or-split": "要求拆分 PR 或提供逐文件 review map",
         "verify-dependency-change": "核查依赖来源和 lockfile 影响",
+        "review-major-dependency-upgrade": "核查依赖大版本升级影响",
         "assign-sensitive-file-review": "安排敏感文件重点 review"
     }[actionId] ?? fallback;
 }
@@ -51027,9 +51067,12 @@ function translateReviewActionDetail(actionId, fallback) {
         "add-reproduction-context": "PR 应包含复现步骤、预期/实际行为，或相关 before/after 截图。",
         "rotate-secret": "在 secret 从 PR 中移除并完成轮换前，不要合并。",
         "justify-workflow-permissions": "确认写权限或 OIDC 是否必要，并检查不可信 PR 是否能触发该 workflow。",
+        "review-privileged-pr-trigger": "确认 workflow 不会用写权限 token、secret 或仓库权限执行不可信 PR 代码。",
+        "review-package-lifecycle-script": "检查 install、postinstall、prepare 或 publish 脚本是否会执行非预期代码。",
         "review-mcp-execution-surface": "检查 MCP 配置是否提交凭证，或意外扩大本地执行面。",
         "request-review-map-or-split": "要求贡献者拆分无关改动，或标出最需要重点 review 的文件。",
         "verify-dependency-change": "检查包名、维护者、许可证、安装脚本，以及 lockfile 是否符合预期依赖变化。",
+        "review-major-dependency-upgrade": "检查 changelog、迁移说明、peer dependencies，以及测试是否覆盖升级后的关键路径。",
         "assign-sensitive-file-review": "合并前由维护者有意识地检查敏感文件改动。"
     }[actionId] ?? fallback;
 }
@@ -51038,7 +51081,10 @@ function translateFocusReason(reasonId, fallback) {
         "change-size": "review 面积相关 finding",
         "sensitive-path": "敏感路径发生变更",
         "dependency-added": "依赖清单发生变更",
+        "dependency-major-upgrade": "依赖发生大版本升级",
+        "dependency-lifecycle-script": "包生命周期脚本发生变更",
         "workflow-permission-change": "workflow 权限发生变更",
+        "workflow-dangerous-trigger": "workflow 使用了高风险触发器",
         "mcp-credential-risk": "MCP 配置存在执行面或凭证风险",
         "missing-tests": "代码改动缺少测试或验证证据"
     }[reasonId] ?? fallback;
@@ -51067,6 +51113,9 @@ function translateDeduction(reasonId, fallback) {
         "sensitive-path-high": "高敏感文件发生变更，需要重点 review。",
         "sensitive-path-medium": "敏感文件发生变更，需要重点 review。",
         "dependency-change": "依赖清单发生变更。",
+        "dependency-major-upgrade": "依赖发生大版本升级。",
+        "dependency-lifecycle-script": "包生命周期脚本可能在安装或发布阶段执行代码。",
+        "workflow-dangerous-trigger": "pull_request_target workflow 需要重点审查高权限触发路径。",
         "missing-tests": "代码发生变更，但缺少测试变更或验证说明。"
     }[reasonId] ?? fallback;
 }
@@ -51378,6 +51427,7 @@ function analyzeDiffFiles(files, config, pullRequest) {
     findings.push(...analyzePullRequestEvidence(activeFiles, pullRequest));
     findings.push(...analyzeDependencyChanges(activeFiles, config));
     findings.push(...analyzeWorkflowPermissions(activeFiles));
+    findings.push(...analyzeWorkflowDangerousTriggers(activeFiles));
     findings.push(...analyzeMcpConfigs(activeFiles));
     if (config.secrets.enabled) {
         for (const file of activeFiles) {
@@ -51503,49 +51553,132 @@ function analyzePullRequestEvidence(files, pullRequest) {
     return findings;
 }
 function analyzeDependencyChanges(files, config) {
-    if (!config.dependencies.flagNewPackages) {
-        return [];
-    }
     const findings = [];
     for (const file of files.filter((candidate) => isDependencyManifest(candidate.path))) {
-        const addedDependencyLines = file.addedLines.filter((line) => isDependencyLikeAddition(file.path, line.value.trim()));
-        if (addedDependencyLines.length === 0) {
-            continue;
+        if (config.dependencies.flagNewPackages) {
+            const addedDependencyLines = file.addedLines.filter((line) => isDependencyLikeAddition(file.path, line.value.trim()));
+            if (addedDependencyLines.length > 0) {
+                findings.push({
+                    ruleId: "dependency-added",
+                    title: "Dependency manifest changed",
+                    message: `${file.path} adds or changes dependency-like entries.`,
+                    severity: "medium",
+                    path: file.path,
+                    evidence: addedDependencyLines.slice(0, 5).map(formatEvidenceLine),
+                    recommendation: "Verify package names, licenses, provenance, and whether the lockfile matches the intended dependency change."
+                });
+            }
         }
-        findings.push({
-            ruleId: "dependency-added",
-            title: "Dependency manifest changed",
-            message: `${file.path} adds or changes dependency-like entries.`,
-            severity: "medium",
-            path: file.path,
-            evidence: addedDependencyLines.slice(0, 5).map(formatEvidenceLine),
-            recommendation: "Verify package names, licenses, provenance, and whether the lockfile matches the intended dependency change."
-        });
+        if (config.dependencies.flagMajorUpgrades) {
+            findings.push(...analyzeMajorDependencyUpgrades(file));
+        }
+        if (config.dependencies.flagLifecycleScripts) {
+            findings.push(...analyzeLifecycleScripts(file));
+        }
     }
     return findings;
 }
 function isDependencyLikeAddition(path, line) {
+    return parseDependencyLine(path, { value: line }) !== undefined;
+}
+function analyzeMajorDependencyUpgrades(file) {
+    const removedDependencies = new Map();
+    for (const line of file.removedLines) {
+        const parsed = parseDependencyLine(file.path, line);
+        if (parsed) {
+            removedDependencies.set(parsed.name, parsed);
+        }
+    }
+    const upgrades = file.addedLines
+        .map((line) => parseDependencyLine(file.path, line))
+        .filter((line) => Boolean(line))
+        .map((added) => ({ added, removed: removedDependencies.get(added.name) }))
+        .filter((change) => change.removed !== undefined && isMajorUpgrade(change.removed.version, change.added.version));
+    if (upgrades.length === 0) {
+        return [];
+    }
+    return [
+        {
+            ruleId: "dependency-major-upgrade",
+            title: "Dependency major version upgrade",
+            message: `${file.path} upgrades one or more dependencies across a major version boundary.`,
+            severity: "medium",
+            path: file.path,
+            evidence: upgrades.slice(0, 5).map(({ added, removed }) => `${added.line.lineNumber ? `line ${added.line.lineNumber}: ` : ""}${added.name} ${removed.version} -> ${added.version}`),
+            recommendation: "Check changelogs, migration notes, peer dependency impact, and whether tests cover the upgraded package surface."
+        }
+    ];
+}
+function analyzeLifecycleScripts(file) {
+    if (!file.path.endsWith("package.json")) {
+        return [];
+    }
+    const lifecycleLines = file.addedLines.filter((line) => /^"(?:preinstall|install|postinstall|prepare|prepublish|prepublishOnly)"\s*:/.test(line.value.trim()));
+    if (lifecycleLines.length === 0) {
+        return [];
+    }
+    return [
+        {
+            ruleId: "dependency-lifecycle-script",
+            title: "Package lifecycle script changed",
+            message: `${file.path} adds or changes npm lifecycle scripts that may run during install or publish.`,
+            severity: "high",
+            path: file.path,
+            evidence: lifecycleLines.slice(0, 5).map(formatEvidenceLine),
+            recommendation: "Review whether the lifecycle script is necessary, whether it downloads or executes remote code, and whether it can affect consumers during install."
+        }
+    ];
+}
+function parseDependencyLine(path, line) {
+    const value = line.value.trim();
     if (path.endsWith("package.json")) {
-        const match = /^"(?<key>[@A-Za-z0-9_.-]+)"\s*:\s*"(?<value>[^"]*)"/.exec(line);
+        const match = /^"(?<key>[@A-Za-z0-9_.-]+)"\s*:\s*"(?<version>[^"]*)"/.exec(value);
         if (!match?.groups) {
-            return false;
+            return undefined;
         }
-        const { key, value } = match.groups;
-        if (!key || !value || PACKAGE_JSON_NON_DEPENDENCY_KEYS.has(key)) {
-            return false;
+        const { key, version } = match.groups;
+        if (!key || !version || PACKAGE_JSON_NON_DEPENDENCY_KEYS.has(key)) {
+            return undefined;
         }
-        return /^(?:\^|~|>=?|<=?|\d|workspace:|npm:|file:|link:|portal:|git\+|https?:|github:)/.test(value);
+        if (!/^(?:\^|~|>=?|<=?|\d|workspace:|npm:|file:|link:|portal:|git\+|https?:|github:)/.test(version)) {
+            return undefined;
+        }
+        return { name: key, version, line };
     }
     if (path.endsWith("requirements.txt")) {
-        return /^[A-Za-z0-9_.-]+(?:\[.*\])?\s*(?:==|>=|<=|~=|>|<)\s*[^#\s]+/.test(line);
+        const match = /^(?<name>[A-Za-z0-9_.-]+)(?:\[.*\])?\s*(?:==|>=|<=|~=|>|<)\s*(?<version>[^#\s]+)/.exec(value);
+        return match?.groups?.name && match.groups.version
+            ? { name: match.groups.name, version: match.groups.version, line }
+            : undefined;
     }
     if (path.endsWith("pyproject.toml") || path.endsWith("Cargo.toml")) {
-        return /^[A-Za-z0-9_.-]+\s*=\s*"(?:\^|~|>=?|<=?|\d|workspace:|path\s*=|git\s*=)[^"]*"/.test(line);
+        const match = /^(?<name>[A-Za-z0-9_.-]+)\s*=\s*"(?<version>(?:\^|~|>=?|<=?|\d|workspace:|path\s*=|git\s*=)[^"]*)"/.exec(value);
+        return match?.groups?.name && match.groups.version
+            ? { name: match.groups.name, version: match.groups.version, line }
+            : undefined;
     }
     if (path.endsWith("go.mod")) {
-        return /^(?:require\s+)?[A-Za-z0-9_.\-/]+\s+v\d+\.\d+\.\d+/.test(line);
+        const match = /^(?:require\s+)?(?<name>[A-Za-z0-9_.\-/]+)\s+(?<version>v\d+\.\d+\.\d+)/.exec(value);
+        return match?.groups?.name && match.groups.version
+            ? { name: match.groups.name, version: match.groups.version, line }
+            : undefined;
     }
-    return false;
+    return undefined;
+}
+function isMajorUpgrade(previousVersion, nextVersion) {
+    const previousMajor = extractMajorVersion(previousVersion);
+    const nextMajor = extractMajorVersion(nextVersion);
+    return previousMajor !== undefined && nextMajor !== undefined && nextMajor > previousMajor;
+}
+function extractMajorVersion(version) {
+    const normalized = version
+        .replace(/^workspace:/, "")
+        .replace(/^npm:[^@]+@/, "")
+        .replace(/^[~^<>=\s]+/, "")
+        .replace(/^v/, "");
+    const match = /(?<major>\d+)\.\d+\.\d+/.exec(normalized);
+    const major = match?.groups?.major ? Number(match.groups.major) : undefined;
+    return major !== undefined && Number.isInteger(major) ? major : undefined;
 }
 function analyzeWorkflowPermissions(files) {
     const findings = [];
@@ -51562,6 +51695,25 @@ function analyzeWorkflowPermissions(files) {
             path: file.path,
             evidence: permissionLines.slice(0, 5).map(formatEvidenceLine),
             recommendation: "Check whether the workflow really needs write or token permissions and whether untrusted pull requests can reach it."
+        });
+    }
+    return findings;
+}
+function analyzeWorkflowDangerousTriggers(files) {
+    const findings = [];
+    for (const file of files.filter((candidate) => isWorkflowPath(candidate.path))) {
+        const triggerLines = file.addedLines.filter((line) => /\bpull_request_target\b/.test(line.value.trim()));
+        if (triggerLines.length === 0) {
+            continue;
+        }
+        findings.push({
+            ruleId: "workflow-dangerous-trigger",
+            title: "Workflow uses pull_request_target",
+            message: `${file.path} adds pull_request_target, which runs with base repository context and can be risky for untrusted PRs.`,
+            severity: "high",
+            path: file.path,
+            evidence: triggerLines.slice(0, 5).map(formatEvidenceLine),
+            recommendation: "Confirm the workflow does not check out or execute untrusted PR code with privileged tokens or write permissions."
         });
     }
     return findings;
@@ -51659,7 +51811,10 @@ function calculateEvidenceScore(summary, findings) {
         "sensitive-path",
         "missing-tests",
         "dependency-added",
+        "dependency-major-upgrade",
+        "dependency-lifecycle-script",
         "workflow-permission-change",
+        "workflow-dangerous-trigger",
         "mcp-credential-risk"
     ].includes(finding.ruleId));
     if (needsVerificationEvidence && !summary.verificationEvidence) {
@@ -51675,6 +51830,9 @@ function calculateEvidenceScore(summary, findings) {
         else if (finding.ruleId === "workflow-permission-change") {
             addDeduction("workflow-permission-change", 25, "Workflow permission changes need deliberate review.");
         }
+        else if (finding.ruleId === "workflow-dangerous-trigger") {
+            addDeduction("workflow-dangerous-trigger", 30, "pull_request_target workflows need privileged trigger review.");
+        }
         else if (finding.ruleId === "mcp-credential-risk") {
             addDeduction("mcp-credential-risk", 25, "MCP configuration expands local execution or credential risk.");
         }
@@ -51688,6 +51846,12 @@ function calculateEvidenceScore(summary, findings) {
         }
         else if (finding.ruleId === "dependency-added") {
             addDeduction("dependency-change", 10, "Dependency manifest changed.");
+        }
+        else if (finding.ruleId === "dependency-major-upgrade") {
+            addDeduction("dependency-major-upgrade", 15, "Dependency major version changed.");
+        }
+        else if (finding.ruleId === "dependency-lifecycle-script") {
+            addDeduction("dependency-lifecycle-script", 25, "Package lifecycle scripts can run during install or publish.");
         }
         else if (finding.ruleId === "missing-tests") {
             addDeduction("missing-tests", finding.severity === "medium" ? 20 : 12, "Code changed without test changes or verification notes.");
@@ -51740,11 +51904,14 @@ function gradeEvidenceScore(value) {
 function calculateReviewDecision(risk, evidenceScore, findings) {
     const hasBlockingSecurityFinding = findings.some((finding) => finding.ruleId.startsWith("secret-detected") ||
         finding.ruleId === "workflow-permission-change" ||
+        finding.ruleId === "workflow-dangerous-trigger" ||
+        finding.ruleId === "dependency-lifecycle-script" ||
         finding.ruleId === "mcp-credential-risk");
     if (hasBlockingSecurityFinding || evidenceScore.value < 50 || risk === "high") {
         return "block-merge";
     }
-    if (evidenceScore.value < 70 || findings.some((finding) => finding.ruleId === "missing-tests" || finding.ruleId === "thin-pr-description")) {
+    if (evidenceScore.value < 70 ||
+        findings.some((finding) => finding.ruleId === "missing-tests" || finding.ruleId === "thin-pr-description")) {
         return "needs-evidence";
     }
     if (risk === "medium") {
@@ -51881,6 +52048,28 @@ function reviewActionsForFinding(finding) {
             }
         ];
     }
+    if (finding.ruleId === "workflow-dangerous-trigger") {
+        return [
+            {
+                actionId: "review-privileged-pr-trigger",
+                title: "Review privileged pull_request_target usage.",
+                detail: "Confirm the workflow does not execute untrusted PR code with write tokens, secrets, or repository permissions.",
+                priority: "high",
+                relatedRuleIds: [finding.ruleId]
+            }
+        ];
+    }
+    if (finding.ruleId === "dependency-lifecycle-script") {
+        return [
+            {
+                actionId: "review-package-lifecycle-script",
+                title: "Review package lifecycle scripts before merge.",
+                detail: "Check whether install, postinstall, prepare, or publish scripts can execute unexpected code for contributors or consumers.",
+                priority: "high",
+                relatedRuleIds: [finding.ruleId]
+            }
+        ];
+    }
     if (finding.ruleId === "mcp-credential-risk") {
         return [
             {
@@ -51909,6 +52098,17 @@ function reviewActionsForFinding(finding) {
                 actionId: "verify-dependency-change",
                 title: "Verify dependency provenance and lockfile impact.",
                 detail: "Check package name, maintainer, license, install scripts, and whether the lockfile matches the intended dependency change.",
+                priority: "medium",
+                relatedRuleIds: [finding.ruleId]
+            }
+        ];
+    }
+    if (finding.ruleId === "dependency-major-upgrade") {
+        return [
+            {
+                actionId: "review-major-dependency-upgrade",
+                title: "Review major dependency upgrade impact.",
+                detail: "Check changelogs, migration notes, peer dependencies, and whether tests cover the upgraded surface.",
                 priority: "medium",
                 relatedRuleIds: [finding.ruleId]
             }
@@ -51987,11 +52187,12 @@ const execFileAsync = (0,external_node_util_.promisify)(external_node_child_proc
 async function run() {
     const token = lib_core.getInput("github-token", { required: false });
     const configPath = lib_core.getInput("config-path", { required: false }) || ".proofpr.yml";
-    const failOn = parseFailLevel(lib_core.getInput("fail-on", { required: false }) || "high");
+    const failOnInput = lib_core.getInput("fail-on", { required: false });
     const shouldComment = parseBoolean(lib_core.getInput("comment", { required: false }) || "true");
     const shouldAnnotate = parseBoolean(lib_core.getInput("annotations", { required: false }) || "true");
     const sarifOutput = lib_core.getInput("sarif-output", { required: false });
     const config = await loadConfig(configPath);
+    const failOn = parseFailLevel(failOnInput || config.riskThreshold);
     const diffText = await readDiff(token);
     const pullRequest = github.context.payload.pull_request
         ? {

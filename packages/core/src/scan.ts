@@ -84,7 +84,10 @@ function calculateEvidenceScore(summary: ScanSummary, findings: Finding[]): Evid
       "sensitive-path",
       "missing-tests",
       "dependency-added",
+      "dependency-major-upgrade",
+      "dependency-lifecycle-script",
       "workflow-permission-change",
+      "workflow-dangerous-trigger",
       "mcp-credential-risk"
     ].includes(finding.ruleId)
   );
@@ -94,7 +97,11 @@ function calculateEvidenceScore(summary: ScanSummary, findings: Finding[]): Evid
   }
 
   if ((summary.sensitiveFilesChanged > 0 || summary.filesChanged >= 5) && !summary.reproductionEvidence) {
-    addDeduction("missing-reproduction-context", 15, "No reproduction, before/after, or expected/actual context was found.");
+    addDeduction(
+      "missing-reproduction-context",
+      15,
+      "No reproduction, before/after, or expected/actual context was found."
+    );
   }
 
   for (const finding of findings) {
@@ -102,6 +109,8 @@ function calculateEvidenceScore(summary: ScanSummary, findings: Finding[]): Evid
       addDeduction("secret-detected", 40, "Possible committed secret detected.");
     } else if (finding.ruleId === "workflow-permission-change") {
       addDeduction("workflow-permission-change", 25, "Workflow permission changes need deliberate review.");
+    } else if (finding.ruleId === "workflow-dangerous-trigger") {
+      addDeduction("workflow-dangerous-trigger", 30, "pull_request_target workflows need privileged trigger review.");
     } else if (finding.ruleId === "mcp-credential-risk") {
       addDeduction("mcp-credential-risk", 25, "MCP configuration expands local execution or credential risk.");
     } else if (finding.ruleId === "change-size") {
@@ -120,8 +129,20 @@ function calculateEvidenceScore(summary: ScanSummary, findings: Finding[]): Evid
       );
     } else if (finding.ruleId === "dependency-added") {
       addDeduction("dependency-change", 10, "Dependency manifest changed.");
+    } else if (finding.ruleId === "dependency-major-upgrade") {
+      addDeduction("dependency-major-upgrade", 15, "Dependency major version changed.");
+    } else if (finding.ruleId === "dependency-lifecycle-script") {
+      addDeduction(
+        "dependency-lifecycle-script",
+        25,
+        "Package lifecycle scripts can run during install or publish."
+      );
     } else if (finding.ruleId === "missing-tests") {
-      addDeduction("missing-tests", finding.severity === "medium" ? 20 : 12, "Code changed without test changes or verification notes.");
+      addDeduction(
+        "missing-tests",
+        finding.severity === "medium" ? 20 : 12,
+        "Code changed without test changes or verification notes."
+      );
     }
   }
 
@@ -191,6 +212,8 @@ function calculateReviewDecision(
     (finding) =>
       finding.ruleId.startsWith("secret-detected") ||
       finding.ruleId === "workflow-permission-change" ||
+      finding.ruleId === "workflow-dangerous-trigger" ||
+      finding.ruleId === "dependency-lifecycle-script" ||
       finding.ruleId === "mcp-credential-risk"
   );
 
@@ -198,7 +221,12 @@ function calculateReviewDecision(
     return "block-merge";
   }
 
-  if (evidenceScore.value < 70 || findings.some((finding) => finding.ruleId === "missing-tests" || finding.ruleId === "thin-pr-description")) {
+  if (
+    evidenceScore.value < 70 ||
+    findings.some(
+      (finding) => finding.ruleId === "missing-tests" || finding.ruleId === "thin-pr-description"
+    )
+  ) {
     return "needs-evidence";
   }
 
@@ -360,6 +388,30 @@ function reviewActionsForFinding(finding: Finding): ReviewAction[] {
     ];
   }
 
+  if (finding.ruleId === "workflow-dangerous-trigger") {
+    return [
+      {
+        actionId: "review-privileged-pr-trigger",
+        title: "Review privileged pull_request_target usage.",
+        detail: "Confirm the workflow does not execute untrusted PR code with write tokens, secrets, or repository permissions.",
+        priority: "high",
+        relatedRuleIds: [finding.ruleId]
+      }
+    ];
+  }
+
+  if (finding.ruleId === "dependency-lifecycle-script") {
+    return [
+      {
+        actionId: "review-package-lifecycle-script",
+        title: "Review package lifecycle scripts before merge.",
+        detail: "Check whether install, postinstall, prepare, or publish scripts can execute unexpected code for contributors or consumers.",
+        priority: "high",
+        relatedRuleIds: [finding.ruleId]
+      }
+    ];
+  }
+
   if (finding.ruleId === "mcp-credential-risk") {
     return [
       {
@@ -390,6 +442,18 @@ function reviewActionsForFinding(finding: Finding): ReviewAction[] {
         actionId: "verify-dependency-change",
         title: "Verify dependency provenance and lockfile impact.",
         detail: "Check package name, maintainer, license, install scripts, and whether the lockfile matches the intended dependency change.",
+        priority: "medium",
+        relatedRuleIds: [finding.ruleId]
+      }
+    ];
+  }
+
+  if (finding.ruleId === "dependency-major-upgrade") {
+    return [
+      {
+        actionId: "review-major-dependency-upgrade",
+        title: "Review major dependency upgrade impact.",
+        detail: "Check changelogs, migration notes, peer dependencies, and whether tests cover the upgraded surface.",
         priority: "medium",
         relatedRuleIds: [finding.ruleId]
       }

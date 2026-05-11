@@ -302,6 +302,24 @@ function maintainerFocus(findings: Finding[], locale: ReportLocale): string[] {
           ? "要求拆分 PR，或提供逐文件 review 指南。"
           : "Request a smaller PR or a file-by-file review guide."
       );
+    } else if (finding.ruleId === "dependency-major-upgrade") {
+      focus.add(
+        locale === "zh-CN"
+          ? "重点核查依赖大版本升级的迁移说明、兼容性和测试覆盖。"
+          : "Review dependency major upgrade migration notes, compatibility, and test coverage."
+      );
+    } else if (finding.ruleId === "dependency-lifecycle-script") {
+      focus.add(
+        locale === "zh-CN"
+          ? "合并前审查包生命周期脚本是否会在安装或发布时执行非预期代码。"
+          : "Review package lifecycle scripts for unexpected install or publish-time execution."
+      );
+    } else if (finding.ruleId === "workflow-dangerous-trigger") {
+      focus.add(
+        locale === "zh-CN"
+          ? "重点审查 pull_request_target 是否会用高权限 token 执行不可信 PR 代码。"
+          : "Review whether pull_request_target can execute untrusted PR code with privileged tokens."
+      );
     } else if (finding.ruleId === "mcp-credential-risk") {
       focus.add(
         locale === "zh-CN"
@@ -377,11 +395,35 @@ function translateFinding(finding: Finding): Pick<Finding, "title" | "message" |
     };
   }
 
+  if (finding.ruleId === "dependency-major-upgrade") {
+    return {
+      title: "依赖发生大版本升级",
+      message: finding.path ? `${finding.path} 中有依赖跨越了大版本边界。` : finding.message,
+      recommendation: "请核查 changelog、迁移说明、peer dependencies 影响，以及测试是否覆盖升级后的关键路径。"
+    };
+  }
+
+  if (finding.ruleId === "dependency-lifecycle-script") {
+    return {
+      title: "包生命周期脚本发生变更",
+      message: finding.path ? `${finding.path} 新增或修改了安装/发布阶段可能自动执行的脚本。` : finding.message,
+      recommendation: "请确认该脚本是否必要，是否下载或执行远程代码，以及是否会影响安装该包的用户。"
+    };
+  }
+
   if (finding.ruleId === "workflow-permission-change") {
     return {
       title: "Workflow 权限发生变更",
       message: finding.path ? `${finding.path} 新增或修改了 GitHub Actions 权限。` : finding.message,
       recommendation: "请确认 workflow 是否真的需要写权限或 token 权限，并检查不可信 PR 是否能触达该 workflow。"
+    };
+  }
+
+  if (finding.ruleId === "workflow-dangerous-trigger") {
+    return {
+      title: "Workflow 使用了 pull_request_target",
+      message: finding.path ? `${finding.path} 新增了 pull_request_target 触发器。` : finding.message,
+      recommendation: "请确认该 workflow 不会用高权限 token、secret 或写权限执行不可信 PR 代码。"
     };
   }
 
@@ -474,9 +516,12 @@ function translateReviewActionTitle(actionId: string, fallback: string): string 
     "add-reproduction-context": "要求补充复现或 before/after 上下文",
     "rotate-secret": "轮换并移除暴露的凭证",
     "justify-workflow-permissions": "要求说明 workflow 权限最小化理由",
+    "review-privileged-pr-trigger": "审查 pull_request_target 高权限触发器",
+    "review-package-lifecycle-script": "审查包生命周期脚本",
     "review-mcp-execution-surface": "审查 MCP 命令、参数和凭证处理",
     "request-review-map-or-split": "要求拆分 PR 或提供逐文件 review map",
     "verify-dependency-change": "核查依赖来源和 lockfile 影响",
+    "review-major-dependency-upgrade": "核查依赖大版本升级影响",
     "assign-sensitive-file-review": "安排敏感文件重点 review"
   }[actionId] ?? fallback;
 }
@@ -492,9 +537,12 @@ function translateReviewActionDetail(actionId: string, fallback: string): string
     "add-reproduction-context": "PR 应包含复现步骤、预期/实际行为，或相关 before/after 截图。",
     "rotate-secret": "在 secret 从 PR 中移除并完成轮换前，不要合并。",
     "justify-workflow-permissions": "确认写权限或 OIDC 是否必要，并检查不可信 PR 是否能触发该 workflow。",
+    "review-privileged-pr-trigger": "确认 workflow 不会用写权限 token、secret 或仓库权限执行不可信 PR 代码。",
+    "review-package-lifecycle-script": "检查 install、postinstall、prepare 或 publish 脚本是否会执行非预期代码。",
     "review-mcp-execution-surface": "检查 MCP 配置是否提交凭证，或意外扩大本地执行面。",
     "request-review-map-or-split": "要求贡献者拆分无关改动，或标出最需要重点 review 的文件。",
     "verify-dependency-change": "检查包名、维护者、许可证、安装脚本，以及 lockfile 是否符合预期依赖变化。",
+    "review-major-dependency-upgrade": "检查 changelog、迁移说明、peer dependencies，以及测试是否覆盖升级后的关键路径。",
     "assign-sensitive-file-review": "合并前由维护者有意识地检查敏感文件改动。"
   }[actionId] ?? fallback;
 }
@@ -504,7 +552,10 @@ function translateFocusReason(reasonId: string, fallback: string): string {
     "change-size": "review 面积相关 finding",
     "sensitive-path": "敏感路径发生变更",
     "dependency-added": "依赖清单发生变更",
+    "dependency-major-upgrade": "依赖发生大版本升级",
+    "dependency-lifecycle-script": "包生命周期脚本发生变更",
     "workflow-permission-change": "workflow 权限发生变更",
+    "workflow-dangerous-trigger": "workflow 使用了高风险触发器",
     "mcp-credential-risk": "MCP 配置存在执行面或凭证风险",
     "missing-tests": "代码改动缺少测试或验证证据"
   }[reasonId] ?? fallback;
@@ -535,6 +586,9 @@ function translateDeduction(reasonId: string, fallback: string): string {
     "sensitive-path-high": "高敏感文件发生变更，需要重点 review。",
     "sensitive-path-medium": "敏感文件发生变更，需要重点 review。",
     "dependency-change": "依赖清单发生变更。",
+    "dependency-major-upgrade": "依赖发生大版本升级。",
+    "dependency-lifecycle-script": "包生命周期脚本可能在安装或发布阶段执行代码。",
+    "workflow-dangerous-trigger": "pull_request_target workflow 需要重点审查高权限触发路径。",
     "missing-tests": "代码发生变更，但缺少测试变更或验证说明。"
   }[reasonId] ?? fallback;
 }

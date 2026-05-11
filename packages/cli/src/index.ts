@@ -203,6 +203,7 @@ comment:
 # dependencies:
 #   flagNewPackages: true
 #   flagMajorUpgrades: true
+#   flagLifecycleScripts: true
 `;
 }
 

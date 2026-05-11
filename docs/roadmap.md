@@ -16,7 +16,7 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 - SARIF / Code Scanning：CLI 可输出 SARIF，Action 可写出 `sarif-output`。
 - 真实案例库：提供可复现的 diff 样例。
 - Marketplace 准备：补充 action branding、安装说明和上架文案。
-- 内置规则：改动规模、敏感路径、缺少测试、PR 描述、复现上下文、secret、依赖、workflow 权限、MCP 配置。
+- 内置规则：改动规模、敏感路径、缺少测试、PR 描述、复现上下文、secret、依赖、大版本升级、包生命周期脚本、workflow 权限、`pull_request_target`、MCP 配置。
 
 ## 短期方向
 
@@ -26,7 +26,10 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 2. 真实截图刷新
    用 `v0.1.5` 的 annotations / SARIF 能力重新跑一个 demo PR，补充新版效果图。
 
-3. GitHub Release 页面发布说明自动化
+3. 真实项目样例扩展
+   继续补充 React、Python、Go、Rust 等不同生态的真实 diff 示例，让用户能更快理解规则价值。
+
+4. GitHub Release 页面发布说明自动化
    当前 npm 已发布，后续要让 release workflow 在 npm 失败时也能创建 GitHub Release 页面。
 
 ## 中期方向
