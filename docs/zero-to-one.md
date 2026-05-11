@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.6
+      - uses: linsk27/proof-pr@v0.1.7
         with:
           fail-on: high
           comment: "true"
@@ -163,7 +163,7 @@ permissions:
 
 steps:
   - uses: actions/checkout@v4
-  - uses: linsk27/proof-pr@v0.1.6
+  - uses: linsk27/proof-pr@v0.1.7
     with:
       fail-on: high
       comment: "true"

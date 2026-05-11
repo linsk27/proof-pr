@@ -2,10 +2,19 @@
 
 ## Unreleased
 
+暂无。
+
+## 0.1.7 - 2026-05-11
+
 - 新增 Evidence Contract：仓库可以用 `.proofpr.yml` 定义路径级证据要求，例如 UI 改动必须有截图、workflow 改动必须有权限理由。
 - 新增 `benchmark` CLI 命令和 `pnpm benchmark` 脚本，用样本 case 验证风险等级、Review 门禁和 finding 命中结果。
+- 新增 `benchmark --output`，CI 可以直接生成 Markdown benchmark 报告。
+- CI 现在会自动运行 benchmark，并把报告写入 GitHub Actions Summary。
 - 新增 benchmark 样本和 UI 改动案例，帮助公开讨论规则命中、误报和漏报。
+- 新增 `workflow-untrusted-checkout`：识别 `pull_request_target` 中 checkout PR head 代码的高风险组合。
+- 优化 `workflow-permission-change`：只读权限如 `contents: read` 不再被当成权限升级。
 - 报告证据概览新增截图、changelog / 迁移说明、权限理由等证据信号。
+- 中文文档补充 CI benchmark、规则准确性边界和 workflow 供应链风险说明。
 
 ## 0.1.6 - 2026-05-11
 
