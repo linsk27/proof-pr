@@ -39,7 +39,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.7
+- uses: linsk27/proof-pr@v0.1.8
   with:
     fail-on: high
     comment: "true"

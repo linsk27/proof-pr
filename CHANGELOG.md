@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+暂无。
+
+## 0.1.8 - 2026-05-11
+
 - 新增独立 HTML 可视化报告：CLI 支持 `--format html`，GitHub Action 支持 `html-output`。
 - 文档新增可视化报告截图，帮助用户理解风险面板、证据评分和行动清单。
 
