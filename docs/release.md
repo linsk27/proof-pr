@@ -44,6 +44,13 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
+当前验证结果：
+
+```txt
+npm view proof-pr version -> 0.1.9
+npx proof-pr@latest --version -> 0.1.9
+```
+
 ## `v0.1.9` 发布状态
 
 `v0.1.9` 已经完成：
@@ -51,6 +58,8 @@ npx proof-pr@latest --version
 - Git tag：`v0.1.9`
 - GitHub Release：`v0.1.9`
 - npm：`proof-pr@0.1.9`
+- npm dist-tag：`latest -> 0.1.9`
+- GitHub Actions：Release workflow 和 main CI 均已通过。
 
 本次是功能增强版，重点包括：
 
@@ -60,6 +69,10 @@ npx proof-pr@latest --version
 - GitHub Action 支持 `html-output`，可把可视化报告上传为 artifact。
 - README 和中文文档补充真实截图、从 0 到 1 使用路径和报告解释。
 - HTML 报告集中展示风险等级、证据评分、Review 门禁、行动清单、重点文件和扣分原因。
+
+## 版本说明
+
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.9` 已修复这个问题，并且是当前推荐使用版本。
 
 ## 发布后动作
 

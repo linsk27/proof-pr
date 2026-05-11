@@ -18,6 +18,15 @@
 - npm：[`proof-pr@0.1.9`](https://www.npmjs.com/package/proof-pr)
 - 核心能力：Review Plan、规则预设、Evidence Contract、GitHub annotations、SARIF、benchmark、真实案例库、依赖大版本升级检查、包生命周期脚本检查、`pull_request_target` / PR head checkout 检查、独立 HTML 可视化报告、Marketplace 准备材料。
 
+确认本机拿到的 latest：
+
+```bash
+npm view proof-pr version
+npx proof-pr@latest --version
+```
+
+当前都应输出 `0.1.9`。
+
 ## 图示和截图
 
 真实运行截图：

@@ -140,8 +140,11 @@ evidence:
 不用开 PR，也可以本地扫描：
 
 ```bash
+npx proof-pr@latest --version
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 ```
+
+第一行当前应输出 `0.1.9`，用于确认 npm latest 已经安装正确。
 
 扫描内置案例：
 

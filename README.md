@@ -19,6 +19,15 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 - 当前 benchmark：`14/14 passed`
 - 可视化报告：`--format html` / `html-output`
 
+验证你拿到的是最新版本：
+
+```bash
+npm view proof-pr version
+npx proof-pr@latest --version
+```
+
+这两个命令当前都应输出 `0.1.9`。
+
 ## 它解决什么问题
 
 | 常见 PR 问题 | ProofPR 给维护者什么 |

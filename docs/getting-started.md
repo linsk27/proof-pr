@@ -140,9 +140,12 @@ comment:
 可以直接通过 npm 使用：
 
 ```bash
+npx proof-pr@latest --version
 npx proof-pr@latest init
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 ```
+
+如果第一行输出 `0.1.9`，说明你正在使用当前最新发布版。
 
 也可以全局安装：
 
