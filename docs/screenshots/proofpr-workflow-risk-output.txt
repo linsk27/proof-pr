@@ -1,0 +1,78 @@
+﻿<!-- proof-pr-report -->
+# ProofPR 审查报告
+
+风险等级：**高**
+证据评分：**0/100（证据不足）**
+Review 门禁：**处理风险前不建议合并**
+
+## 证据概览
+
+- 改动文件数：1
+- 新增行数：9
+- 删除行数：1
+- 测试文件改动数：0
+- 敏感文件改动数：1
+- PR 描述质量：不可用
+- 验证证据：无
+- 复现上下文：无
+- 截图或视觉证据：无
+- Changelog 或迁移证据：无
+- 权限理由证据：无
+
+## 证据评分细节
+
+- 证据优势：暂无明显优势信号。
+- 扣分项：-10，扫描时没有可用的 PR 描述上下文。
+- 扣分项：-20，没有检测到测试或手动验证证据。
+- 扣分项：-15，没有检测到复现步骤、before/after 或预期/实际上下文。
+- 扣分项：-20，高敏感文件发生变更，需要重点 review。
+- 扣分项：-30，pull_request_target workflow 需要重点审查高权限触发路径。
+- 扣分项：-30，Workflow checkout PR head 代码，需要审查权限边界。
+
+## Review 行动清单
+
+- [ ] 风险处理前不要合并（高优先级）：在高风险 finding 被解释、降低或移除前，把这个 PR 视为不可合并。
+- [ ] 安排敏感文件重点 review（高优先级）：合并前由维护者有意识地检查敏感文件改动。
+- [ ] 审查 pull_request_target 高权限触发器（高优先级）：确认 workflow 不会用写权限 token、secret 或仓库权限执行不可信 PR 代码。
+- [ ] 审查 PR head checkout 的权限边界（高优先级）：确认 job 不会在写权限 token、仓库 secret 或 pull_request_target 高权限上下文中运行不可信 PR 代码。
+- [ ] 要求补充更清楚的 PR 描述（中优先级）：贡献者应说明为什么改、改了什么、如何验证，以及是否有发布或兼容性风险。
+- [ ] 要求补充测试或手动验证证据（中优先级）：要求测试输出、CI 链接、截图，或简短的手动验证说明。
+- [ ] 要求补充复现或 before/after 上下文（中优先级）：PR 应包含复现步骤、预期/实际行为，或相关 before/after 截图。
+
+重点文件：
+- `.github/workflows/pr.yml`（高优先级）：敏感路径发生变更
+
+## 风险发现
+
+### 敏感文件发生变更
+- 规则：`sensitive-path`
+- 严重程度：`高`
+- 路径：`.github/workflows/pr.yml`
+- 详情：.github/workflows/pr.yml 命中了敏感路径配置。
+- 证据：
+  - `+9 -1`
+- 建议：请重点审查权限、凭证、发布、依赖和 CI 相关变更。
+
+### Workflow 使用了 pull_request_target
+- 规则：`workflow-dangerous-trigger`
+- 严重程度：`高`
+- 路径：`.github/workflows/pr.yml`
+- 详情：.github/workflows/pr.yml 新增了 pull_request_target 触发器。
+- 证据：
+  - `第 3 行：pull_request_target:`
+- 建议：请确认该 workflow 不会用高权限 token、secret 或写权限执行不可信 PR 代码。
+
+### Workflow checkout 了 PR head
+- 规则：`workflow-untrusted-checkout`
+- 严重程度：`高`
+- 路径：`.github/workflows/pr.yml`
+- 详情：.github/workflows/pr.yml 引用了 PR head 代码来源，需要审查它是否会在高权限上下文中执行。
+- 证据：
+  - `第 12 行：repository: ${{ github.event.pull_request.head.repo.full_name }}`
+  - `第 13 行：ref: ${{ github.event.pull_request.head.sha }}`
+- 建议：避免在 pull_request_target、写权限 token 或可读取 secret 的上下文中运行不可信 PR 代码。
+
+## 维护者关注点
+
+- 重点审查 pull_request_target 是否会用高权限 token 执行不可信 PR 代码。
+- 重点审查 workflow 是否 checkout 并执行了不可信 PR head 代码。

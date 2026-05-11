@@ -1,0 +1,3 @@
+﻿ProofPR initialized:
+- .proofpr.yml
+- .github\workflows\proofpr.yml

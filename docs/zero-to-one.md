@@ -15,6 +15,10 @@
 
 ![ProofPR 输出位置示意图](assets/proofpr-output-locations.svg)
 
+初始化成功时，你会看到类似输出：
+
+![ProofPR 初始化输出](screenshots/proofpr-init-output.png)
+
 ## 第 1 步：添加 GitHub Action
 
 在目标仓库创建文件：
@@ -150,6 +154,22 @@ npx proof-pr@latest scan --diff-file examples/cases/secret-leak.diff --locale zh
 真实 CLI 输出截图：
 
 ![ProofPR 真实 CLI 输出截图](screenshots/ai-vue-flask-cli-output.png)
+
+如果你想快速理解高风险 workflow finding，可以扫描内置案例：
+
+```bash
+npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.diff --locale zh-CN
+```
+
+![ProofPR workflow 风险扫描输出](screenshots/proofpr-workflow-risk-output.png)
+
+验证规则样本是否仍按预期命中：
+
+```bash
+npx proof-pr@latest benchmark --cases benchmarks/cases
+```
+
+![ProofPR benchmark 输出](screenshots/proofpr-benchmark-output.png)
 
 ## 第 7 步：可选接入 Code Scanning
 

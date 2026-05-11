@@ -20,11 +20,17 @@
 
 ## 图示和截图
 
-真实截图：
+真实运行截图：
+
+![ProofPR 初始化输出](screenshots/proofpr-init-output.png)
 
 ![ProofPR 真实 PR 评论截图](screenshots/proofpr-demo-pr-comment.png)
 
 ![ProofPR 真实 CLI 输出截图](screenshots/ai-vue-flask-cli-output.png)
+
+![ProofPR workflow 风险扫描输出](screenshots/proofpr-workflow-risk-output.png)
+
+![ProofPR benchmark 输出](screenshots/proofpr-benchmark-output.png)
 
 流程示意图：
 

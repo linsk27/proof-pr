@@ -1,0 +1,44 @@
+﻿ProofPR benchmark
+
+Summary: 14/14 passed (100%)
+
+Categories:
+- agent-security: 1/1 passed (100%)
+- dependency: 3/3 passed (100%)
+- evidence: 1/1 passed (100%)
+- evidence-contract: 4/4 passed (100%)
+- low-risk: 1/1 passed (100%)
+- security: 1/1 passed (100%)
+- workflow-security: 3/3 passed (100%)
+
+Finding coverage:
+- sensitive-path: 10
+- workflow-permission-change: 3
+- dependency-added: 2
+- missing-reproduction-context: 2
+- missing-tests: 2
+- workflow-dangerous-trigger: 2
+- dependency-lifecycle-script: 1
+- dependency-major-upgrade: 1
+- evidence-contract:ui-screenshot: 1
+- evidence-contract:workflow-permission-rationale: 1
+- mcp-credential-risk: 1
+- secret-detected:database-url: 1
+- secret-detected:openai-key: 1
+- thin-pr-description: 1
+- workflow-untrusted-checkout: 1
+
+PASS dependency-change - Dependency manifest changes should be visible to maintainers
+PASS dependency-major-upgrade - Dependency major version upgrades should be visible to maintainers
+PASS docs-only-low-risk - Documentation-only changes should remain low risk
+PASS evidence-contract-missing - UI changes can require screenshot evidence through an evidence contract
+PASS evidence-contract-satisfied - UI evidence contracts should pass when screenshot and verification are present
+PASS mcp-config-risk - MCP command or credential surface should block merge
+PASS missing-tests - Code changes without tests or verification should ask for evidence
+PASS package-lifecycle-script - Package lifecycle scripts should block merge until reviewed
+PASS secret-leak - Committed secrets should block merge
+PASS security-strict-workflow-contract-satisfied - workflow evidence contract should pass when permission rationale is present
+PASS security-strict-workflow-contract - security-strict preset should require workflow permission rationale
+PASS workflow-dangerous-trigger - pull_request_target should be treated as privileged workflow risk
+PASS workflow-permission - Workflow permission changes should block merge until reviewed
+PASS workflow-untrusted-checkout - pull_request_target should not run pull request head code with privileged context

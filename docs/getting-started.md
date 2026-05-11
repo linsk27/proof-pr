@@ -6,6 +6,10 @@
 
 ![ProofPR 真实 PR 评论截图](screenshots/proofpr-demo-pr-comment.png)
 
+ProofPR 初始化输出：
+
+![ProofPR 初始化输出](screenshots/proofpr-init-output.png)
+
 ## 你应该选哪种方式？
 
 大多数用户应该选择 GitHub Action。
@@ -164,6 +168,14 @@ node packages/cli/dist/index.js scan --base origin/main --head HEAD --locale zh-
 ```bash
 proof-pr init
 ```
+
+运行 benchmark，确认规则样本仍按预期命中：
+
+```bash
+proof-pr benchmark --cases benchmarks/cases
+```
+
+![ProofPR benchmark 输出](screenshots/proofpr-benchmark-output.png)
 
 如果你的仓库更关注安全、MCP 或依赖风险，可以换成：
 

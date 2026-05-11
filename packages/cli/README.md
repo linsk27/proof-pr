@@ -1,41 +1,61 @@
 # proof-pr
 
-ProofPR 的命令行工具。
+ProofPR 是给开源维护者和工程团队使用的 PR 证据门禁。它在投入深度 review 之前，先检查 PR 是否提供了足够证据：测试、复现、截图、changelog、权限理由，以及是否触碰敏感路径、依赖、workflow、MCP 或 secret 风险。
 
-ProofPR 帮助维护者在投入深入 review 之前，先检查 PR 的证据、范围和安全风险。报告会输出风险等级、0-100 证据评分，以及 Review 门禁建议。
+它不依赖大模型，不上传代码，只基于 diff、PR 描述和配置做确定性判断。
 
-## 它什么时候运行？
+## 快速使用
 
-作为 GitHub Action 使用时，ProofPR 默认在 PR 打开、PR 分支更新、PR 重新打开时运行。普通分支 push 不会单独生成报告。
-
-报告会出现在 PR 评论区、GitHub Actions job summary 和 PR checks 状态里。
-`v0.1.5` 起还可以输出 GitHub annotations，并通过 `sarif-output` 写出 SARIF 文件。当前版本还会识别依赖大版本升级、包生命周期脚本和 `pull_request_target` workflow 触发器。
-
-## 使用
-
-可以直接通过 npm 使用：
+初始化配置和 GitHub Action：
 
 ```bash
-npx proof-pr@latest init
-npx proof-pr@latest init --preset security-strict
-npx proof-pr@latest scan --base origin/main --head HEAD
-npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
-npx proof-pr@latest scan --base origin/main --pr-body-file pr-body.md --format json
-npx proof-pr@latest benchmark --cases benchmarks/cases
+npx proof-pr@latest init --preset open-source-maintainer
 ```
 
-可用预设：`balanced`、`open-source-maintainer`、`security-strict`、`ai-generated-pr`、`mcp-security`、`dependency-careful`。
+本地扫描当前分支：
+
+```bash
+npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
+```
+
+扫描内置案例：
+
+```bash
+npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.diff --locale zh-CN
+```
+
+运行 benchmark：
+
+```bash
+npx proof-pr@latest benchmark --cases benchmarks/cases
+```
 
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.5
+- uses: linsk27/proof-pr@v0.1.7
   with:
     fail-on: high
     comment: "true"
     annotations: "true"
 ```
 
-完整文档见仓库 README：
+## 输出什么
+
+- 风险等级：`low`、`medium`、`high`。
+- 证据评分：0-100 分。
+- Review 门禁：正常 review、重点 review、先补证据、风险处理前不要合并。
+- Review 行动清单：维护者可直接执行的 checklist。
+- 可选输出：GitHub annotations、SARIF、benchmark report。
+
+## 常用预设
+
+- `open-source-maintainer`：开源仓库推荐。
+- `security-strict`：安全敏感项目。
+- `ai-generated-pr`：AI 生成 PR 较多的仓库。
+- `mcp-security`：关注 MCP / agent 配置。
+- `dependency-careful`：关注依赖和锁文件变化。
+
+完整中文文档、截图和从 0 到 1 教程见仓库 README：
 
 https://github.com/linsk27/proof-pr
