@@ -89,7 +89,7 @@ function calculateEvidenceScore(summary: ScanSummary, findings: Finding[]): Evid
       "workflow-permission-change",
       "workflow-dangerous-trigger",
       "mcp-credential-risk"
-    ].includes(finding.ruleId)
+    ].includes(finding.ruleId) || finding.ruleId.startsWith("evidence-contract:")
   );
 
   if (needsVerificationEvidence && !summary.verificationEvidence) {
@@ -137,6 +137,12 @@ function calculateEvidenceScore(summary: ScanSummary, findings: Finding[]): Evid
         25,
         "Package lifecycle scripts can run during install or publish."
       );
+    } else if (finding.ruleId.startsWith("evidence-contract:")) {
+      addDeduction(
+        "evidence-contract-missing",
+        finding.severity === "high" ? 25 : 15,
+        "Configured evidence contract was not satisfied."
+      );
     } else if (finding.ruleId === "missing-tests") {
       addDeduction(
         "missing-tests",
@@ -174,6 +180,18 @@ function collectEvidenceStrengths(summary: ScanSummary): string[] {
 
   if (summary.reproductionEvidence) {
     strengths.push("Reproduction or before/after context was found.");
+  }
+
+  if (summary.screenshotEvidence) {
+    strengths.push("Screenshot or visual evidence was found.");
+  }
+
+  if (summary.changelogEvidence) {
+    strengths.push("Changelog or migration evidence was found.");
+  }
+
+  if (summary.permissionRationaleEvidence) {
+    strengths.push("Permission rationale evidence was found.");
   }
 
   if (summary.testFilesChanged > 0) {
@@ -371,6 +389,18 @@ function reviewActionsForFinding(finding: Finding): ReviewAction[] {
         title: "Rotate and remove the exposed credential.",
         detail: "Do not merge until the secret is removed from the PR and any exposed value has been rotated.",
         priority: "high",
+        relatedRuleIds: [finding.ruleId]
+      }
+    ];
+  }
+
+  if (finding.ruleId.startsWith("evidence-contract:")) {
+    return [
+      {
+        actionId: "satisfy-evidence-contract",
+        title: "Ask for the configured evidence contract to be satisfied.",
+        detail: "The PR matches a repository-defined evidence contract but is missing required proof in the PR description.",
+        priority: finding.severity === "high" ? "high" : "medium",
         relatedRuleIds: [finding.ruleId]
       }
     ];

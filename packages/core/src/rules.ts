@@ -1,4 +1,12 @@
-import type { ChangeLine, DiffFile, Finding, ProofPRConfig, PullRequestContext, ScanSummary } from "./types.js";
+import type {
+  ChangeLine,
+  DiffFile,
+  EvidenceRequirement,
+  Finding,
+  ProofPRConfig,
+  PullRequestContext,
+  ScanSummary
+} from "./types.js";
 import { analyzeEvidence } from "./evidence.js";
 import { matchesAny, isCodePath, isDependencyManifest, isMcpConfigPath, isTestPath, isWorkflowPath } from "./path-utils.js";
 import { detectSecrets } from "./secrets.js";
@@ -45,6 +53,7 @@ export function analyzeDiffFiles(
   findings.push(...analyzeSensitivePaths(activeFiles, config));
   findings.push(...analyzeMissingTests(activeFiles, config, pullRequest));
   findings.push(...analyzePullRequestEvidence(activeFiles, pullRequest));
+  findings.push(...analyzeEvidenceContracts(activeFiles, config, pullRequest));
   findings.push(...analyzeDependencyChanges(activeFiles, config));
   findings.push(...analyzeWorkflowPermissions(activeFiles));
   findings.push(...analyzeWorkflowDangerousTriggers(activeFiles));
@@ -75,7 +84,10 @@ export function summarizeDiffFiles(
     sensitiveFilesChanged: activeFiles.filter((file) => matchesAny(file.path, config.sensitivePaths)).length,
     pullRequestDescription: evidence.descriptionState,
     verificationEvidence: evidence.verificationEvidence,
-    reproductionEvidence: evidence.reproductionEvidence
+    reproductionEvidence: evidence.reproductionEvidence,
+    screenshotEvidence: evidence.screenshotEvidence,
+    changelogEvidence: evidence.changelogEvidence,
+    permissionRationaleEvidence: evidence.permissionRationaleEvidence
   };
 }
 
@@ -206,6 +218,79 @@ function analyzePullRequestEvidence(files: DiffFile[], pullRequest?: PullRequest
   }
 
   return findings;
+}
+
+function analyzeEvidenceContracts(
+  files: DiffFile[],
+  config: ProofPRConfig,
+  pullRequest?: PullRequestContext
+): Finding[] {
+  if (config.evidence.contracts.length === 0) {
+    return [];
+  }
+
+  const evidence = analyzeEvidence(pullRequest);
+  const hasTestChanges = files.some((file) => isTestPath(file.path));
+  const findings: Finding[] = [];
+
+  for (const contract of config.evidence.contracts) {
+    const matchedFiles = files.filter((file) => matchesAny(file.path, contract.paths));
+
+    if (matchedFiles.length === 0) {
+      continue;
+    }
+
+    const missingRequirements = contract.requires.filter(
+      (requirement) => !hasEvidenceRequirement(requirement, evidence, hasTestChanges)
+    );
+
+    if (missingRequirements.length === 0) {
+      continue;
+    }
+
+    findings.push({
+      ruleId: `evidence-contract:${contract.id}`,
+      title: contract.title ?? "Evidence contract missing",
+      message: `Changed files match evidence contract "${contract.id}", but missing required evidence: ${missingRequirements
+        .map(formatEvidenceRequirement)
+        .join(", ")}.`,
+      severity: contract.severity,
+      path: matchedFiles[0]?.path,
+      evidence: [
+        `matched files: ${matchedFiles.slice(0, 5).map((file) => file.path).join(", ")}`,
+        `missing evidence: ${missingRequirements.map(formatEvidenceRequirement).join(", ")}`
+      ],
+      recommendation:
+        contract.recommendation ??
+        "Ask the contributor to add the missing evidence before spending deep review time."
+    });
+  }
+
+  return findings;
+}
+
+function hasEvidenceRequirement(
+  requirement: EvidenceRequirement,
+  evidence: ReturnType<typeof analyzeEvidence>,
+  hasTestChanges: boolean
+): boolean {
+  if (requirement === "verification") {
+    return evidence.verificationEvidence || hasTestChanges;
+  }
+
+  if (requirement === "reproduction") {
+    return evidence.reproductionEvidence;
+  }
+
+  if (requirement === "screenshot") {
+    return evidence.screenshotEvidence;
+  }
+
+  if (requirement === "changelog") {
+    return evidence.changelogEvidence;
+  }
+
+  return evidence.permissionRationaleEvidence;
 }
 
 function analyzeDependencyChanges(files: DiffFile[], config: ProofPRConfig): Finding[] {
@@ -480,6 +565,10 @@ function analyzeMcpConfigs(files: DiffFile[]): Finding[] {
 function formatEvidenceLine(line: ChangeLine): string {
   const value = line.value.trim();
   return line.lineNumber ? `line ${line.lineNumber}: ${value}` : value;
+}
+
+function formatEvidenceRequirement(requirement: EvidenceRequirement): string {
+  return requirement;
 }
 
 function sensitivePathSeverity(path: string): "medium" | "high" {

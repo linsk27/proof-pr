@@ -21,6 +21,7 @@ npx proof-pr@latest init --preset security-strict
 npx proof-pr@latest scan --base origin/main --head HEAD
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 npx proof-pr@latest scan --base origin/main --pr-body-file pr-body.md --format json
+npx proof-pr@latest benchmark --cases benchmarks/cases
 ```
 
 可用预设：`balanced`、`open-source-maintainer`、`security-strict`、`ai-generated-pr`、`mcp-security`、`dependency-careful`。

@@ -1,5 +1,12 @@
 # 变更记录
 
+## Unreleased
+
+- 新增 Evidence Contract：仓库可以用 `.proofpr.yml` 定义路径级证据要求，例如 UI 改动必须有截图、workflow 改动必须有权限理由。
+- 新增 `benchmark` CLI 命令和 `pnpm benchmark` 脚本，用样本 case 验证风险等级、Review 门禁和 finding 命中结果。
+- 新增 benchmark 样本和 UI 改动案例，帮助公开讨论规则命中、误报和漏报。
+- 报告证据概览新增截图、changelog / 迁移说明、权限理由等证据信号。
+
 ## 0.1.6 - 2026-05-11
 
 - 新增 `dependency-major-upgrade`：识别依赖跨大版本升级。

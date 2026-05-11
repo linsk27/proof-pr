@@ -116,6 +116,17 @@ dependencies:
   flagMajorUpgrades: true
   flagLifecycleScripts: true
 
+evidence:
+  contracts:
+    - id: ui-screenshot
+      paths:
+        - "src/components/**"
+        - "app/**"
+      requires:
+        - screenshot
+        - verification
+      severity: medium
+
 comment:
   enabled: true
 ```

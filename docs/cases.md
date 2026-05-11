@@ -27,6 +27,17 @@ npx proof-pr@latest scan --diff-file examples/cases/missing-tests.diff --locale 
 | 依赖大版本升级 | `examples/cases/dependency-major-upgrade.diff` | `dependency-major-upgrade`，建议核查 changelog、迁移说明和测试覆盖。 |
 | 包生命周期脚本 | `examples/cases/package-lifecycle-script.diff` | `dependency-lifecycle-script`，建议审查安装或发布阶段是否会执行非预期代码。 |
 | 高风险 workflow 触发器 | `examples/cases/workflow-dangerous-trigger.diff` | `workflow-dangerous-trigger`，建议审查 `pull_request_target` 是否会用高权限执行不可信代码。 |
+| UI 改动 | `examples/cases/ui-change.diff` | 可配合 Evidence Contract 验证“UI 改动必须有截图和验证说明”。 |
+
+## Benchmark
+
+项目内置 benchmark case，用来验证规则是否按预期命中：
+
+```bash
+pnpm benchmark
+```
+
+当前 benchmark 会覆盖依赖大版本升级、包生命周期脚本、`pull_request_target` 和 Evidence Contract 满足/不满足两种场景。
 
 ## 推荐 PR 描述模板
 

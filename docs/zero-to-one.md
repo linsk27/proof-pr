@@ -82,6 +82,20 @@ preset: dependency-careful
 preset: mcp-security
 ```
 
+如果你想让仓库自己定义证据要求，可以加 Evidence Contract。比如 UI 改动必须有截图和验证说明：
+
+```yaml
+evidence:
+  contracts:
+    - id: ui-screenshot
+      paths:
+        - "src/components/**"
+      requires:
+        - screenshot
+        - verification
+      severity: medium
+```
+
 ## 第 3 步：打开一个测试 PR
 
 你可以在测试分支里做一个很小的改动，比如修改一个源码文件但不加测试。打开 PR 后，ProofPR 会在这些事件触发：

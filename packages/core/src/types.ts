@@ -18,6 +18,22 @@ export type ReviewDecision = "ready" | "review-carefully" | "needs-evidence" | "
 
 export type ReviewActionPriority = "low" | "medium" | "high";
 
+export type EvidenceRequirement =
+  | "verification"
+  | "reproduction"
+  | "screenshot"
+  | "changelog"
+  | "permission-rationale";
+
+export interface EvidenceContract {
+  id: string;
+  title?: string;
+  paths: string[];
+  requires: EvidenceRequirement[];
+  severity: FindingSeverity;
+  recommendation?: string;
+}
+
 export interface ProofPRConfig {
   preset: ConfigPreset;
   locale: ReportLocale;
@@ -35,6 +51,9 @@ export interface ProofPRConfig {
     flagNewPackages: boolean;
     flagMajorUpgrades: boolean;
     flagLifecycleScripts: boolean;
+  };
+  evidence: {
+    contracts: EvidenceContract[];
   };
   comment: {
     enabled: boolean;
@@ -81,6 +100,9 @@ export interface ScanSummary {
   pullRequestDescription: "unavailable" | "missing" | "thin" | "present";
   verificationEvidence: boolean;
   reproductionEvidence: boolean;
+  screenshotEvidence: boolean;
+  changelogEvidence: boolean;
+  permissionRationaleEvidence: boolean;
 }
 
 export interface EvidenceScoreDetail {

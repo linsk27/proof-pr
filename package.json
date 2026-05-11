@@ -32,6 +32,7 @@
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "typecheck": "pnpm --filter @proof-pr/core build && pnpm -r typecheck",
+    "benchmark": "pnpm --filter proof-pr build && node packages/cli/dist/index.js benchmark --cases benchmarks/cases",
     "pack:cli": "pnpm --filter proof-pr exec npm pack --dry-run",
     "release:check": "pnpm typecheck && pnpm test && pnpm build && pnpm pack:cli"
   },

@@ -1,0 +1,27 @@
+{
+  "id": "evidence-contract-missing",
+  "title": "UI changes can require screenshot evidence through an evidence contract",
+  "diffFile": "../../examples/cases/ui-change.diff",
+  "config": {
+    "evidence": {
+      "contracts": [
+        {
+          "id": "ui-screenshot",
+          "title": "UI changes need screenshots",
+          "paths": ["src/components/**"],
+          "requires": ["screenshot", "verification"],
+          "severity": "medium"
+        }
+      ]
+    }
+  },
+  "pullRequest": {
+    "title": "Update button styling",
+    "body": "This updates the primary button style and spacing so the layout is easier to scan."
+  },
+  "expect": {
+    "risk": "medium",
+    "reviewDecision": "needs-evidence",
+    "findings": ["evidence-contract:ui-screenshot"]
+  }
+}

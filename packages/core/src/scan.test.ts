@@ -133,6 +133,102 @@ index 0000000..1111111 100644
     expect(result.findings.some((finding) => finding.ruleId === "missing-tests")).toBe(false);
   });
 
+  it("flags repository-defined evidence contracts when required evidence is missing", () => {
+    const result = scanDiff(
+      `diff --git a/src/components/Button.tsx b/src/components/Button.tsx
+index 0000000..1111111 100644
+--- a/src/components/Button.tsx
++++ b/src/components/Button.tsx
+@@ -1 +1,2 @@
+ export function Button() { return null; }
++export function PrimaryButton() { return null; }
+`,
+      {
+        config: {
+          evidence: {
+            contracts: [
+              {
+                id: "ui-screenshot",
+                title: "UI changes need screenshots",
+                paths: ["src/components/**"],
+                requires: ["screenshot", "verification"],
+                severity: "medium"
+              }
+            ]
+          }
+        },
+        pullRequest: {
+          title: "Update button",
+          body: "This updates the primary button style and spacing so the layout is easier to scan."
+        }
+      }
+    );
+
+    expect(result.findings.some((finding) => finding.ruleId === "evidence-contract:ui-screenshot")).toBe(true);
+    expect(result.summary.screenshotEvidence).toBe(false);
+    expect(result.reviewPlan.actionItems.some((action) => action.actionId === "satisfy-evidence-contract")).toBe(true);
+  });
+
+  it("accepts repository-defined evidence contracts when PR evidence is present", () => {
+    const result = scanDiff(
+      `diff --git a/src/components/Button.tsx b/src/components/Button.tsx
+index 0000000..1111111 100644
+--- a/src/components/Button.tsx
++++ b/src/components/Button.tsx
+@@ -1 +1,2 @@
+ export function Button() { return null; }
++export function PrimaryButton() { return null; }
+`,
+      {
+        config: {
+          evidence: {
+            contracts: [
+              {
+                id: "ui-screenshot",
+                paths: ["src/components/**"],
+                requires: ["screenshot", "verification"],
+                severity: "medium"
+              }
+            ]
+          }
+        },
+        pullRequest: {
+          title: "Update button",
+          body: "Verified with pnpm test. Screenshot attached with before/after UI comparison."
+        }
+      }
+    );
+
+    expect(result.findings.some((finding) => finding.ruleId === "evidence-contract:ui-screenshot")).toBe(false);
+    expect(result.summary.screenshotEvidence).toBe(true);
+    expect(result.summary.verificationEvidence).toBe(true);
+  });
+
+  it("uses security-strict evidence contracts for workflow changes", () => {
+    const result = scanDiff(
+      `diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 0000000..1111111 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -1 +1,2 @@
+ name: CI
++permissions: write-all
+`,
+      {
+        config: {
+          preset: "security-strict"
+        },
+        pullRequest: {
+          title: "Update CI",
+          body: "Update CI workflow."
+        }
+      }
+    );
+
+    expect(result.findings.some((finding) => finding.ruleId === "evidence-contract:workflow-permission-rationale")).toBe(true);
+    expect(result.summary.permissionRationaleEvidence).toBe(false);
+  });
+
   it("flags missing PR context for sensitive changes", () => {
     const result = scanDiff(
       `diff --git a/.github/workflows/release.yml b/.github/workflows/release.yml

@@ -113,6 +113,7 @@ preset: open-source-maintainer
 - `missing-tests`：源码路径变化但没有测试文件变化，也没有 PR 验证说明时触发。
 - `thin-pr-description`：PR body 为空或太短时触发。
 - `missing-reproduction-context`：缺少复现、预期/实际行为、before/after 说明时触发。
+- `evidence-contract:*`：仓库自定义证据契约未满足时触发。
 - `secret-detected:*`：用正则检测常见 API key、GitHub token、数据库连接串和 secret 赋值。
 - `dependency-added`：检查依赖清单中的新增依赖或依赖变化。
 - `dependency-major-upgrade`：检查依赖是否跨越大版本边界。
@@ -127,6 +128,32 @@ preset: open-source-maintainer
 - 变更文件数大于等于 20，或变更行数大于等于 800：触发 `high`。
 
 敏感路径、依赖、workflow 权限、MCP 和 secret 规则会基于路径、added line、正则和 glob 做确定性匹配。它们不调用大模型，也不会猜测作者是谁。
+
+## Evidence Contract
+
+Evidence Contract 用来解决“固定规则不够贴合我的仓库”的问题。维护者可以在 `.proofpr.yml` 中声明某类路径必须提供哪些证据：
+
+```yaml
+evidence:
+  contracts:
+    - id: ui-screenshot
+      paths:
+        - "src/components/**"
+      requires:
+        - screenshot
+        - verification
+      severity: medium
+```
+
+当 PR 命中这些路径时，ProofPR 会在 PR 标题和正文中寻找对应证据信号：
+
+- `verification`：测试、CI、手动验证，或测试文件变化。
+- `reproduction`：复现步骤、before/after、预期/实际行为。
+- `screenshot`：截图、录屏、效果图、前后对比。
+- `changelog`：changelog、release notes、迁移说明、破坏性变更说明。
+- `permission-rationale`：最小权限、写权限、OIDC、不可信 PR 或 token 权限说明。
+
+这让 ProofPR 更像“仓库维护策略执行器”，而不是只靠固定规则猜测风险。
 
 ## 风险评分
 
@@ -158,6 +185,7 @@ ProofPR 会从 100 分开始，根据缺失的证据和触发的规则扣分：
 - 包生命周期脚本风险：扣 25 分。
 - workflow 权限或 MCP 配置风险：扣 25 分。
 - `pull_request_target` 高权限触发器：扣 30 分。
+- Evidence Contract 未满足：扣 15-25 分。
 - 疑似提交 secret：扣 40 分。
 
 分数会映射为四档：
@@ -241,6 +269,18 @@ GitHub Action 的 PR 评论里带有隐藏 marker：
 - 更适合作为 CI 门禁。
 
 后续可以加入可选 AI summary，但核心扫描会继续保持确定性。
+
+## Benchmark 和准确性边界
+
+ProofPR 的准确性不是“发现代码 bug 的准确率”，而是“规则是否按维护者定义的证据策略稳定命中”。因此项目提供 benchmark：
+
+```bash
+pnpm benchmark
+```
+
+Benchmark case 会声明输入 diff、PR 描述、配置和期望 finding。命令会输出通过/失败结果，帮助维护者讨论误报、漏报和规则调整。
+
+这也是 ProofPR 当前更诚实的边界：它能提高 PR triage 的一致性，但不能替代人工代码 review，也不能保证业务逻辑正确。
 
 ## 项目价值
 

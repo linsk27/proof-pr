@@ -15,6 +15,8 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 - GitHub Check annotations：在 workflow annotations / PR 文件视图标出风险 finding。
 - SARIF / Code Scanning：CLI 可输出 SARIF，Action 可写出 `sarif-output`。
 - 真实案例库：提供可复现的 diff 样例。
+- Evidence Contract：仓库可以定义路径级证据要求。
+- Benchmark：用样本 case 验证规则命中、风险等级和 Review 门禁。
 - Marketplace 准备：补充 action branding、安装说明和上架文案。
 - 内置规则：改动规模、敏感路径、缺少测试、PR 描述、复现上下文、secret、依赖、大版本升级、包生命周期脚本、workflow 权限、`pull_request_target`、MCP 配置。
 
@@ -34,13 +36,16 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 
 ## 中期方向
 
-1. Issue 质量检查
+1. Benchmark 扩充
+   继续补充真实/模拟 PR 样本，标注预期 finding、误报和漏报原因。
+
+2. Issue 质量检查
    扫描 issue 是否包含复现步骤、环境信息、预期/实际结果。
 
-2. 规则插件系统
+3. 规则插件系统
    允许项目自定义组织内部规则。
 
-3. 可选 AI 摘要
+4. 可选 AI 摘要
    核心评分继续保持确定性，AI 只做可选摘要和措辞优化。
 
 ## 与其他工具的区别

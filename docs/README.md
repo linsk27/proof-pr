@@ -8,14 +8,15 @@
 2. [快速开始](getting-started.md)
 3. [配置说明](configuration.md)
 4. [规则说明](rules.md)
-5. [真实案例库](cases.md)
-6. [实现原理](how-it-works.md)
+5. [Benchmark 和准确性边界](../benchmarks/README.md)
+6. [真实案例库](cases.md)
+7. [实现原理](how-it-works.md)
 
 ## 当前发布
 
 - GitHub Release：[`v0.1.6`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.6)
 - npm：[`proof-pr@0.1.6`](https://www.npmjs.com/package/proof-pr)
-- 核心能力：Review Plan、规则预设、GitHub annotations、SARIF、真实案例库、依赖大版本升级检查、包生命周期脚本检查、Marketplace 准备材料。
+- 核心能力：Review Plan、规则预设、Evidence Contract、GitHub annotations、SARIF、benchmark、真实案例库、依赖大版本升级检查、包生命周期脚本检查、Marketplace 准备材料。
 
 ## 图示和截图
 
@@ -50,5 +51,7 @@ ProofPR 是一个给开源维护者使用的 PR 证据门禁。它关注的是�
 - 0-100 证据评分。
 - Review 门禁建议。
 - Review 行动清单。
+- Evidence Contract。
+- Benchmark case。
 - GitHub annotations。
 - SARIF / Code Scanning 输出。

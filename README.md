@@ -15,7 +15,7 @@ ProofPR 是给开源维护者使用的 **PR 证据门禁**。它在 Pull Request
 
 - GitHub Release：[`v0.1.6`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.6)
 - npm：[`proof-pr@0.1.6`](https://www.npmjs.com/package/proof-pr)
-- 主要能力：Review Plan、规则预设、GitHub annotations、SARIF 输出、真实案例库、依赖大版本升级、包生命周期脚本、`pull_request_target` 风险检测。
+- 主要能力：Review Plan、规则预设、Evidence Contract、GitHub annotations、SARIF 输出、benchmark、真实案例库、依赖大版本升级、包生命周期脚本、`pull_request_target` 风险检测。
 
 ## 30 秒安装
 
@@ -85,6 +85,7 @@ CLI 输出截图来自本机 `AI-Vue3-python-flask-Blog` 项目：
 | 改动规模 | 判断 PR 是否过大，是否应该拆分。 |
 | 测试和验证证据 | 发现“改了代码但没有测试、CI、截图或手动验证说明”的 PR。 |
 | PR 描述质量 | 检查是否缺少动机、复现步骤、before/after、预期/实际结果。 |
+| Evidence Contract | 按仓库自定义规则要求截图、验证、changelog、权限理由等证据。 |
 | 敏感路径 | 标记 `.github/workflows/**`、`.env*`、`mcp*.json`、依赖文件等高关注区域。 |
 | secrets | 检测疑似 API key、token、数据库连接串。 |
 | 依赖变化 | 标记新增依赖、依赖大版本升级和 lockfile 相关风险。 |
@@ -123,6 +124,7 @@ npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 ```bash
 npx proof-pr@latest scan --diff-file examples/cases/mcp-config-risk.diff --locale zh-CN
 npx proof-pr@latest scan --diff-file examples/cases/secret-leak.diff --format sarif
+npx proof-pr@latest benchmark --cases benchmarks/cases
 ```
 
 初始化配置：
@@ -149,6 +151,7 @@ npx proof-pr@latest init --preset security-strict
 - [快速开始](docs/getting-started.md)
 - [配置说明](docs/configuration.md)
 - [规则说明](docs/rules.md)
+- [Benchmark](benchmarks/README.md)
 - [真实案例库](docs/cases.md)
 - [实现原理](docs/how-it-works.md)
 - [SARIF / Code Scanning](docs/sarif-code-scanning.md)
@@ -158,7 +161,7 @@ npx proof-pr@latest init --preset security-strict
 
 ## 现在还差什么
 
-项目已经具备可用的 Action、CLI、npm 包、Release、annotations、SARIF、案例库和中文文档。下一步更像“产品化”和“传播”工作：
+项目已经具备可用的 Action、CLI、npm 包、Release、annotations、SARIF、Evidence Contract、benchmark、案例库和中文文档。下一步更像“产品化”和“传播”工作：
 
 - 刷新一组 `v0.1.6` 的真实截图，展示 annotations 和 Code Scanning。
 - 上架 GitHub Marketplace。
@@ -177,6 +180,7 @@ GitHub Action、Pull Request、PR review、PR triage、code review、maintainer 
 pnpm install
 pnpm typecheck
 pnpm test
+pnpm benchmark
 pnpm build
 pnpm release:check
 ```

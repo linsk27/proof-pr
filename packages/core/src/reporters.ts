@@ -81,6 +81,9 @@ function renderEnglishMarkdownReport(result: ScanResult): string {
     `- PR description: ${result.summary.pullRequestDescription}`,
     `- Verification evidence: ${formatBoolean(result.summary.verificationEvidence)}`,
     `- Reproduction context: ${formatBoolean(result.summary.reproductionEvidence)}`,
+    `- Screenshot evidence: ${formatBoolean(result.summary.screenshotEvidence)}`,
+    `- Changelog evidence: ${formatBoolean(result.summary.changelogEvidence)}`,
+    `- Permission rationale: ${formatBoolean(result.summary.permissionRationaleEvidence)}`,
     ""
   ];
 
@@ -127,6 +130,9 @@ function renderChineseMarkdownReport(result: ScanResult): string {
     `- PR 描述质量：${translateDescriptionState(result.summary.pullRequestDescription)}`,
     `- 验证证据：${formatChineseBoolean(result.summary.verificationEvidence)}`,
     `- 复现上下文：${formatChineseBoolean(result.summary.reproductionEvidence)}`,
+    `- 截图或视觉证据：${formatChineseBoolean(result.summary.screenshotEvidence)}`,
+    `- Changelog 或迁移证据：${formatChineseBoolean(result.summary.changelogEvidence)}`,
+    `- 权限理由证据：${formatChineseBoolean(result.summary.permissionRationaleEvidence)}`,
     ""
   ];
 
@@ -272,6 +278,12 @@ function maintainerFocus(findings: Finding[], locale: ReportLocale): string[] {
           ? "轮换任何可能暴露的凭证，并在移除 secret 前阻止合并。"
           : "Rotate any exposed credential and block the PR until secrets are removed."
       );
+    } else if (finding.ruleId.startsWith("evidence-contract:")) {
+      focus.add(
+        locale === "zh-CN"
+          ? "先要求贡献者补齐仓库定义的证据契约，再投入深度 review。"
+          : "Ask the contributor to satisfy the repository-defined evidence contract before deep review."
+      );
     } else if (finding.ruleId === "workflow-permission-change") {
       focus.add(
         locale === "zh-CN"
@@ -341,6 +353,14 @@ function maintainerFocus(findings: Finding[], locale: ReportLocale): string[] {
 }
 
 function translateFinding(finding: Finding): Pick<Finding, "title" | "message" | "recommendation"> {
+  if (finding.ruleId.startsWith("evidence-contract:")) {
+    return {
+      title: "证据契约未满足",
+      message: "该 PR 命中了仓库自定义证据契约，但 PR 描述中缺少必需证据。",
+      recommendation: "建议要求贡献者补齐缺失证据后再深入 review。"
+    };
+  }
+
   if (finding.ruleId === "change-size") {
     const files = finding.evidence?.find((item) => item.startsWith("files: "))?.replace("files: ", "");
     const lines = finding.evidence?.find((item) => item.startsWith("changed lines: "))?.replace("changed lines: ", "");
@@ -448,8 +468,15 @@ function translateFinding(finding: Finding): Pick<Finding, "title" | "message" |
 
 function translateEvidence(item: string): string {
   return item
+    .replace("matched files: ", "命中文件：")
+    .replace("missing evidence: ", "缺失证据：")
     .replace("files: ", "文件数：")
     .replace("changed lines: ", "变更行数：")
+    .replace(/\bverification\b/g, "验证")
+    .replace(/\breproduction\b/g, "复现")
+    .replace(/\bscreenshot\b/g, "截图")
+    .replace(/\bchangelog\b/g, "变更日志")
+    .replace(/\bpermission-rationale\b/g, "权限理由")
     .replace("line ", "第 ")
     .replace(": ", " 行：");
 }
@@ -511,6 +538,7 @@ function translateReviewActionTitle(actionId: string, fallback: string): string 
     "ask-for-evidence-before-review": "深入 review 前先要求补充证据",
     "review-with-focus": "带着重点清单进行 review",
     "normal-review": "进入常规 review",
+    "satisfy-evidence-contract": "要求补齐证据契约",
     "improve-pr-description": "要求补充更清楚的 PR 描述",
     "add-verification-evidence": "要求补充测试或手动验证证据",
     "add-reproduction-context": "要求补充复现或 before/after 上下文",
@@ -532,6 +560,7 @@ function translateReviewActionDetail(actionId: string, fallback: string): string
     "ask-for-evidence-before-review": "要求测试、截图、复现步骤或更清楚的 PR 描述，再投入详细 review。",
     "review-with-focus": "优先使用下面的风险发现和重点文件作为第一轮 review map。",
     "normal-review": "当前证据足够支撑维护者进行常规 review。",
+    "satisfy-evidence-contract": "该 PR 命中了仓库自定义证据契约，但 PR 描述里缺少必需证据。",
     "improve-pr-description": "贡献者应说明为什么改、改了什么、如何验证，以及是否有发布或兼容性风险。",
     "add-verification-evidence": "要求测试输出、CI 链接、截图，或简短的手动验证说明。",
     "add-reproduction-context": "PR 应包含复现步骤、预期/实际行为，或相关 before/after 截图。",
@@ -548,6 +577,10 @@ function translateReviewActionDetail(actionId: string, fallback: string): string
 }
 
 function translateFocusReason(reasonId: string, fallback: string): string {
+  if (reasonId.startsWith("evidence-contract:")) {
+    return "仓库自定义证据契约未满足";
+  }
+
   return {
     "change-size": "review 面积相关 finding",
     "sensitive-path": "敏感路径发生变更",
@@ -566,6 +599,9 @@ function translateScoreMessage(message: string): string {
     "PR description provides review context.": "PR 描述提供了 review 上下文。",
     "Verification evidence was found.": "检测到测试或手动验证证据。",
     "Reproduction or before/after context was found.": "检测到复现步骤或 before/after 上下文。",
+    "Screenshot or visual evidence was found.": "检测到截图或视觉证据。",
+    "Changelog or migration evidence was found.": "检测到 changelog 或迁移证据。",
+    "Permission rationale evidence was found.": "检测到权限理由证据。",
     "Test files changed with the PR.": "PR 同时修改了测试文件。",
     "No configured sensitive files changed.": "没有改动已配置的敏感文件。"
   }[message] ?? message;
@@ -589,6 +625,7 @@ function translateDeduction(reasonId: string, fallback: string): string {
     "dependency-major-upgrade": "依赖发生大版本升级。",
     "dependency-lifecycle-script": "包生命周期脚本可能在安装或发布阶段执行代码。",
     "workflow-dangerous-trigger": "pull_request_target workflow 需要重点审查高权限触发路径。",
+    "evidence-contract-missing": "仓库自定义证据契约未满足。",
     "missing-tests": "代码发生变更，但缺少测试变更或验证说明。"
   }[reasonId] ?? fallback;
 }

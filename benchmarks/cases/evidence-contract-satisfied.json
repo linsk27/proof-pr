@@ -1,0 +1,24 @@
+{
+  "id": "evidence-contract-satisfied",
+  "title": "UI evidence contracts should pass when screenshot and verification are present",
+  "diffFile": "../../examples/cases/ui-change.diff",
+  "config": {
+    "evidence": {
+      "contracts": [
+        {
+          "id": "ui-screenshot",
+          "paths": ["src/components/**"],
+          "requires": ["screenshot", "verification"],
+          "severity": "medium"
+        }
+      ]
+    }
+  },
+  "pullRequest": {
+    "title": "Update button styling",
+    "body": "Verified with pnpm test. Screenshot attached with before/after UI comparison."
+  },
+  "expect": {
+    "absentFindings": ["evidence-contract:ui-screenshot"]
+  }
+}

@@ -32,6 +32,18 @@ dependencies:
   flagMajorUpgrades: true
   flagLifecycleScripts: true
 
+evidence:
+  contracts:
+    - id: ui-screenshot
+      title: UI changes need screenshots
+      paths:
+        - "src/components/**"
+        - "app/**"
+      requires:
+        - screenshot
+        - verification
+      severity: medium
+
 comment:
   enabled: true
 ```
@@ -63,6 +75,8 @@ proof-pr scan --base origin/main --head HEAD --locale zh-CN
 | `ai-generated-pr` | AI 生成 PR 较多的仓库，重点要求验证证据和清晰 PR 描述。 |
 | `mcp-security` | 关注 MCP、Cursor、VS Code、本地 agent 配置和凭证风险。 |
 | `dependency-careful` | 关注依赖清单、锁文件和多语言包管理配置变化。 |
+
+`security-strict` 会内置 workflow 权限理由证据契约。`dependency-careful` 会内置依赖变更证据契约。
 
 示例：
 
@@ -98,6 +112,37 @@ preset: security-strict
 - `flagNewPackages`：标记新增依赖或依赖条目变化。
 - `flagMajorUpgrades`：标记跨大版本升级，例如 `18.x` 到 `19.x`。
 - `flagLifecycleScripts`：标记 `preinstall`、`postinstall`、`prepare` 等安装/发布阶段脚本。
+
+## `evidence.contracts`
+
+Evidence Contract 是仓库自定义证据契约。它不会判断代码 bug，而是要求命中特定路径的 PR 必须在 PR 描述里提供指定证据。
+
+示例：UI 改动必须有截图和验证说明。
+
+```yaml
+evidence:
+  contracts:
+    - id: ui-screenshot
+      title: UI changes need screenshots
+      paths:
+        - "src/components/**"
+        - "app/**"
+      requires:
+        - screenshot
+        - verification
+      severity: medium
+      recommendation: "请补充 before/after 截图和测试命令。"
+```
+
+可用 `requires`：
+
+| 值 | ProofPR 会寻找什么 |
+| --- | --- |
+| `verification` | 测试命令、CI、手动验证、测试文件变更。 |
+| `reproduction` | 复现步骤、before/after、预期/实际行为。 |
+| `screenshot` | 截图、录屏、效果图、前后对比图。 |
+| `changelog` | changelog、release notes、迁移说明、破坏性变更说明。 |
+| `permission-rationale` | 权限理由、最小权限、OIDC、写权限、不可信 PR 说明。 |
 
 ## `comment`
 

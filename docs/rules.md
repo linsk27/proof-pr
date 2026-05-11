@@ -22,6 +22,26 @@ ProofPR 的规则只回答一个维护者真正关心的问题：在深入 revie
 
 当 PR 改动较大或涉及敏感文件，但没有提到复现步骤、预期行为、实际行为或 before/after 信息时触发。
 
+## `evidence-contract:*`
+
+当 `.proofpr.yml` 中配置的 Evidence Contract 被命中，但 PR 描述缺少必需证据时触发。
+
+例如：
+
+```yaml
+evidence:
+  contracts:
+    - id: ui-screenshot
+      paths:
+        - "src/components/**"
+      requires:
+        - screenshot
+        - verification
+      severity: medium
+```
+
+如果 PR 修改 `src/components/Button.tsx`，但正文没有截图或验证说明，就会触发 `evidence-contract:ui-screenshot`。
+
 ## `secret-detected:*`
 
 在新增代码行中标记常见硬编码凭证。报告输出会对疑似敏感值做脱敏。

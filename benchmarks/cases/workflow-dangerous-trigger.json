@@ -1,0 +1,10 @@
+{
+  "id": "workflow-dangerous-trigger",
+  "title": "pull_request_target should be treated as privileged workflow risk",
+  "diffFile": "../../examples/cases/workflow-dangerous-trigger.diff",
+  "expect": {
+    "risk": "high",
+    "reviewDecision": "block-merge",
+    "findings": ["workflow-dangerous-trigger"]
+  }
+}

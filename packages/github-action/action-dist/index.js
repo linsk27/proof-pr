@@ -50434,7 +50434,15 @@ function preprocess(fn, schema) {
 
 
 const riskLevelSchema = schemas_enum(["low", "medium", "high"]);
+const findingSeveritySchema = schemas_enum(["info", "low", "medium", "high"]);
 const localeSchema = schemas_enum(["en", "zh-CN"]);
+const evidenceRequirementSchema = schemas_enum([
+    "verification",
+    "reproduction",
+    "screenshot",
+    "changelog",
+    "permission-rationale"
+]);
 const configPresetSchema = schemas_enum([
     "balanced",
     "open-source-maintainer",
@@ -50472,6 +50480,38 @@ const DEFAULT_SENSITIVE_PATHS = [
     "go.sum"
 ];
 const DEFAULT_TEST_PATHS = ["src/**", "packages/**/src/**", "app/**", "lib/**"];
+const WORKFLOW_EVIDENCE_CONTRACTS = [
+    {
+        id: "workflow-permission-rationale",
+        title: "Workflow changes need a permission rationale",
+        paths: [".github/workflows/**", ".github/actions/**"],
+        requires: ["verification", "permission-rationale"],
+        severity: "high",
+        recommendation: "Explain why the workflow needs this trigger or permission, and include verification that untrusted PR code cannot reach privileged tokens."
+    }
+];
+const DEPENDENCY_EVIDENCE_CONTRACTS = [
+    {
+        id: "dependency-upgrade-evidence",
+        title: "Dependency changes need upgrade evidence",
+        paths: [
+            "package.json",
+            "**/package.json",
+            "pnpm-lock.yaml",
+            "package-lock.json",
+            "yarn.lock",
+            "requirements.txt",
+            "**/requirements.txt",
+            "pyproject.toml",
+            "**/pyproject.toml",
+            "go.mod",
+            "**/go.mod"
+        ],
+        requires: ["verification", "changelog"],
+        severity: "medium",
+        recommendation: "Link changelog or migration notes and include the test command or CI evidence used to validate the dependency change."
+    }
+];
 const PRESET_DEFAULTS = {
     balanced: {},
     "open-source-maintainer": {
@@ -50502,6 +50542,9 @@ const PRESET_DEFAULTS = {
         requireTests: {
             enabled: true,
             paths: ["src/**", "packages/**/src/**", "app/**", "lib/**", "server/**", "api/**"]
+        },
+        evidence: {
+            contracts: WORKFLOW_EVIDENCE_CONTRACTS
         }
     },
     "ai-generated-pr": {
@@ -50540,9 +50583,20 @@ const PRESET_DEFAULTS = {
         requireTests: {
             enabled: true,
             paths: DEFAULT_TEST_PATHS
+        },
+        evidence: {
+            contracts: DEPENDENCY_EVIDENCE_CONTRACTS
         }
     }
 };
+const evidenceContractSchema = object({
+    id: schemas_string().min(1),
+    title: schemas_string().min(1).optional(),
+    paths: array(schemas_string().min(1)).min(1),
+    requires: array(evidenceRequirementSchema).min(1),
+    severity: findingSeveritySchema.default("medium"),
+    recommendation: schemas_string().min(1).optional()
+});
 const configSchema = object({
     preset: configPresetSchema.default("balanced"),
     locale: localeSchema.default("en"),
@@ -50561,6 +50615,10 @@ const configSchema = object({
         flagLifecycleScripts: schemas_boolean().default(true)
     })
         .default({ flagNewPackages: true, flagMajorUpgrades: true, flagLifecycleScripts: true }),
+    evidence: object({
+        contracts: array(evidenceContractSchema).default([])
+    })
+        .default({ contracts: [] }),
     comment: object({ enabled: schemas_boolean().default(true) }).default({ enabled: true })
 });
 function parseConfig(input) {
@@ -50698,6 +50756,9 @@ function renderEnglishMarkdownReport(result) {
         `- PR description: ${result.summary.pullRequestDescription}`,
         `- Verification evidence: ${formatBoolean(result.summary.verificationEvidence)}`,
         `- Reproduction context: ${formatBoolean(result.summary.reproductionEvidence)}`,
+        `- Screenshot evidence: ${formatBoolean(result.summary.screenshotEvidence)}`,
+        `- Changelog evidence: ${formatBoolean(result.summary.changelogEvidence)}`,
+        `- Permission rationale: ${formatBoolean(result.summary.permissionRationaleEvidence)}`,
         ""
     ];
     appendEvidenceScoreSection(lines, result, "en");
@@ -50732,6 +50793,9 @@ function renderChineseMarkdownReport(result) {
         `- PR 描述质量：${translateDescriptionState(result.summary.pullRequestDescription)}`,
         `- 验证证据：${formatChineseBoolean(result.summary.verificationEvidence)}`,
         `- 复现上下文：${formatChineseBoolean(result.summary.reproductionEvidence)}`,
+        `- 截图或视觉证据：${formatChineseBoolean(result.summary.screenshotEvidence)}`,
+        `- Changelog 或迁移证据：${formatChineseBoolean(result.summary.changelogEvidence)}`,
+        `- 权限理由证据：${formatChineseBoolean(result.summary.permissionRationaleEvidence)}`,
         ""
     ];
     appendEvidenceScoreSection(lines, result, "zh-CN");
@@ -50842,6 +50906,11 @@ function maintainerFocus(findings, locale) {
                 ? "轮换任何可能暴露的凭证，并在移除 secret 前阻止合并。"
                 : "Rotate any exposed credential and block the PR until secrets are removed.");
         }
+        else if (finding.ruleId.startsWith("evidence-contract:")) {
+            focus.add(locale === "zh-CN"
+                ? "先要求贡献者补齐仓库定义的证据契约，再投入深度 review。"
+                : "Ask the contributor to satisfy the repository-defined evidence contract before deep review.");
+        }
         else if (finding.ruleId === "workflow-permission-change") {
             focus.add(locale === "zh-CN"
                 ? "合并前重点审查 GitHub Actions 权限。"
@@ -50896,6 +50965,13 @@ function maintainerFocus(findings, locale) {
     return [...focus];
 }
 function translateFinding(finding) {
+    if (finding.ruleId.startsWith("evidence-contract:")) {
+        return {
+            title: "证据契约未满足",
+            message: "该 PR 命中了仓库自定义证据契约，但 PR 描述中缺少必需证据。",
+            recommendation: "建议要求贡献者补齐缺失证据后再深入 review。"
+        };
+    }
     if (finding.ruleId === "change-size") {
         const files = finding.evidence?.find((item) => item.startsWith("files: "))?.replace("files: ", "");
         const lines = finding.evidence?.find((item) => item.startsWith("changed lines: "))?.replace("changed lines: ", "");
@@ -50989,8 +51065,15 @@ function translateFinding(finding) {
 }
 function translateEvidence(item) {
     return item
+        .replace("matched files: ", "命中文件：")
+        .replace("missing evidence: ", "缺失证据：")
         .replace("files: ", "文件数：")
         .replace("changed lines: ", "变更行数：")
+        .replace(/\bverification\b/g, "验证")
+        .replace(/\breproduction\b/g, "复现")
+        .replace(/\bscreenshot\b/g, "截图")
+        .replace(/\bchangelog\b/g, "变更日志")
+        .replace(/\bpermission-rationale\b/g, "权限理由")
         .replace("line ", "第 ")
         .replace(": ", " 行：");
 }
@@ -51042,6 +51125,7 @@ function translateReviewActionTitle(actionId, fallback) {
         "ask-for-evidence-before-review": "深入 review 前先要求补充证据",
         "review-with-focus": "带着重点清单进行 review",
         "normal-review": "进入常规 review",
+        "satisfy-evidence-contract": "要求补齐证据契约",
         "improve-pr-description": "要求补充更清楚的 PR 描述",
         "add-verification-evidence": "要求补充测试或手动验证证据",
         "add-reproduction-context": "要求补充复现或 before/after 上下文",
@@ -51062,6 +51146,7 @@ function translateReviewActionDetail(actionId, fallback) {
         "ask-for-evidence-before-review": "要求测试、截图、复现步骤或更清楚的 PR 描述，再投入详细 review。",
         "review-with-focus": "优先使用下面的风险发现和重点文件作为第一轮 review map。",
         "normal-review": "当前证据足够支撑维护者进行常规 review。",
+        "satisfy-evidence-contract": "该 PR 命中了仓库自定义证据契约，但 PR 描述里缺少必需证据。",
         "improve-pr-description": "贡献者应说明为什么改、改了什么、如何验证，以及是否有发布或兼容性风险。",
         "add-verification-evidence": "要求测试输出、CI 链接、截图，或简短的手动验证说明。",
         "add-reproduction-context": "PR 应包含复现步骤、预期/实际行为，或相关 before/after 截图。",
@@ -51077,6 +51162,9 @@ function translateReviewActionDetail(actionId, fallback) {
     }[actionId] ?? fallback;
 }
 function translateFocusReason(reasonId, fallback) {
+    if (reasonId.startsWith("evidence-contract:")) {
+        return "仓库自定义证据契约未满足";
+    }
     return {
         "change-size": "review 面积相关 finding",
         "sensitive-path": "敏感路径发生变更",
@@ -51094,6 +51182,9 @@ function translateScoreMessage(message) {
         "PR description provides review context.": "PR 描述提供了 review 上下文。",
         "Verification evidence was found.": "检测到测试或手动验证证据。",
         "Reproduction or before/after context was found.": "检测到复现步骤或 before/after 上下文。",
+        "Screenshot or visual evidence was found.": "检测到截图或视觉证据。",
+        "Changelog or migration evidence was found.": "检测到 changelog 或迁移证据。",
+        "Permission rationale evidence was found.": "检测到权限理由证据。",
         "Test files changed with the PR.": "PR 同时修改了测试文件。",
         "No configured sensitive files changed.": "没有改动已配置的敏感文件。"
     }[message] ?? message;
@@ -51116,6 +51207,7 @@ function translateDeduction(reasonId, fallback) {
         "dependency-major-upgrade": "依赖发生大版本升级。",
         "dependency-lifecycle-script": "包生命周期脚本可能在安装或发布阶段执行代码。",
         "workflow-dangerous-trigger": "pull_request_target workflow 需要重点审查高权限触发路径。",
+        "evidence-contract-missing": "仓库自定义证据契约未满足。",
         "missing-tests": "代码发生变更，但缺少测试变更或验证说明。"
     }[reasonId] ?? fallback;
 }
@@ -51231,12 +51323,27 @@ const REPRODUCTION_PATTERNS = [
     /\b(?:before|after|expected|actual)\b/i,
     /复现|重现|复现步骤|期望|实际/
 ];
+const SCREENSHOT_PATTERNS = [
+    /\b(?:screenshot|screen shot|screen recording|recording|gif|image|before\/after)\b/i,
+    /截图|录屏|效果图|前后对比|对比图/
+];
+const CHANGELOG_PATTERNS = [
+    /\b(?:changelog|release notes?|migration guide|breaking changes?|upgrade guide)\b/i,
+    /变更日志|发布说明|迁移指南|升级说明|破坏性变更|兼容性/
+];
+const PERMISSION_RATIONALE_PATTERNS = [
+    /\b(?:least privilege|permission rationale|write permission|oidc|id-token|trusted workflow|untrusted pr|token scope)\b/i,
+    /权限理由|最小权限|写权限|OIDC|id-token|不可信 PR|高权限|token 权限|凭证权限/
+];
 function analyzeEvidence(context) {
     if (!context) {
         return {
             descriptionState: "unavailable",
             verificationEvidence: false,
-            reproductionEvidence: false
+            reproductionEvidence: false,
+            screenshotEvidence: false,
+            changelogEvidence: false,
+            permissionRationaleEvidence: false
         };
     }
     const text = [context.title ?? "", context.body ?? ""].join("\n").trim();
@@ -51244,7 +51351,10 @@ function analyzeEvidence(context) {
     return {
         descriptionState: descriptionState(body),
         verificationEvidence: matchesAnyPattern(text, VERIFICATION_PATTERNS),
-        reproductionEvidence: matchesAnyPattern(text, REPRODUCTION_PATTERNS)
+        reproductionEvidence: matchesAnyPattern(text, REPRODUCTION_PATTERNS),
+        screenshotEvidence: matchesAnyPattern(text, SCREENSHOT_PATTERNS),
+        changelogEvidence: matchesAnyPattern(text, CHANGELOG_PATTERNS),
+        permissionRationaleEvidence: matchesAnyPattern(text, PERMISSION_RATIONALE_PATTERNS)
     };
 }
 function descriptionState(body) {
@@ -51425,6 +51535,7 @@ function analyzeDiffFiles(files, config, pullRequest) {
     findings.push(...analyzeSensitivePaths(activeFiles, config));
     findings.push(...analyzeMissingTests(activeFiles, config, pullRequest));
     findings.push(...analyzePullRequestEvidence(activeFiles, pullRequest));
+    findings.push(...analyzeEvidenceContracts(activeFiles, config, pullRequest));
     findings.push(...analyzeDependencyChanges(activeFiles, config));
     findings.push(...analyzeWorkflowPermissions(activeFiles));
     findings.push(...analyzeWorkflowDangerousTriggers(activeFiles));
@@ -51447,7 +51558,10 @@ function summarizeDiffFiles(files, config, pullRequest) {
         sensitiveFilesChanged: activeFiles.filter((file) => matchesAny(file.path, config.sensitivePaths)).length,
         pullRequestDescription: evidence.descriptionState,
         verificationEvidence: evidence.verificationEvidence,
-        reproductionEvidence: evidence.reproductionEvidence
+        reproductionEvidence: evidence.reproductionEvidence,
+        screenshotEvidence: evidence.screenshotEvidence,
+        changelogEvidence: evidence.changelogEvidence,
+        permissionRationaleEvidence: evidence.permissionRationaleEvidence
     };
 }
 function analyzeChangeSize(files) {
@@ -51551,6 +51665,55 @@ function analyzePullRequestEvidence(files, pullRequest) {
         });
     }
     return findings;
+}
+function analyzeEvidenceContracts(files, config, pullRequest) {
+    if (config.evidence.contracts.length === 0) {
+        return [];
+    }
+    const evidence = analyzeEvidence(pullRequest);
+    const hasTestChanges = files.some((file) => isTestPath(file.path));
+    const findings = [];
+    for (const contract of config.evidence.contracts) {
+        const matchedFiles = files.filter((file) => matchesAny(file.path, contract.paths));
+        if (matchedFiles.length === 0) {
+            continue;
+        }
+        const missingRequirements = contract.requires.filter((requirement) => !hasEvidenceRequirement(requirement, evidence, hasTestChanges));
+        if (missingRequirements.length === 0) {
+            continue;
+        }
+        findings.push({
+            ruleId: `evidence-contract:${contract.id}`,
+            title: contract.title ?? "Evidence contract missing",
+            message: `Changed files match evidence contract "${contract.id}", but missing required evidence: ${missingRequirements
+                .map(formatEvidenceRequirement)
+                .join(", ")}.`,
+            severity: contract.severity,
+            path: matchedFiles[0]?.path,
+            evidence: [
+                `matched files: ${matchedFiles.slice(0, 5).map((file) => file.path).join(", ")}`,
+                `missing evidence: ${missingRequirements.map(formatEvidenceRequirement).join(", ")}`
+            ],
+            recommendation: contract.recommendation ??
+                "Ask the contributor to add the missing evidence before spending deep review time."
+        });
+    }
+    return findings;
+}
+function hasEvidenceRequirement(requirement, evidence, hasTestChanges) {
+    if (requirement === "verification") {
+        return evidence.verificationEvidence || hasTestChanges;
+    }
+    if (requirement === "reproduction") {
+        return evidence.reproductionEvidence;
+    }
+    if (requirement === "screenshot") {
+        return evidence.screenshotEvidence;
+    }
+    if (requirement === "changelog") {
+        return evidence.changelogEvidence;
+    }
+    return evidence.permissionRationaleEvidence;
 }
 function analyzeDependencyChanges(files, config) {
     const findings = [];
@@ -51741,6 +51904,9 @@ function formatEvidenceLine(line) {
     const value = line.value.trim();
     return line.lineNumber ? `line ${line.lineNumber}: ${value}` : value;
 }
+function formatEvidenceRequirement(requirement) {
+    return requirement;
+}
 function sensitivePathSeverity(path) {
     if (matchesAny(path, [
         "**/.env*",
@@ -51816,7 +51982,7 @@ function calculateEvidenceScore(summary, findings) {
         "workflow-permission-change",
         "workflow-dangerous-trigger",
         "mcp-credential-risk"
-    ].includes(finding.ruleId));
+    ].includes(finding.ruleId) || finding.ruleId.startsWith("evidence-contract:"));
     if (needsVerificationEvidence && !summary.verificationEvidence) {
         addDeduction("missing-verification", 20, "No test or manual verification evidence was found.");
     }
@@ -51853,6 +52019,9 @@ function calculateEvidenceScore(summary, findings) {
         else if (finding.ruleId === "dependency-lifecycle-script") {
             addDeduction("dependency-lifecycle-script", 25, "Package lifecycle scripts can run during install or publish.");
         }
+        else if (finding.ruleId.startsWith("evidence-contract:")) {
+            addDeduction("evidence-contract-missing", finding.severity === "high" ? 25 : 15, "Configured evidence contract was not satisfied.");
+        }
         else if (finding.ruleId === "missing-tests") {
             addDeduction("missing-tests", finding.severity === "medium" ? 20 : 12, "Code changed without test changes or verification notes.");
         }
@@ -51880,6 +52049,15 @@ function collectEvidenceStrengths(summary) {
     }
     if (summary.reproductionEvidence) {
         strengths.push("Reproduction or before/after context was found.");
+    }
+    if (summary.screenshotEvidence) {
+        strengths.push("Screenshot or visual evidence was found.");
+    }
+    if (summary.changelogEvidence) {
+        strengths.push("Changelog or migration evidence was found.");
+    }
+    if (summary.permissionRationaleEvidence) {
+        strengths.push("Permission rationale evidence was found.");
     }
     if (summary.testFilesChanged > 0) {
         strengths.push("Test files changed with the PR.");
@@ -52033,6 +52211,17 @@ function reviewActionsForFinding(finding) {
                 title: "Rotate and remove the exposed credential.",
                 detail: "Do not merge until the secret is removed from the PR and any exposed value has been rotated.",
                 priority: "high",
+                relatedRuleIds: [finding.ruleId]
+            }
+        ];
+    }
+    if (finding.ruleId.startsWith("evidence-contract:")) {
+        return [
+            {
+                actionId: "satisfy-evidence-contract",
+                title: "Ask for the configured evidence contract to be satisfied.",
+                detail: "The PR matches a repository-defined evidence contract but is missing required proof in the PR description.",
+                priority: finding.severity === "high" ? "high" : "medium",
                 relatedRuleIds: [finding.ruleId]
             }
         ];

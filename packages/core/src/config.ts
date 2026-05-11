@@ -1,10 +1,18 @@
 import { readFile } from "node:fs/promises";
 import YAML from "yaml";
 import { z } from "zod";
-import type { ConfigPreset, ProofPRConfig, ReportLocale, RiskLevel } from "./types.js";
+import type { ConfigPreset, EvidenceContract, ProofPRConfig, ReportLocale, RiskLevel } from "./types.js";
 
 const riskLevelSchema = z.enum(["low", "medium", "high"]);
+const findingSeveritySchema = z.enum(["info", "low", "medium", "high"]);
 const localeSchema = z.enum(["en", "zh-CN"]);
+const evidenceRequirementSchema = z.enum([
+  "verification",
+  "reproduction",
+  "screenshot",
+  "changelog",
+  "permission-rationale"
+]);
 const configPresetSchema = z.enum([
   "balanced",
   "open-source-maintainer",
@@ -46,6 +54,42 @@ const DEFAULT_SENSITIVE_PATHS = [
 
 const DEFAULT_TEST_PATHS = ["src/**", "packages/**/src/**", "app/**", "lib/**"];
 
+const WORKFLOW_EVIDENCE_CONTRACTS: EvidenceContract[] = [
+  {
+    id: "workflow-permission-rationale",
+    title: "Workflow changes need a permission rationale",
+    paths: [".github/workflows/**", ".github/actions/**"],
+    requires: ["verification", "permission-rationale"],
+    severity: "high",
+    recommendation:
+      "Explain why the workflow needs this trigger or permission, and include verification that untrusted PR code cannot reach privileged tokens."
+  }
+];
+
+const DEPENDENCY_EVIDENCE_CONTRACTS: EvidenceContract[] = [
+  {
+    id: "dependency-upgrade-evidence",
+    title: "Dependency changes need upgrade evidence",
+    paths: [
+      "package.json",
+      "**/package.json",
+      "pnpm-lock.yaml",
+      "package-lock.json",
+      "yarn.lock",
+      "requirements.txt",
+      "**/requirements.txt",
+      "pyproject.toml",
+      "**/pyproject.toml",
+      "go.mod",
+      "**/go.mod"
+    ],
+    requires: ["verification", "changelog"],
+    severity: "medium",
+    recommendation:
+      "Link changelog or migration notes and include the test command or CI evidence used to validate the dependency change."
+  }
+];
+
 type ConfigPresetDefaults = Partial<Omit<ProofPRConfig, "preset">>;
 
 const PRESET_DEFAULTS: Record<ConfigPreset, ConfigPresetDefaults> = {
@@ -78,6 +122,9 @@ const PRESET_DEFAULTS: Record<ConfigPreset, ConfigPresetDefaults> = {
     requireTests: {
       enabled: true,
       paths: ["src/**", "packages/**/src/**", "app/**", "lib/**", "server/**", "api/**"]
+    },
+    evidence: {
+      contracts: WORKFLOW_EVIDENCE_CONTRACTS
     }
   },
   "ai-generated-pr": {
@@ -116,9 +163,21 @@ const PRESET_DEFAULTS: Record<ConfigPreset, ConfigPresetDefaults> = {
     requireTests: {
       enabled: true,
       paths: DEFAULT_TEST_PATHS
+    },
+    evidence: {
+      contracts: DEPENDENCY_EVIDENCE_CONTRACTS
     }
   }
 };
+
+const evidenceContractSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1).optional(),
+  paths: z.array(z.string().min(1)).min(1),
+  requires: z.array(evidenceRequirementSchema).min(1),
+  severity: findingSeveritySchema.default("medium"),
+  recommendation: z.string().min(1).optional()
+});
 
 const configSchema = z
   .object({
@@ -141,6 +200,11 @@ const configSchema = z
         flagLifecycleScripts: z.boolean().default(true)
       })
       .default({ flagNewPackages: true, flagMajorUpgrades: true, flagLifecycleScripts: true }),
+    evidence: z
+      .object({
+        contracts: z.array(evidenceContractSchema).default([])
+      })
+      .default({ contracts: [] }),
     comment: z.object({ enabled: z.boolean().default(true) }).default({ enabled: true })
   });
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { execFile } from "node:child_process";
-import { access, mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
+import { access, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 import { promisify } from "node:util";
 import { Command, InvalidArgumentError } from "commander";
 import {
@@ -14,7 +14,9 @@ import {
   riskMeetsThreshold,
   scanDiff,
   type ConfigPreset,
+  type ProofPRConfig,
   type ReportLocale,
+  type ReviewDecision,
   type RiskLevel
 } from "@proof-pr/core";
 
@@ -42,6 +44,42 @@ interface InitCommandOptions {
   preset: ConfigPreset;
   failOn: FailLevel;
   force: boolean;
+}
+
+type BenchmarkOutputFormat = "text" | "json";
+
+interface BenchmarkCommandOptions {
+  cases: string;
+  format: BenchmarkOutputFormat;
+}
+
+interface BenchmarkCase {
+  id: string;
+  title?: string;
+  diffFile: string;
+  config?: Partial<ProofPRConfig>;
+  pullRequest?: {
+    title?: string;
+    body?: string;
+  };
+  expect: {
+    risk?: RiskLevel;
+    reviewDecision?: ReviewDecision;
+    findings?: string[];
+    absentFindings?: string[];
+  };
+}
+
+interface BenchmarkCaseResult {
+  id: string;
+  title?: string;
+  passed: boolean;
+  failures: string[];
+  actual: {
+    risk: RiskLevel;
+    reviewDecision: ReviewDecision;
+    findings: string[];
+  };
 }
 
 const program = new Command();
@@ -109,6 +147,25 @@ program
     process.stdout.write(
       `ProofPR initialized:\n- ${options.configPath}\n- ${options.workflowPath}\n`
     );
+  });
+
+program
+  .command("benchmark")
+  .description("Run ProofPR benchmark cases and compare expected risk/finding output.")
+  .option("--cases <dir>", "Directory containing benchmark case JSON files.", "benchmarks/cases")
+  .option("--format <format>", "Output format: text or json.", parseBenchmarkFormat, "text")
+  .action(async (options: BenchmarkCommandOptions) => {
+    const results = await runBenchmarks(options.cases);
+
+    if (options.format === "json") {
+      process.stdout.write(`${JSON.stringify(results, null, 2)}\n`);
+    } else {
+      process.stdout.write(renderBenchmarkText(results));
+    }
+
+    if (results.some((result) => !result.passed)) {
+      process.exitCode = 1;
+    }
   });
 
 program.parseAsync(process.argv).catch((error: unknown) => {
@@ -204,6 +261,18 @@ comment:
 #   flagNewPackages: true
 #   flagMajorUpgrades: true
 #   flagLifecycleScripts: true
+#
+# evidence:
+#   contracts:
+#     - id: ui-screenshot
+#       title: UI changes need screenshots
+#       paths:
+#         - "src/components/**"
+#         - "app/**"
+#       requires:
+#         - screenshot
+#         - verification
+#       severity: medium
 `;
 }
 
@@ -243,12 +312,102 @@ function renderOutput(result: ReturnType<typeof scanDiff>, format: OutputFormat,
   return renderMarkdownReport(result, locale);
 }
 
+async function runBenchmarks(casesDir: string): Promise<BenchmarkCaseResult[]> {
+  const root = resolve(casesDir);
+  const entries = await readdir(root, { withFileTypes: true });
+  const caseFiles = entries
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+    .map((entry) => resolve(root, entry.name))
+    .sort();
+  const results: BenchmarkCaseResult[] = [];
+
+  for (const caseFile of caseFiles) {
+    const testCase = JSON.parse(await readFile(caseFile, "utf8")) as BenchmarkCase;
+    const diffText = await readFile(resolve(dirname(caseFile), testCase.diffFile), "utf8");
+    const result = scanDiff(diffText, {
+      config: testCase.config,
+      pullRequest: testCase.pullRequest
+    });
+    const actualFindings = result.findings.map((finding) => finding.ruleId);
+    const failures: string[] = [];
+
+    if (testCase.expect.risk && result.risk !== testCase.expect.risk) {
+      failures.push(`expected risk ${testCase.expect.risk}, got ${result.risk}`);
+    }
+
+    if (testCase.expect.reviewDecision && result.reviewDecision !== testCase.expect.reviewDecision) {
+      failures.push(
+        `expected review decision ${testCase.expect.reviewDecision}, got ${result.reviewDecision}`
+      );
+    }
+
+    for (const expectedFinding of testCase.expect.findings ?? []) {
+      if (!matchesFindingExpectation(actualFindings, expectedFinding)) {
+        failures.push(`expected finding ${expectedFinding}`);
+      }
+    }
+
+    for (const absentFinding of testCase.expect.absentFindings ?? []) {
+      if (matchesFindingExpectation(actualFindings, absentFinding)) {
+        failures.push(`unexpected finding ${absentFinding}`);
+      }
+    }
+
+    results.push({
+      id: testCase.id,
+      title: testCase.title,
+      passed: failures.length === 0,
+      failures,
+      actual: {
+        risk: result.risk,
+        reviewDecision: result.reviewDecision,
+        findings: actualFindings
+      }
+    });
+  }
+
+  return results;
+}
+
+function renderBenchmarkText(results: BenchmarkCaseResult[]): string {
+  const passed = results.filter((result) => result.passed).length;
+  const lines = ["ProofPR benchmark", ""];
+
+  for (const result of results) {
+    lines.push(`${result.passed ? "PASS" : "FAIL"} ${result.id}${result.title ? ` - ${result.title}` : ""}`);
+
+    for (const failure of result.failures) {
+      lines.push(`  - ${failure}`);
+    }
+  }
+
+  lines.push("", `Summary: ${passed}/${results.length} passed`, "");
+  return lines.join("\n");
+}
+
+function matchesFindingExpectation(actualFindings: string[], expected: string): boolean {
+  if (expected.endsWith("*")) {
+    const prefix = expected.slice(0, -1);
+    return actualFindings.some((finding) => finding.startsWith(prefix));
+  }
+
+  return actualFindings.includes(expected);
+}
+
 function parseFormat(value: string): OutputFormat {
   if (value === "json" || value === "markdown" || value === "sarif") {
     return value;
   }
 
   throw new InvalidArgumentError("format must be one of: markdown, json, sarif");
+}
+
+function parseBenchmarkFormat(value: string): BenchmarkOutputFormat {
+  if (value === "text" || value === "json") {
+    return value;
+  }
+
+  throw new InvalidArgumentError("benchmark format must be one of: text, json");
 }
 
 function parseFailLevel(value: string): FailLevel {
