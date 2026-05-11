@@ -332,6 +332,12 @@ function maintainerFocus(findings: Finding[], locale: ReportLocale): string[] {
           ? "重点审查 pull_request_target 是否会用高权限 token 执行不可信 PR 代码。"
           : "Review whether pull_request_target can execute untrusted PR code with privileged tokens."
       );
+    } else if (finding.ruleId === "workflow-untrusted-checkout") {
+      focus.add(
+        locale === "zh-CN"
+          ? "重点审查 workflow 是否 checkout 并执行了不可信 PR head 代码。"
+          : "Review whether the workflow checks out and executes untrusted PR head code."
+      );
     } else if (finding.ruleId === "mcp-credential-risk") {
       focus.add(
         locale === "zh-CN"
@@ -447,6 +453,16 @@ function translateFinding(finding: Finding): Pick<Finding, "title" | "message" |
     };
   }
 
+  if (finding.ruleId === "workflow-untrusted-checkout") {
+    return {
+      title: "Workflow checkout 了 PR head",
+      message: finding.path
+        ? `${finding.path} 引用了 PR head 代码来源，需要审查它是否会在高权限上下文中执行。`
+        : finding.message,
+      recommendation: "避免在 pull_request_target、写权限 token 或可读取 secret 的上下文中运行不可信 PR 代码。"
+    };
+  }
+
   if (finding.ruleId === "mcp-credential-risk") {
     return {
       title: "MCP 配置需要重点审查",
@@ -545,6 +561,7 @@ function translateReviewActionTitle(actionId: string, fallback: string): string 
     "rotate-secret": "轮换并移除暴露的凭证",
     "justify-workflow-permissions": "要求说明 workflow 权限最小化理由",
     "review-privileged-pr-trigger": "审查 pull_request_target 高权限触发器",
+    "review-untrusted-checkout": "审查 PR head checkout 的权限边界",
     "review-package-lifecycle-script": "审查包生命周期脚本",
     "review-mcp-execution-surface": "审查 MCP 命令、参数和凭证处理",
     "request-review-map-or-split": "要求拆分 PR 或提供逐文件 review map",
@@ -567,6 +584,7 @@ function translateReviewActionDetail(actionId: string, fallback: string): string
     "rotate-secret": "在 secret 从 PR 中移除并完成轮换前，不要合并。",
     "justify-workflow-permissions": "确认写权限或 OIDC 是否必要，并检查不可信 PR 是否能触发该 workflow。",
     "review-privileged-pr-trigger": "确认 workflow 不会用写权限 token、secret 或仓库权限执行不可信 PR 代码。",
+    "review-untrusted-checkout": "确认 job 不会在写权限 token、仓库 secret 或 pull_request_target 高权限上下文中运行不可信 PR 代码。",
     "review-package-lifecycle-script": "检查 install、postinstall、prepare 或 publish 脚本是否会执行非预期代码。",
     "review-mcp-execution-surface": "检查 MCP 配置是否提交凭证，或意外扩大本地执行面。",
     "request-review-map-or-split": "要求贡献者拆分无关改动，或标出最需要重点 review 的文件。",
@@ -589,6 +607,7 @@ function translateFocusReason(reasonId: string, fallback: string): string {
     "dependency-lifecycle-script": "包生命周期脚本发生变更",
     "workflow-permission-change": "workflow 权限发生变更",
     "workflow-dangerous-trigger": "workflow 使用了高风险触发器",
+    "workflow-untrusted-checkout": "workflow checkout 了不可信 PR head",
     "mcp-credential-risk": "MCP 配置存在执行面或凭证风险",
     "missing-tests": "代码改动缺少测试或验证证据"
   }[reasonId] ?? fallback;
@@ -625,6 +644,7 @@ function translateDeduction(reasonId: string, fallback: string): string {
     "dependency-major-upgrade": "依赖发生大版本升级。",
     "dependency-lifecycle-script": "包生命周期脚本可能在安装或发布阶段执行代码。",
     "workflow-dangerous-trigger": "pull_request_target workflow 需要重点审查高权限触发路径。",
+    "workflow-untrusted-checkout": "Workflow checkout PR head 代码，需要审查权限边界。",
     "evidence-contract-missing": "仓库自定义证据契约未满足。",
     "missing-tests": "代码发生变更，但缺少测试变更或验证说明。"
   }[reasonId] ?? fallback;

@@ -57,6 +57,7 @@ export function analyzeDiffFiles(
   findings.push(...analyzeDependencyChanges(activeFiles, config));
   findings.push(...analyzeWorkflowPermissions(activeFiles));
   findings.push(...analyzeWorkflowDangerousTriggers(activeFiles));
+  findings.push(...analyzeWorkflowUntrustedCheckout(activeFiles));
   findings.push(...analyzeMcpConfigs(activeFiles));
 
   if (config.secrets.enabled) {
@@ -485,9 +486,7 @@ function analyzeWorkflowPermissions(files: DiffFile[]): Finding[] {
   const findings: Finding[] = [];
 
   for (const file of files.filter((candidate) => isWorkflowPath(candidate.path))) {
-    const permissionLines = file.addedLines.filter((line) =>
-      /permissions:|contents:\s*write|packages:\s*write|id-token:\s*write|pull-requests:\s*write/.test(line.value.trim())
-    );
+    const permissionLines = file.addedLines.filter((line) => isRiskyWorkflowPermissionLine(line.value));
 
     if (permissionLines.length === 0) {
       continue;
@@ -506,6 +505,18 @@ function analyzeWorkflowPermissions(files: DiffFile[]): Finding[] {
   }
 
   return findings;
+}
+
+function isRiskyWorkflowPermissionLine(value: string): boolean {
+  const line = value.trim();
+
+  if (/^permissions:\s*write-all\b/i.test(line)) {
+    return true;
+  }
+
+  return /^(?:actions|attestations|checks|contents|deployments|discussions|id-token|issues|models|packages|pages|pull-requests|repository-projects|security-events|statuses):\s*write\b/i.test(
+    line
+  );
 }
 
 function analyzeWorkflowDangerousTriggers(files: DiffFile[]): Finding[] {
@@ -533,6 +544,48 @@ function analyzeWorkflowDangerousTriggers(files: DiffFile[]): Finding[] {
   }
 
   return findings;
+}
+
+function analyzeWorkflowUntrustedCheckout(files: DiffFile[]): Finding[] {
+  const findings: Finding[] = [];
+
+  for (const file of files.filter((candidate) => isWorkflowPath(candidate.path))) {
+    const headCheckoutLines = file.addedLines.filter((line) =>
+      isPullRequestHeadCheckoutLine(line.value)
+    );
+
+    if (headCheckoutLines.length === 0) {
+      continue;
+    }
+
+    const hasPullRequestTarget = file.addedLines.some((line) =>
+      /\bpull_request_target\b/.test(line.value.trim())
+    );
+
+    findings.push({
+      ruleId: "workflow-untrusted-checkout",
+      title: "Workflow checks out pull request head",
+      message: hasPullRequestTarget
+        ? `${file.path} combines pull_request_target with pull request head checkout references.`
+        : `${file.path} checks out pull request head references; review the job privilege boundary before merging.`,
+      severity: hasPullRequestTarget ? "high" : "medium",
+      path: file.path,
+      evidence: headCheckoutLines.slice(0, 5).map(formatEvidenceLine),
+      recommendation:
+        "Avoid running untrusted PR code with write tokens, repository secrets, or privileged pull_request_target context."
+    });
+  }
+
+  return findings;
+}
+
+function isPullRequestHeadCheckoutLine(value: string): boolean {
+  const line = value.trim();
+
+  return (
+    /\bgithub\.head_ref\b/.test(line) ||
+    /\bgithub\.event\.pull_request\.head(?:\.sha|\.ref|\.repo\.full_name)?\b/.test(line)
+  );
 }
 
 function analyzeMcpConfigs(files: DiffFile[]): Finding[] {

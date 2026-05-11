@@ -1,6 +1,6 @@
 # ProofPR Benchmark
 
-**Summary:** 13/13 passed (100%)
+**Summary:** 14/14 passed (100%)
 
 ## Categories
 
@@ -12,17 +12,18 @@
 | evidence-contract | 4 | 4 | 100% |
 | low-risk | 1 | 1 | 100% |
 | security | 1 | 1 | 100% |
-| workflow-security | 2 | 2 | 100% |
+| workflow-security | 3 | 3 | 100% |
 
 ## Finding Coverage
 
 | Rule | Cases |
 | --- | ---: |
-| `sensitive-path` | 9 |
+| `sensitive-path` | 10 |
 | `workflow-permission-change` | 3 |
 | `dependency-added` | 2 |
 | `missing-reproduction-context` | 2 |
 | `missing-tests` | 2 |
+| `workflow-dangerous-trigger` | 2 |
 | `dependency-lifecycle-script` | 1 |
 | `dependency-major-upgrade` | 1 |
 | `evidence-contract:ui-screenshot` | 1 |
@@ -31,7 +32,7 @@
 | `secret-detected:database-url` | 1 |
 | `secret-detected:openai-key` | 1 |
 | `thin-pr-description` | 1 |
-| `workflow-dangerous-trigger` | 1 |
+| `workflow-untrusted-checkout` | 1 |
 
 ## Cases
 
@@ -50,3 +51,4 @@
 | PASS | `security-strict-workflow-contract` | evidence-contract | high | block-merge |
 | PASS | `workflow-dangerous-trigger` | workflow-security | high | block-merge |
 | PASS | `workflow-permission` | workflow-security | high | block-merge |
+| PASS | `workflow-untrusted-checkout` | workflow-security | high | block-merge |

@@ -15,7 +15,7 @@ ProofPR 是给开源维护者使用的 **PR 证据门禁**。它在 Pull Request
 
 - GitHub Release：[`v0.1.6`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.6)
 - npm：[`proof-pr@0.1.6`](https://www.npmjs.com/package/proof-pr)
-- 主要能力：Review Plan、规则预设、Evidence Contract、GitHub annotations、SARIF 输出、benchmark、真实案例库、依赖大版本升级、包生命周期脚本、`pull_request_target` 风险检测。
+- 主要能力：Review Plan、规则预设、Evidence Contract、GitHub annotations、SARIF 输出、benchmark、真实案例库、依赖大版本升级、包生命周期脚本、`pull_request_target` 和 PR head checkout 风险检测。
 
 ## 30 秒安装
 
@@ -90,7 +90,7 @@ CLI 输出截图来自本机 `AI-Vue3-python-flask-Blog` 项目：
 | secrets | 检测疑似 API key、token、数据库连接串。 |
 | 依赖变化 | 标记新增依赖、依赖大版本升级和 lockfile 相关风险。 |
 | 包生命周期脚本 | 标记 `preinstall`、`postinstall`、`prepare` 等安装/发布阶段脚本。 |
-| CI 权限和触发器 | 标记 GitHub Actions 写权限、OIDC 权限和 `pull_request_target` 高风险触发器。 |
+| CI 权限和触发器 | 标记 GitHub Actions 写权限、OIDC 权限、`pull_request_target` 和 PR head checkout 高风险组合。 |
 | MCP 风险 | 标记 MCP command、args、env、credential 相关风险。 |
 
 ## 报告怎么看

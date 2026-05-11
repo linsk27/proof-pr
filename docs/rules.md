@@ -60,11 +60,17 @@ evidence:
 
 ## `workflow-permission-change`
 
-标记 GitHub Actions 权限变化，例如 `contents: write`、`packages: write`、`id-token: write` 或 `pull-requests: write`。
+标记 GitHub Actions 写权限或 OIDC 权限变化，例如 `permissions: write-all`、`contents: write`、`packages: write`、`id-token: write` 或 `pull-requests: write`。只读权限如 `contents: read` 不会被当成权限升级。
 
 ## `workflow-dangerous-trigger`
 
 标记新增 `pull_request_target` 的 GitHub Actions workflow。这个触发器会在 base repository 上下文运行，如果同时执行不可信 PR 代码、使用高权限 token 或读取 secret，风险会很高。
+
+## `workflow-untrusted-checkout`
+
+标记 workflow 中 checkout PR head 代码的行为，例如 `github.event.pull_request.head.sha`、`github.event.pull_request.head.repo.full_name` 或 `github.head_ref`。
+
+如果它和 `pull_request_target` 同时出现，ProofPR 会把它视为高风险组合，因为这可能让不可信 PR 代码在高权限上下文中运行。
 
 ## `mcp-credential-risk`
 

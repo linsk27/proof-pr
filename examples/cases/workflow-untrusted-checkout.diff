@@ -1,0 +1,21 @@
+diff --git a/.github/workflows/pr.yml b/.github/workflows/pr.yml
+index 1111111..2222222 100644
+--- a/.github/workflows/pr.yml
++++ b/.github/workflows/pr.yml
+@@ -1,7 +1,17 @@
+ name: PR automation
+ on:
++  pull_request_target:
++    types: [opened, synchronize]
++
+ jobs:
+   test:
+     runs-on: ubuntu-latest
+     steps:
+-      - uses: actions/checkout@v4
++      - uses: actions/checkout@v4
++        with:
++          repository: ${{ github.event.pull_request.head.repo.full_name }}
++          ref: ${{ github.event.pull_request.head.sha }}
++      - run: pnpm install
++      - run: pnpm test

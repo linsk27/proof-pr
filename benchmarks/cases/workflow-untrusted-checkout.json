@@ -1,0 +1,11 @@
+{
+  "id": "workflow-untrusted-checkout",
+  "title": "pull_request_target should not run pull request head code with privileged context",
+  "category": "workflow-security",
+  "diffFile": "../../examples/cases/workflow-untrusted-checkout.diff",
+  "expect": {
+    "risk": "high",
+    "reviewDecision": "block-merge",
+    "findings": ["workflow-dangerous-trigger", "workflow-untrusted-checkout"]
+  }
+}

@@ -88,6 +88,7 @@ function calculateEvidenceScore(summary: ScanSummary, findings: Finding[]): Evid
       "dependency-lifecycle-script",
       "workflow-permission-change",
       "workflow-dangerous-trigger",
+      "workflow-untrusted-checkout",
       "mcp-credential-risk"
     ].includes(finding.ruleId) || finding.ruleId.startsWith("evidence-contract:")
   );
@@ -111,6 +112,12 @@ function calculateEvidenceScore(summary: ScanSummary, findings: Finding[]): Evid
       addDeduction("workflow-permission-change", 25, "Workflow permission changes need deliberate review.");
     } else if (finding.ruleId === "workflow-dangerous-trigger") {
       addDeduction("workflow-dangerous-trigger", 30, "pull_request_target workflows need privileged trigger review.");
+    } else if (finding.ruleId === "workflow-untrusted-checkout") {
+      addDeduction(
+        "workflow-untrusted-checkout",
+        finding.severity === "high" ? 30 : 18,
+        "Workflow checkout of pull request head needs privilege-boundary review."
+      );
     } else if (finding.ruleId === "mcp-credential-risk") {
       addDeduction("mcp-credential-risk", 25, "MCP configuration expands local execution or credential risk.");
     } else if (finding.ruleId === "change-size") {
@@ -231,6 +238,7 @@ function calculateReviewDecision(
       finding.ruleId.startsWith("secret-detected") ||
       finding.ruleId === "workflow-permission-change" ||
       finding.ruleId === "workflow-dangerous-trigger" ||
+      (finding.ruleId === "workflow-untrusted-checkout" && finding.severity === "high") ||
       finding.ruleId === "dependency-lifecycle-script" ||
       finding.ruleId === "mcp-credential-risk"
   );
@@ -425,6 +433,18 @@ function reviewActionsForFinding(finding: Finding): ReviewAction[] {
         title: "Review privileged pull_request_target usage.",
         detail: "Confirm the workflow does not execute untrusted PR code with write tokens, secrets, or repository permissions.",
         priority: "high",
+        relatedRuleIds: [finding.ruleId]
+      }
+    ];
+  }
+
+  if (finding.ruleId === "workflow-untrusted-checkout") {
+    return [
+      {
+        actionId: "review-untrusted-checkout",
+        title: "Review pull request head checkout privileges.",
+        detail: "Confirm the job does not run untrusted PR code with write tokens, repository secrets, or pull_request_target privileges.",
+        priority: finding.severity === "high" ? "high" : "medium",
         relatedRuleIds: [finding.ruleId]
       }
     ];

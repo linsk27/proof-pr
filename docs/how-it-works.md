@@ -120,6 +120,7 @@ preset: open-source-maintainer
 - `dependency-lifecycle-script`：检查 `package.json` 中安装或发布阶段会自动执行的包生命周期脚本。
 - `workflow-permission-change`：检查 GitHub Actions 是否新增写权限或 OIDC 权限。
 - `workflow-dangerous-trigger`：检查是否新增 `pull_request_target` 这类高权限 PR 触发器。
+- `workflow-untrusted-checkout`：检查 workflow 是否 checkout PR head 代码，尤其是和 `pull_request_target` 同时出现时。
 - `mcp-credential-risk`：检查 MCP 配置中 command、args、env、token、secret 等高风险字段。
 
 其中 `change-size` 的默认阈值是：
@@ -127,7 +128,7 @@ preset: open-source-maintainer
 - 变更文件数大于等于 10，或变更行数大于等于 250：触发 `medium`。
 - 变更文件数大于等于 20，或变更行数大于等于 800：触发 `high`。
 
-敏感路径、依赖、workflow 权限、MCP 和 secret 规则会基于路径、added line、正则和 glob 做确定性匹配。它们不调用大模型，也不会猜测作者是谁。
+敏感路径、依赖、workflow 权限、PR head checkout、MCP 和 secret 规则会基于路径、added line、正则和 glob 做确定性匹配。它们不调用大模型，也不会猜测作者是谁。
 
 ## Evidence Contract
 

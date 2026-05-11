@@ -257,6 +257,21 @@ index 0000000..1111111 100644
     ).toBe(true);
   });
 
+  it("does not flag read-only workflow permissions as permission escalation", () => {
+    const result = scanDiff(`diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 0000000..1111111 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -1 +1,4 @@
+ name: CI
++permissions:
++  contents: read
++  pull-requests: read
+`);
+
+    expect(result.findings.some((finding) => finding.ruleId === "workflow-permission-change")).toBe(false);
+  });
+
   it("does not treat package scripts as dependency additions", () => {
     const result = scanDiff(`diff --git a/package.json b/package.json
 index 0000000..1111111 100644
@@ -386,6 +401,31 @@ index 0000000..1111111 100644
       result.reviewPlan.actionItems.some(
         (action) => action.actionId === "review-privileged-pr-trigger"
       )
+    ).toBe(true);
+  });
+
+  it("flags pull_request_target workflows that check out pull request head", () => {
+    const result = scanDiff(`diff --git a/.github/workflows/pr.yml b/.github/workflows/pr.yml
+index 0000000..1111111 100644
+--- a/.github/workflows/pr.yml
++++ b/.github/workflows/pr.yml
+@@ -1 +1,8 @@
+ name: pr
++on:
++  pull_request_target:
++jobs:
++  test:
++    steps:
++      - uses: actions/checkout@v4
++        with:
++          ref: \${{ github.event.pull_request.head.sha }}
+`);
+
+    expect(result.risk).toBe("high");
+    expect(result.reviewDecision).toBe("block-merge");
+    expect(result.findings.some((finding) => finding.ruleId === "workflow-untrusted-checkout")).toBe(true);
+    expect(
+      result.reviewPlan.actionItems.some((action) => action.actionId === "review-untrusted-checkout")
     ).toBe(true);
   });
 

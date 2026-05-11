@@ -50951,6 +50951,11 @@ function maintainerFocus(findings, locale) {
                 ? "重点审查 pull_request_target 是否会用高权限 token 执行不可信 PR 代码。"
                 : "Review whether pull_request_target can execute untrusted PR code with privileged tokens.");
         }
+        else if (finding.ruleId === "workflow-untrusted-checkout") {
+            focus.add(locale === "zh-CN"
+                ? "重点审查 workflow 是否 checkout 并执行了不可信 PR head 代码。"
+                : "Review whether the workflow checks out and executes untrusted PR head code.");
+        }
         else if (finding.ruleId === "mcp-credential-risk") {
             focus.add(locale === "zh-CN"
                 ? "重点审查 MCP command、args 和凭证处理方式。"
@@ -51047,6 +51052,15 @@ function translateFinding(finding) {
             recommendation: "请确认该 workflow 不会用高权限 token、secret 或写权限执行不可信 PR 代码。"
         };
     }
+    if (finding.ruleId === "workflow-untrusted-checkout") {
+        return {
+            title: "Workflow checkout 了 PR head",
+            message: finding.path
+                ? `${finding.path} 引用了 PR head 代码来源，需要审查它是否会在高权限上下文中执行。`
+                : finding.message,
+            recommendation: "避免在 pull_request_target、写权限 token 或可读取 secret 的上下文中运行不可信 PR 代码。"
+        };
+    }
     if (finding.ruleId === "mcp-credential-risk") {
         return {
             title: "MCP 配置需要重点审查",
@@ -51132,6 +51146,7 @@ function translateReviewActionTitle(actionId, fallback) {
         "rotate-secret": "轮换并移除暴露的凭证",
         "justify-workflow-permissions": "要求说明 workflow 权限最小化理由",
         "review-privileged-pr-trigger": "审查 pull_request_target 高权限触发器",
+        "review-untrusted-checkout": "审查 PR head checkout 的权限边界",
         "review-package-lifecycle-script": "审查包生命周期脚本",
         "review-mcp-execution-surface": "审查 MCP 命令、参数和凭证处理",
         "request-review-map-or-split": "要求拆分 PR 或提供逐文件 review map",
@@ -51153,6 +51168,7 @@ function translateReviewActionDetail(actionId, fallback) {
         "rotate-secret": "在 secret 从 PR 中移除并完成轮换前，不要合并。",
         "justify-workflow-permissions": "确认写权限或 OIDC 是否必要，并检查不可信 PR 是否能触发该 workflow。",
         "review-privileged-pr-trigger": "确认 workflow 不会用写权限 token、secret 或仓库权限执行不可信 PR 代码。",
+        "review-untrusted-checkout": "确认 job 不会在写权限 token、仓库 secret 或 pull_request_target 高权限上下文中运行不可信 PR 代码。",
         "review-package-lifecycle-script": "检查 install、postinstall、prepare 或 publish 脚本是否会执行非预期代码。",
         "review-mcp-execution-surface": "检查 MCP 配置是否提交凭证，或意外扩大本地执行面。",
         "request-review-map-or-split": "要求贡献者拆分无关改动，或标出最需要重点 review 的文件。",
@@ -51173,6 +51189,7 @@ function translateFocusReason(reasonId, fallback) {
         "dependency-lifecycle-script": "包生命周期脚本发生变更",
         "workflow-permission-change": "workflow 权限发生变更",
         "workflow-dangerous-trigger": "workflow 使用了高风险触发器",
+        "workflow-untrusted-checkout": "workflow checkout 了不可信 PR head",
         "mcp-credential-risk": "MCP 配置存在执行面或凭证风险",
         "missing-tests": "代码改动缺少测试或验证证据"
     }[reasonId] ?? fallback;
@@ -51207,6 +51224,7 @@ function translateDeduction(reasonId, fallback) {
         "dependency-major-upgrade": "依赖发生大版本升级。",
         "dependency-lifecycle-script": "包生命周期脚本可能在安装或发布阶段执行代码。",
         "workflow-dangerous-trigger": "pull_request_target workflow 需要重点审查高权限触发路径。",
+        "workflow-untrusted-checkout": "Workflow checkout PR head 代码，需要审查权限边界。",
         "evidence-contract-missing": "仓库自定义证据契约未满足。",
         "missing-tests": "代码发生变更，但缺少测试变更或验证说明。"
     }[reasonId] ?? fallback;
@@ -51539,6 +51557,7 @@ function analyzeDiffFiles(files, config, pullRequest) {
     findings.push(...analyzeDependencyChanges(activeFiles, config));
     findings.push(...analyzeWorkflowPermissions(activeFiles));
     findings.push(...analyzeWorkflowDangerousTriggers(activeFiles));
+    findings.push(...analyzeWorkflowUntrustedCheckout(activeFiles));
     findings.push(...analyzeMcpConfigs(activeFiles));
     if (config.secrets.enabled) {
         for (const file of activeFiles) {
@@ -51846,7 +51865,7 @@ function extractMajorVersion(version) {
 function analyzeWorkflowPermissions(files) {
     const findings = [];
     for (const file of files.filter((candidate) => isWorkflowPath(candidate.path))) {
-        const permissionLines = file.addedLines.filter((line) => /permissions:|contents:\s*write|packages:\s*write|id-token:\s*write|pull-requests:\s*write/.test(line.value.trim()));
+        const permissionLines = file.addedLines.filter((line) => isRiskyWorkflowPermissionLine(line.value));
         if (permissionLines.length === 0) {
             continue;
         }
@@ -51861,6 +51880,13 @@ function analyzeWorkflowPermissions(files) {
         });
     }
     return findings;
+}
+function isRiskyWorkflowPermissionLine(value) {
+    const line = value.trim();
+    if (/^permissions:\s*write-all\b/i.test(line)) {
+        return true;
+    }
+    return /^(?:actions|attestations|checks|contents|deployments|discussions|id-token|issues|models|packages|pages|pull-requests|repository-projects|security-events|statuses):\s*write\b/i.test(line);
 }
 function analyzeWorkflowDangerousTriggers(files) {
     const findings = [];
@@ -51880,6 +51906,33 @@ function analyzeWorkflowDangerousTriggers(files) {
         });
     }
     return findings;
+}
+function analyzeWorkflowUntrustedCheckout(files) {
+    const findings = [];
+    for (const file of files.filter((candidate) => isWorkflowPath(candidate.path))) {
+        const headCheckoutLines = file.addedLines.filter((line) => isPullRequestHeadCheckoutLine(line.value));
+        if (headCheckoutLines.length === 0) {
+            continue;
+        }
+        const hasPullRequestTarget = file.addedLines.some((line) => /\bpull_request_target\b/.test(line.value.trim()));
+        findings.push({
+            ruleId: "workflow-untrusted-checkout",
+            title: "Workflow checks out pull request head",
+            message: hasPullRequestTarget
+                ? `${file.path} combines pull_request_target with pull request head checkout references.`
+                : `${file.path} checks out pull request head references; review the job privilege boundary before merging.`,
+            severity: hasPullRequestTarget ? "high" : "medium",
+            path: file.path,
+            evidence: headCheckoutLines.slice(0, 5).map(formatEvidenceLine),
+            recommendation: "Avoid running untrusted PR code with write tokens, repository secrets, or privileged pull_request_target context."
+        });
+    }
+    return findings;
+}
+function isPullRequestHeadCheckoutLine(value) {
+    const line = value.trim();
+    return (/\bgithub\.head_ref\b/.test(line) ||
+        /\bgithub\.event\.pull_request\.head(?:\.sha|\.ref|\.repo\.full_name)?\b/.test(line));
 }
 function analyzeMcpConfigs(files) {
     const findings = [];
@@ -51981,6 +52034,7 @@ function calculateEvidenceScore(summary, findings) {
         "dependency-lifecycle-script",
         "workflow-permission-change",
         "workflow-dangerous-trigger",
+        "workflow-untrusted-checkout",
         "mcp-credential-risk"
     ].includes(finding.ruleId) || finding.ruleId.startsWith("evidence-contract:"));
     if (needsVerificationEvidence && !summary.verificationEvidence) {
@@ -51998,6 +52052,9 @@ function calculateEvidenceScore(summary, findings) {
         }
         else if (finding.ruleId === "workflow-dangerous-trigger") {
             addDeduction("workflow-dangerous-trigger", 30, "pull_request_target workflows need privileged trigger review.");
+        }
+        else if (finding.ruleId === "workflow-untrusted-checkout") {
+            addDeduction("workflow-untrusted-checkout", finding.severity === "high" ? 30 : 18, "Workflow checkout of pull request head needs privilege-boundary review.");
         }
         else if (finding.ruleId === "mcp-credential-risk") {
             addDeduction("mcp-credential-risk", 25, "MCP configuration expands local execution or credential risk.");
@@ -52083,6 +52140,7 @@ function calculateReviewDecision(risk, evidenceScore, findings) {
     const hasBlockingSecurityFinding = findings.some((finding) => finding.ruleId.startsWith("secret-detected") ||
         finding.ruleId === "workflow-permission-change" ||
         finding.ruleId === "workflow-dangerous-trigger" ||
+        (finding.ruleId === "workflow-untrusted-checkout" && finding.severity === "high") ||
         finding.ruleId === "dependency-lifecycle-script" ||
         finding.ruleId === "mcp-credential-risk");
     if (hasBlockingSecurityFinding || evidenceScore.value < 50 || risk === "high") {
@@ -52244,6 +52302,17 @@ function reviewActionsForFinding(finding) {
                 title: "Review privileged pull_request_target usage.",
                 detail: "Confirm the workflow does not execute untrusted PR code with write tokens, secrets, or repository permissions.",
                 priority: "high",
+                relatedRuleIds: [finding.ruleId]
+            }
+        ];
+    }
+    if (finding.ruleId === "workflow-untrusted-checkout") {
+        return [
+            {
+                actionId: "review-untrusted-checkout",
+                title: "Review pull request head checkout privileges.",
+                detail: "Confirm the job does not run untrusted PR code with write tokens, repository secrets, or pull_request_target privileges.",
+                priority: finding.severity === "high" ? "high" : "medium",
                 relatedRuleIds: [finding.ruleId]
             }
         ];
