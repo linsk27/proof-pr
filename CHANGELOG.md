@@ -1,6 +1,6 @@
 # 变更记录
 
-## Unreleased
+## 0.1.6 - 2026-05-11
 
 - 新增 `dependency-major-upgrade`：识别依赖跨大版本升级。
 - 新增 `dependency-lifecycle-script`：识别 `package.json` 中可能在安装或发布阶段执行的包生命周期脚本。

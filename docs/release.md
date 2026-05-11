@@ -1,6 +1,6 @@
 # 发布流程
 
-当前 `main` 分支已经准备好 `0.1.5`。正式发布需要仓库维护者确认后再打 tag。
+当前 `main` 分支正在准备 `0.1.6`。正式发布需要仓库维护者确认后再打 tag。
 
 ## 发布前检查
 
@@ -33,8 +33,8 @@ GitHub Release 会先创建；随后 workflow 会检查该版本是否已经存�
 确认 `NPM_TOKEN` 已配置后：
 
 ```bash
-git tag v0.1.5
-git push origin v0.1.5
+git tag v0.1.6
+git push origin v0.1.6
 ```
 
 发布完成后需要检查：
@@ -44,20 +44,21 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-## `v0.1.5` 发布状态
+## `v0.1.6` 发布重点
 
-`v0.1.5` 已经完成：
+`v0.1.6` 是功能增强版，重点包括：
 
-- Git tag：`v0.1.5`
-- npm：`proof-pr@0.1.5`
-
-本次 npm 发布使用本机临时 token 完成，token 已从本机 npm 配置移除。
+- 依赖大版本升级识别：`dependency-major-upgrade`。
+- 包生命周期脚本识别：`dependency-lifecycle-script`。
+- `pull_request_target` 高风险触发器识别：`workflow-dangerous-trigger`。
+- GitHub Action 默认使用 `.proofpr.yml` 的 `riskThreshold` 作为 `fail-on` 阈值。
+- 新增三个可复现案例 diff。
 
 ## 发布后文档更新
 
 发布成功后，把 README 的发布状态改成：
 
-- GitHub Release：`v0.1.5`
-- npm 最新公开包：`proof-pr@0.1.5`
+- GitHub Release：`v0.1.6`
+- npm 最新公开包：`proof-pr@0.1.6`
 
 然后可以在 GitHub Release 页面继续执行 Marketplace 上架流程。

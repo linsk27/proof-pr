@@ -13,9 +13,9 @@ ProofPR 是给开源维护者使用的 **PR 证据门禁**。它在 Pull Request
 
 ## 当前发布
 
-- GitHub Release：[`v0.1.5`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.5)
-- npm：[`proof-pr@0.1.5`](https://www.npmjs.com/package/proof-pr)
-- 主要能力：Review Plan、规则预设、GitHub annotations、SARIF 输出、真实案例库、Marketplace 准备材料。
+- GitHub Release：[`v0.1.6`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.6)
+- npm：[`proof-pr@0.1.6`](https://www.npmjs.com/package/proof-pr)
+- 主要能力：Review Plan、规则预设、GitHub annotations、SARIF 输出、真实案例库、依赖大版本升级、包生命周期脚本、`pull_request_target` 风险检测。
 
 ## 30 秒安装
 
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.5
+      - uses: linsk27/proof-pr@v0.1.6
         with:
           fail-on: high
           comment: "true"
@@ -160,7 +160,7 @@ npx proof-pr@latest init --preset security-strict
 
 项目已经具备可用的 Action、CLI、npm 包、Release、annotations、SARIF、案例库和中文文档。下一步更像“产品化”和“传播”工作：
 
-- 刷新一组 `v0.1.5` 的真实截图，展示 annotations 和 Code Scanning。
+- 刷新一组 `v0.1.6` 的真实截图，展示 annotations 和 Code Scanning。
 - 上架 GitHub Marketplace。
 - 增加 Issue 质量检查模式。
 - 做规则插件系统，让团队可以写自己的规则。
