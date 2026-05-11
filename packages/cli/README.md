@@ -24,6 +24,12 @@ npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.diff --locale zh-CN
 ```
 
+生成独立 HTML 可视化报告：
+
+```bash
+npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html > proofpr-report.html
+```
+
 运行 benchmark：
 
 ```bash
@@ -46,7 +52,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 - 证据评分：0-100 分。
 - Review 门禁：正常 review、重点 review、先补证据、风险处理前不要合并。
 - Review 行动清单：维护者可直接执行的 checklist。
-- 可选输出：GitHub annotations、SARIF、benchmark report。
+- 可选输出：GitHub annotations、SARIF、benchmark report、独立 HTML 可视化报告。
 
 ## 常用预设
 

@@ -177,6 +177,14 @@ proof-pr benchmark --cases benchmarks/cases
 
 ![ProofPR benchmark 输出](screenshots/proofpr-benchmark-output.png)
 
+生成独立 HTML 可视化报告：
+
+```bash
+proof-pr scan --base origin/main --head HEAD --locale zh-CN --format html > proofpr-report.html
+```
+
+![ProofPR HTML 可视化报告](screenshots/proofpr-visual-report.png)
+
 如果你的仓库更关注安全、MCP 或依赖风险，可以换成：
 
 ```bash

@@ -7,6 +7,7 @@ import * as github from "@actions/github";
 import {
   getReportMarker,
   loadConfig,
+  renderHtmlReport,
   renderMarkdownReport,
   renderSarifReport,
   riskMeetsThreshold,
@@ -26,6 +27,7 @@ async function run(): Promise<void> {
   const shouldComment = parseBoolean(core.getInput("comment", { required: false }) || "true");
   const shouldAnnotate = parseBoolean(core.getInput("annotations", { required: false }) || "true");
   const sarifOutput = core.getInput("sarif-output", { required: false });
+  const htmlOutput = core.getInput("html-output", { required: false });
 
   const config = await loadConfig(configPath);
   const failOn = parseFailLevel(failOnInput || config.riskThreshold);
@@ -53,6 +55,10 @@ async function run(): Promise<void> {
     await writeSarifReport(sarifOutput, renderSarifReport(result));
   }
 
+  if (htmlOutput) {
+    await writeHtmlReport(htmlOutput, renderHtmlReport(result, config.locale));
+  }
+
   if (shouldComment && token && github.context.payload.pull_request) {
     await upsertPullRequestComment(token, markdown);
   }
@@ -66,6 +72,12 @@ async function writeSarifReport(path: string, body: string): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, body, "utf8");
   core.info(`ProofPR SARIF report written to ${path}.`);
+}
+
+async function writeHtmlReport(path: string, body: string): Promise<void> {
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, body, "utf8");
+  core.info(`ProofPR HTML report written to ${path}.`);
 }
 
 function publishAnnotations(findings: Finding[]): void {

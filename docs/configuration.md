@@ -160,6 +160,7 @@ evidence:
 | `comment` | `true` | 是否创建或更新 PR 评论。 |
 | `annotations` | `true` | `v0.1.5` 起可用，是否输出 GitHub workflow annotations。 |
 | `sarif-output` | 空 | `v0.1.5` 起可用，写出 SARIF 文件路径，例如 `proofpr.sarif`。 |
+| `html-output` | 空 | 写出独立 HTML 可视化报告路径，例如 `proofpr-report.html`。 |
 
 Action 输出项：
 

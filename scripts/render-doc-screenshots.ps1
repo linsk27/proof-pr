@@ -189,4 +189,22 @@ Save-TerminalImage `
   -Text $benchmarkText `
   -Path (Join-Path $OutDir "proofpr-benchmark-output.png")
 
+$visualHtmlPath = Join-Path $OutDir "proofpr-visual-report.html"
+$visualPngPath = Join-Path $OutDir "proofpr-visual-report.png"
+$visualHtml = Invoke-CommandText `
+  -File "node" `
+  -CommandArgs @((Join-Path $Repo "packages\cli\dist\index.js"), "scan", "--diff-file", "examples\cases\workflow-untrusted-checkout.diff", "--locale", "zh-CN", "--format", "html") `
+  -WorkDir $Repo
+Set-Content -LiteralPath $visualHtmlPath -Value $visualHtml -Encoding UTF8
+
+$edgePath = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+if (Test-Path $edgePath) {
+  & $edgePath `
+    --headless `
+    --disable-gpu `
+    --window-size=1440,1800 `
+    "--screenshot=$visualPngPath" `
+    "file:///$($visualHtmlPath -replace '\\', '/')" *> $null
+}
+
 Write-Host "ProofPR doc screenshots generated."

@@ -17,6 +17,7 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 - npm：[`proof-pr@0.1.7`](https://www.npmjs.com/package/proof-pr)
 - GitHub Action：`linsk27/proof-pr@v0.1.7`
 - 当前 benchmark：`14/14 passed`
+- 可视化报告：`--format html` / `html-output`
 
 ## 它解决什么问题
 
@@ -28,6 +29,7 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 | 新增依赖、大版本升级、`postinstall` 脚本。 | 提醒核查供应链风险、changelog、迁移说明和 lockfile。 |
 | 使用 `pull_request_target` 并 checkout PR head。 | 标记为高风险组合，避免高权限上下文运行不可信 PR 代码。 |
 | 团队想要求 UI 改动必须有截图。 | 用 Evidence Contract 声明路径级证据要求。 |
+| 想把扫描结果做成可分享页面。 | 输出独立 HTML 风险面板，适合保存为 artifact 或贴进文档。 |
 
 ## 从 0 到 1
 
@@ -93,6 +95,10 @@ ProofPR 会在这些时机运行：
 
 ![ProofPR workflow 风险扫描输出](docs/screenshots/proofpr-workflow-risk-output.png)
 
+独立 HTML 可视化报告：
+
+![ProofPR HTML 可视化报告](docs/screenshots/proofpr-visual-report.png)
+
 Benchmark 输出，证明规则样本仍按预期命中：
 
 ![ProofPR benchmark 输出](docs/screenshots/proofpr-benchmark-output.png)
@@ -120,6 +126,7 @@ Benchmark 输出，证明规则样本仍按预期命中：
 - GitHub Actions job summary。
 - Workflow annotations / PR 文件视图。
 - 可选 GitHub Code Scanning，见 [SARIF 文档](docs/sarif-code-scanning.md)。
+- 可选 HTML 可视化报告，适合上传为 workflow artifact。
 
 ## 它会检查什么
 
@@ -153,6 +160,12 @@ npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.
 npx proof-pr@latest scan --diff-file examples/cases/secret-leak.diff --format sarif
 ```
 
+生成独立 HTML 可视化报告：
+
+```bash
+npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html > proofpr-report.html
+```
+
 运行 benchmark：
 
 ```bash
@@ -184,6 +197,18 @@ evidence:
         - screenshot
         - verification
       severity: medium
+```
+
+如果想在 GitHub Action 里保存 HTML 面板：
+
+```yaml
+- uses: linsk27/proof-pr@v0.1.7
+  with:
+    html-output: proofpr-report.html
+- uses: actions/upload-artifact@v4
+  with:
+    name: proofpr-report
+    path: proofpr-report.html
 ```
 
 内置预设：

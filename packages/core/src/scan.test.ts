@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseConfig } from "./config.js";
-import { renderMarkdownReport, renderSarifReport } from "./reporters.js";
+import { renderHtmlReport, renderMarkdownReport, renderSarifReport } from "./reporters.js";
 import { scanDiff } from "./scan.js";
 
 describe("scanDiff", () => {
@@ -462,6 +462,39 @@ index 0000000..1111111 100644
     expect(report).toContain("Review 门禁");
     expect(report).toContain("Review 行动清单");
     expect(report).toContain("风险发现");
+  });
+
+  it("renders a standalone HTML visual report", () => {
+    const result = scanDiff(`diff --git a/src/auth.ts b/src/auth.ts
+index 0000000..1111111 100644
+--- a/src/auth.ts
++++ b/src/auth.ts
+@@ -1 +1,2 @@
+ export function auth() {}
++export function logout() {}
+`);
+    const html = renderHtmlReport(result, "zh-CN");
+
+    expect(html).toContain("<!doctype html>");
+    expect(html).toContain("ProofPR 可视化报告");
+    expect(html).toContain("证据评分");
+    expect(html).toContain("Review 行动清单");
+    expect(html).toContain("missing-tests");
+  });
+
+  it("escapes HTML content in visual reports", () => {
+    const result = scanDiff(`diff --git a/src/<auth>.ts b/src/<auth>.ts
+index 0000000..1111111 100644
+--- a/src/<auth>.ts
++++ b/src/<auth>.ts
+@@ -1 +1,2 @@
+ export function auth() {}
++export function logout() {}
+`);
+    const html = renderHtmlReport(result, "en");
+
+    expect(html).toContain("src/&lt;auth&gt;.ts");
+    expect(html).not.toContain("src/<auth>.ts");
   });
 
   it("renders SARIF locations for file findings", () => {

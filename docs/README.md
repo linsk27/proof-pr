@@ -30,6 +30,8 @@
 
 ![ProofPR workflow 风险扫描输出](screenshots/proofpr-workflow-risk-output.png)
 
+![ProofPR HTML 可视化报告](screenshots/proofpr-visual-report.png)
+
 ![ProofPR benchmark 输出](screenshots/proofpr-benchmark-output.png)
 
 流程示意图：
@@ -62,3 +64,4 @@ ProofPR 是一个给开源维护者使用的 PR 证据门禁。它关注的是�
 - CI benchmark report。
 - GitHub annotations。
 - SARIF / Code Scanning 输出。
+- 独立 HTML 可视化报告。

@@ -26,6 +26,10 @@ inputs:
     description: Optional path to write a SARIF report for GitHub Code Scanning upload.
     required: false
     default: ""
+  html-output:
+    description: Optional path to write a standalone visual HTML report.
+    required: false
+    default: ""
 outputs:
   risk:
     description: Overall ProofPR risk level.

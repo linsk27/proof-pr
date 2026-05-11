@@ -50694,6 +50694,434 @@ function renderMarkdownReport(result, locale = "en") {
     }
     return renderEnglishMarkdownReport(result);
 }
+function renderHtmlReport(result, locale = "en") {
+    const labels = htmlLabels(locale);
+    const risk = locale === "zh-CN" ? translateRisk(result.risk) : result.risk;
+    const decision = formatReviewDecision(result.reviewDecision, locale);
+    const scoreGrade = formatEvidenceGrade(result.evidenceScore.grade, locale);
+    const findingsBySeverity = countFindingsBySeverity(result.findings);
+    const ruleCounts = countFindingsByRule(result.findings);
+    const evidenceSignals = [
+        [labels.prDescription, locale === "zh-CN" ? translateDescriptionState(result.summary.pullRequestDescription) : result.summary.pullRequestDescription, result.summary.pullRequestDescription === "present"],
+        [labels.verification, yesNo(result.summary.verificationEvidence, locale), result.summary.verificationEvidence],
+        [labels.reproduction, yesNo(result.summary.reproductionEvidence, locale), result.summary.reproductionEvidence],
+        [labels.screenshot, yesNo(result.summary.screenshotEvidence, locale), result.summary.screenshotEvidence],
+        [labels.changelog, yesNo(result.summary.changelogEvidence, locale), result.summary.changelogEvidence],
+        [labels.permissionRationale, yesNo(result.summary.permissionRationaleEvidence, locale), result.summary.permissionRationaleEvidence]
+    ];
+    return `<!doctype html>
+<html lang="${locale === "zh-CN" ? "zh-CN" : "en"}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ProofPR ${labels.report}</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #17202a;
+      --muted: #667085;
+      --line: #d9dee7;
+      --green: #138a5e;
+      --amber: #b7791f;
+      --red: #c24135;
+      --blue: #2563a9;
+      --soft-green: #e8f6ef;
+      --soft-amber: #fff3d6;
+      --soft-red: #fdebea;
+      --soft-blue: #eaf2fb;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      line-height: 1.5;
+    }
+
+    main {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 32px 0 48px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    h1 {
+      font-size: 28px;
+      line-height: 1.2;
+    }
+
+    h2 {
+      font-size: 17px;
+      margin-bottom: 14px;
+    }
+
+    h3 {
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-top: 8px;
+      max-width: 760px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 10px;
+      background: var(--panel);
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+    }
+
+    .metric { grid-column: span 3; }
+    .wide { grid-column: span 8; }
+    .side { grid-column: span 4; }
+    .full { grid-column: 1 / -1; }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-size: 27px;
+      font-weight: 720;
+      line-height: 1.1;
+    }
+
+    .tone-low { color: var(--green); background: var(--soft-green); border-color: #b8e5cf; }
+    .tone-medium { color: var(--amber); background: var(--soft-amber); border-color: #f1d28a; }
+    .tone-high { color: var(--red); background: var(--soft-red); border-color: #f3b6b1; }
+
+    .scorebar {
+      width: 100%;
+      height: 16px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 14px 0 10px;
+      background: #eef1f5;
+    }
+
+    .scorefill {
+      height: 100%;
+      width: ${result.evidenceScore.value}%;
+      background: ${scoreColor(result.evidenceScore.value)};
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .summary-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fbfcfd;
+    }
+
+    .summary-item strong {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+
+    .summary-item span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .signal-list, .action-list, .finding-list, .focus-list, .deduction-list, .rule-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .signal, .action, .focus, .deduction, .rule-row {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fbfcfd;
+    }
+
+    .signal {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .signal-name, .action-title, .finding-title {
+      font-weight: 680;
+    }
+
+    .signal-state {
+      font-size: 12px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      border: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    .severity-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .severity {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fbfcfd;
+    }
+
+    .severity strong {
+      display: block;
+      font-size: 22px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .action {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+    }
+
+    .box {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--blue);
+      border-radius: 4px;
+      margin-top: 2px;
+    }
+
+    .priority {
+      display: inline-flex;
+      margin-left: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 560;
+    }
+
+    .finding {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .finding-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      background: #f0f3f7;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 2px 5px;
+      word-break: break-word;
+    }
+
+    .evidence-list {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .footer {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 18px;
+      text-align: center;
+    }
+
+    @media (max-width: 860px) {
+      main { width: min(100vw - 20px, 1180px); padding-top: 20px; }
+      .topbar { display: block; }
+      .pill { margin-top: 12px; }
+      .metric, .wide, .side { grid-column: 1 / -1; }
+      .summary-grid, .severity-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="topbar">
+      <div>
+        <h1>ProofPR ${labels.report}</h1>
+        <p class="subtitle">${labels.subtitle}</p>
+      </div>
+      <span class="pill">${labels.generated}</span>
+    </section>
+
+    <section class="grid">
+      <article class="card metric">
+        <div class="metric-label">${labels.risk}</div>
+        <div class="metric-value">${escapeHtml(risk)}</div>
+        <span class="pill tone-${result.risk}">${escapeHtml(result.risk)}</span>
+      </article>
+      <article class="card metric">
+        <div class="metric-label">${labels.evidenceScore}</div>
+        <div class="metric-value">${result.evidenceScore.value}/100</div>
+        <div class="scorebar" aria-label="${labels.evidenceScore}">
+          <div class="scorefill"></div>
+        </div>
+        <div class="muted">${escapeHtml(scoreGrade)}</div>
+      </article>
+      <article class="card metric">
+        <div class="metric-label">${labels.reviewGate}</div>
+        <div class="metric-value" style="font-size: 20px;">${escapeHtml(decision)}</div>
+      </article>
+      <article class="card metric">
+        <div class="metric-label">${labels.findings}</div>
+        <div class="metric-value">${result.findings.length}</div>
+        <div class="muted">${labels.findingsHint}</div>
+      </article>
+
+      <article class="card wide">
+        <h2>${labels.changeSummary}</h2>
+        <div class="summary-grid">
+          ${summaryItem(labels.filesChanged, result.summary.filesChanged)}
+          ${summaryItem(labels.additions, result.summary.additions)}
+          ${summaryItem(labels.deletions, result.summary.deletions)}
+          ${summaryItem(labels.sensitiveFiles, result.summary.sensitiveFilesChanged)}
+          ${summaryItem(labels.testFiles, result.summary.testFilesChanged)}
+          ${summaryItem(labels.highFindings, findingsBySeverity.high)}
+          ${summaryItem(labels.mediumFindings, findingsBySeverity.medium)}
+          ${summaryItem(labels.lowFindings, findingsBySeverity.low)}
+        </div>
+      </article>
+
+      <article class="card side">
+        <h2>${labels.evidenceSignals}</h2>
+        <div class="signal-list">
+          ${evidenceSignals.map(([name, state, ok]) => signalItem(name, state, ok)).join("\n")}
+        </div>
+      </article>
+
+      <article class="card wide">
+        <h2>${labels.reviewPlan}</h2>
+        <div class="action-list">
+          ${result.reviewPlan.actionItems.length > 0
+        ? result.reviewPlan.actionItems.map((action) => `
+          <div class="action">
+            <span class="box"></span>
+            <div>
+              <div class="action-title">${escapeHtml(localizeActionTitle(action.actionId, action.title, locale))}<span class="priority">${escapeHtml(formatPriority(action.priority, locale))}</span></div>
+              <div class="muted">${escapeHtml(localizeActionDetail(action.actionId, action.detail, locale))}</div>
+            </div>
+          </div>`).join("\n")
+        : `<div class="muted">${labels.noActions}</div>`}
+        </div>
+      </article>
+
+      <article class="card side">
+        <h2>${labels.findingDistribution}</h2>
+        <div class="severity-grid">
+          ${severityItem("high", findingsBySeverity.high, labels.high)}
+          ${severityItem("medium", findingsBySeverity.medium, labels.medium)}
+          ${severityItem("low", findingsBySeverity.low, labels.low)}
+          ${severityItem("info", findingsBySeverity.info, labels.info)}
+        </div>
+      </article>
+
+      <article class="card side">
+        <h2>${labels.focusFiles}</h2>
+        <div class="focus-list">
+          ${result.reviewPlan.focusFiles.length > 0
+        ? result.reviewPlan.focusFiles.map((file) => `
+          <div class="focus">
+            <div><code>${escapeHtml(file.path)}</code></div>
+            <div class="muted">${escapeHtml(localizeFocusReason(file.reasonId, file.reason, locale))}</div>
+          </div>`).join("\n")
+        : `<div class="muted">${labels.noFocusFiles}</div>`}
+        </div>
+      </article>
+
+      <article class="card side">
+        <h2>${labels.scoreDetails}</h2>
+        <div class="deduction-list">
+          ${result.evidenceScore.deductions.length > 0
+        ? result.evidenceScore.deductions.map((deduction) => `
+          <div class="deduction">
+            <strong>-${deduction.points}</strong>
+            <div class="muted">${escapeHtml(localizeDeduction(deduction.reasonId, deduction.message, locale))}</div>
+          </div>`).join("\n")
+        : `<div class="muted">${labels.noDeductions}</div>`}
+        </div>
+      </article>
+
+      <article class="card full">
+        <h2>${labels.rulesCovered}</h2>
+        <div class="rule-list">
+          ${ruleCounts.length > 0
+        ? ruleCounts.map((item) => `<div class="rule-row"><code>${escapeHtml(item.ruleId)}</code> <span class="muted">${item.count}</span></div>`).join("\n")
+        : `<div class="muted">${labels.noRules}</div>`}
+        </div>
+      </article>
+
+      <article class="card full">
+        <h2>${labels.findings}</h2>
+        <div class="finding-list">
+          ${result.findings.length > 0
+        ? result.findings.map((finding) => htmlFinding(finding, locale)).join("\n")
+        : `<div class="muted">${labels.noFindings}</div>`}
+        </div>
+      </article>
+    </section>
+
+    <p class="footer">${labels.footer}</p>
+  </main>
+</body>
+</html>
+`;
+}
 function getReportMarker() {
     return REPORT_MARKER;
 }
@@ -51228,6 +51656,191 @@ function translateDeduction(reasonId, fallback) {
         "evidence-contract-missing": "仓库自定义证据契约未满足。",
         "missing-tests": "代码发生变更，但缺少测试变更或验证说明。"
     }[reasonId] ?? fallback;
+}
+function htmlLabels(locale) {
+    if (locale === "zh-CN") {
+        return {
+            report: "可视化报告",
+            subtitle: "把 PR 风险、证据质量、Review 门禁和维护者行动清单整理成一个可分享的静态页面。",
+            generated: "Generated by ProofPR",
+            risk: "风险等级",
+            evidenceScore: "证据评分",
+            reviewGate: "Review 门禁",
+            findings: "风险发现",
+            findingsHint: "需要维护者优先关注的信号",
+            changeSummary: "改动概览",
+            filesChanged: "改动文件",
+            additions: "新增行",
+            deletions: "删除行",
+            sensitiveFiles: "敏感文件",
+            testFiles: "测试文件",
+            highFindings: "高风险",
+            mediumFindings: "中风险",
+            lowFindings: "低风险",
+            evidenceSignals: "证据信号",
+            prDescription: "PR 描述",
+            verification: "验证证据",
+            reproduction: "复现上下文",
+            screenshot: "截图证据",
+            changelog: "Changelog",
+            permissionRationale: "权限理由",
+            reviewPlan: "Review 行动清单",
+            noActions: "没有额外行动项。",
+            findingDistribution: "Finding 分布",
+            high: "高",
+            medium: "中",
+            low: "低",
+            info: "信息",
+            focusFiles: "重点文件",
+            noFocusFiles: "没有重点文件。",
+            scoreDetails: "证据扣分",
+            noDeductions: "没有扣分项。",
+            rulesCovered: "命中规则",
+            noRules: "没有规则命中。",
+            noFindings: "启用的规则没有发现需要优先关注的 review 风险。",
+            rule: "规则",
+            severity: "严重程度",
+            path: "路径",
+            detail: "详情",
+            evidence: "证据",
+            recommendation: "建议",
+            footer: "ProofPR 不替代人工 review，它帮助维护者先判断证据是否足够、风险边界是否清楚。"
+        };
+    }
+    return {
+        report: "Visual Report",
+        subtitle: "A shareable static view of PR risk, evidence quality, review gate, and maintainer actions.",
+        generated: "Generated by ProofPR",
+        risk: "Risk",
+        evidenceScore: "Evidence score",
+        reviewGate: "Review gate",
+        findings: "Findings",
+        findingsHint: "Signals that deserve maintainer attention",
+        changeSummary: "Change summary",
+        filesChanged: "Files changed",
+        additions: "Additions",
+        deletions: "Deletions",
+        sensitiveFiles: "Sensitive files",
+        testFiles: "Test files",
+        highFindings: "High findings",
+        mediumFindings: "Medium findings",
+        lowFindings: "Low findings",
+        evidenceSignals: "Evidence signals",
+        prDescription: "PR description",
+        verification: "Verification",
+        reproduction: "Reproduction",
+        screenshot: "Screenshot",
+        changelog: "Changelog",
+        permissionRationale: "Permission rationale",
+        reviewPlan: "Review plan",
+        noActions: "No additional action items.",
+        findingDistribution: "Finding distribution",
+        high: "High",
+        medium: "Medium",
+        low: "Low",
+        info: "Info",
+        focusFiles: "Focus files",
+        noFocusFiles: "No focus files.",
+        scoreDetails: "Evidence deductions",
+        noDeductions: "No deductions.",
+        rulesCovered: "Rules covered",
+        noRules: "No rule hits.",
+        noFindings: "No review-risk findings detected by the enabled rules.",
+        rule: "Rule",
+        severity: "Severity",
+        path: "Path",
+        detail: "Detail",
+        evidence: "Evidence",
+        recommendation: "Recommendation",
+        footer: "ProofPR does not replace human review. It helps maintainers decide whether evidence is enough and risk boundaries are clear."
+    };
+}
+function summaryItem(label, value) {
+    return `<div class="summary-item"><strong>${value}</strong><span>${escapeHtml(label)}</span></div>`;
+}
+function signalItem(name, state, ok) {
+    return `<div class="signal"><span class="signal-name">${escapeHtml(name)}</span><span class="signal-state ${ok ? "tone-low" : "tone-medium"}">${escapeHtml(state)}</span></div>`;
+}
+function severityItem(severity, value, label) {
+    return `<div class="severity ${severity === "high" ? "tone-high" : severity === "medium" ? "tone-medium" : severity === "low" ? "tone-low" : ""}"><strong>${value}</strong><span>${escapeHtml(label)}</span></div>`;
+}
+function htmlFinding(finding, locale) {
+    const labels = htmlLabels(locale);
+    const translated = locale === "zh-CN" ? translateFinding(finding) : finding;
+    const evidence = finding.evidence && finding.evidence.length > 0
+        ? `<ul class="evidence-list">${finding.evidence
+            .map((item) => `<li><code>${escapeHtml(locale === "zh-CN" ? translateEvidence(item) : item)}</code></li>`)
+            .join("")}</ul>`
+        : "";
+    const path = finding.path
+        ? `<div class="muted">${labels.path}: <code>${escapeHtml(finding.path)}</code></div>`
+        : "";
+    const recommendation = translated.recommendation
+        ? `<div class="muted">${labels.recommendation}: ${escapeHtml(translated.recommendation)}</div>`
+        : "";
+    return `<div class="finding">
+    <div class="finding-head">
+      <div>
+        <div class="finding-title">${escapeHtml(translated.title)}</div>
+        <div class="muted">${labels.rule}: <code>${escapeHtml(finding.ruleId)}</code></div>
+      </div>
+      <span class="pill ${finding.severity === "high" ? "tone-high" : finding.severity === "medium" ? "tone-medium" : "tone-low"}">${escapeHtml(locale === "zh-CN" ? translateSeverity(finding.severity) : finding.severity)}</span>
+    </div>
+    ${path}
+    <div class="muted">${labels.detail}: ${escapeHtml(translated.message)}</div>
+    ${evidence}
+    ${recommendation}
+  </div>`;
+}
+function countFindingsBySeverity(findings) {
+    return findings.reduce((counts, finding) => {
+        counts[finding.severity] += 1;
+        return counts;
+    }, { info: 0, low: 0, medium: 0, high: 0 });
+}
+function countFindingsByRule(findings) {
+    const counts = new Map();
+    for (const finding of findings) {
+        counts.set(finding.ruleId, (counts.get(finding.ruleId) ?? 0) + 1);
+    }
+    return [...counts.entries()]
+        .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+        .map(([ruleId, count]) => ({ ruleId, count }));
+}
+function scoreColor(value) {
+    if (value >= 85) {
+        return "var(--green)";
+    }
+    if (value >= 70) {
+        return "var(--blue)";
+    }
+    if (value >= 50) {
+        return "var(--amber)";
+    }
+    return "var(--red)";
+}
+function yesNo(value, locale) {
+    return locale === "zh-CN" ? formatChineseBoolean(value) : formatBoolean(value);
+}
+function localizeActionTitle(actionId, fallback, locale) {
+    return locale === "zh-CN" ? translateReviewActionTitle(actionId, fallback) : fallback;
+}
+function localizeActionDetail(actionId, fallback, locale) {
+    return locale === "zh-CN" ? translateReviewActionDetail(actionId, fallback) : fallback;
+}
+function localizeFocusReason(reasonId, fallback, locale) {
+    return locale === "zh-CN" ? translateFocusReason(reasonId, fallback) : fallback;
+}
+function localizeDeduction(reasonId, fallback, locale) {
+    return locale === "zh-CN" ? translateDeduction(reasonId, fallback) : fallback;
+}
+function escapeHtml(value) {
+    return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }
 function formatBoolean(value) {
     return value ? "yes" : "no";
@@ -52449,6 +53062,7 @@ async function run() {
     const shouldComment = parseBoolean(lib_core.getInput("comment", { required: false }) || "true");
     const shouldAnnotate = parseBoolean(lib_core.getInput("annotations", { required: false }) || "true");
     const sarifOutput = lib_core.getInput("sarif-output", { required: false });
+    const htmlOutput = lib_core.getInput("html-output", { required: false });
     const config = await loadConfig(configPath);
     const failOn = parseFailLevel(failOnInput || config.riskThreshold);
     const diffText = await readDiff(token);
@@ -52471,6 +53085,9 @@ async function run() {
     if (sarifOutput) {
         await writeSarifReport(sarifOutput, renderSarifReport(result));
     }
+    if (htmlOutput) {
+        await writeHtmlReport(htmlOutput, renderHtmlReport(result, config.locale));
+    }
     if (shouldComment && token && github.context.payload.pull_request) {
         await upsertPullRequestComment(token, markdown);
     }
@@ -52482,6 +53099,11 @@ async function writeSarifReport(path, body) {
     await (0,promises_namespaceObject.mkdir)((0,external_node_path_namespaceObject.dirname)(path), { recursive: true });
     await (0,promises_namespaceObject.writeFile)(path, body, "utf8");
     lib_core.info(`ProofPR SARIF report written to ${path}.`);
+}
+async function writeHtmlReport(path, body) {
+    await (0,promises_namespaceObject.mkdir)((0,external_node_path_namespaceObject.dirname)(path), { recursive: true });
+    await (0,promises_namespaceObject.writeFile)(path, body, "utf8");
+    lib_core.info(`ProofPR HTML report written to ${path}.`);
 }
 function publishAnnotations(findings) {
     const maxAnnotations = 50;

@@ -163,6 +163,14 @@ npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.
 
 ![ProofPR workflow 风险扫描输出](screenshots/proofpr-workflow-risk-output.png)
 
+如果你想把结果保存成可分享页面，可以生成 HTML 可视化报告：
+
+```bash
+npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.diff --locale zh-CN --format html > proofpr-report.html
+```
+
+![ProofPR HTML 可视化报告](screenshots/proofpr-visual-report.png)
+
 验证规则样本是否仍按预期命中：
 
 ```bash
@@ -189,9 +197,14 @@ steps:
       comment: "true"
       annotations: "true"
       sarif-output: proofpr.sarif
+      html-output: proofpr-report.html
   - uses: github/codeql-action/upload-sarif@v3
     with:
       sarif_file: proofpr.sarif
+  - uses: actions/upload-artifact@v4
+    with:
+      name: proofpr-report
+      path: proofpr-report.html
 ```
 
 完整说明见 [SARIF / Code Scanning](sarif-code-scanning.md)。

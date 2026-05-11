@@ -9,6 +9,7 @@ import {
   loadConfig,
   parseLocale,
   parsePreset,
+  renderHtmlReport,
   renderMarkdownReport,
   renderSarifReport,
   riskMeetsThreshold,
@@ -22,7 +23,7 @@ import {
 
 const execFileAsync = promisify(execFile);
 
-type OutputFormat = "json" | "markdown" | "sarif";
+type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
 
 interface ScanCommandOptions {
@@ -125,7 +126,7 @@ program
   .option("--pr-body <body>", "Pull request body used for evidence checks.")
   .option("--pr-body-file <path>", "Read a pull request body from a Markdown file.")
   .option("--config <path>", "Path to .proofpr.yml.", ".proofpr.yml")
-  .option("--format <format>", "Output format: markdown, json, or sarif.", parseFormat, "markdown")
+  .option("--format <format>", "Output format: markdown, json, sarif, or html.", parseFormat, "markdown")
   .option("--locale <locale>", "Report language: en or zh-CN.")
   .option("--fail-on <level>", "Exit with code 1 on risk level: low, medium, high, or never.", parseFailLevel, "never")
   .action(async (options: ScanCommandOptions) => {
@@ -351,6 +352,10 @@ function renderOutput(result: ReturnType<typeof scanDiff>, format: OutputFormat,
     return renderSarifReport(result);
   }
 
+  if (format === "html") {
+    return renderHtmlReport(result, locale);
+  }
+
   return renderMarkdownReport(result, locale);
 }
 
@@ -555,11 +560,11 @@ function matchesFindingExpectation(actualFindings: string[], expected: string): 
 }
 
 function parseFormat(value: string): OutputFormat {
-  if (value === "json" || value === "markdown" || value === "sarif") {
+  if (value === "json" || value === "markdown" || value === "sarif" || value === "html") {
     return value;
   }
 
-  throw new InvalidArgumentError("format must be one of: markdown, json, sarif");
+  throw new InvalidArgumentError("format must be one of: markdown, json, sarif, html");
 }
 
 function parseBenchmarkFormat(value: string): BenchmarkOutputFormat {
