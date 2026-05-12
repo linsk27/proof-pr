@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.10
+      - uses: linsk27/proof-pr@v0.1.11
         with:
           fail-on: high
           comment: "true"
@@ -100,7 +100,7 @@ npx proof-pr@latest init
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 ```
 
-如果第一行输出 `0.1.10`，说明你正在使用当前最新发布版。
+如果第一行输出 `0.1.11`，说明你正在使用当前最新发布版。
 
 也可以全局安装：
 
@@ -138,7 +138,7 @@ proof-pr benchmark --cases benchmarks/cases
 生成独立 HTML 可视化报告：
 
 ```bash
-proof-pr scan --base origin/main --head HEAD --locale zh-CN --format html > proofpr-report.html
+proof-pr scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html
 ```
 
 ![ProofPR HTML 可视化报告](screenshots/proofpr-visual-report.png)
@@ -178,7 +178,7 @@ proof-pr scan --base origin/main --head HEAD --locale zh-CN
 输出 JSON：
 
 ```bash
-proof-pr scan --base origin/main --format json
+proof-pr scan --base origin/main --format json --output proofpr-report.json
 ```
 
 加入 PR 描述证据检查：

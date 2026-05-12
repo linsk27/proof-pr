@@ -61,6 +61,13 @@ CLI 也可以临时指定：
 proof-pr scan --base origin/main --head HEAD --locale zh-CN
 ```
 
+如果要把报告保存成文件，使用 `--output`：
+
+```bash
+proof-pr scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html
+proof-pr scan --base origin/main --head HEAD --format sarif --output proofpr.sarif
+```
+
 ## `preset`
 
 选择内置规则预设。预设会自动设置风险阈值、敏感路径和需要测试覆盖的源码路径，你也可以在同一个 `.proofpr.yml` 里继续覆盖具体字段。

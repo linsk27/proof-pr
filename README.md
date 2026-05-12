@@ -13,9 +13,9 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 
 ## 现在能用吗
 
-- GitHub Release：[`v0.1.10`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.10)
-- npm：[`proof-pr@0.1.10`](https://www.npmjs.com/package/proof-pr)
-- GitHub Action：`linsk27/proof-pr@v0.1.10`
+- GitHub Release：[`v0.1.11`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.11)
+- npm：[`proof-pr@0.1.11`](https://www.npmjs.com/package/proof-pr)
+- GitHub Action：`linsk27/proof-pr@v0.1.11`
 - 当前 benchmark：`14/14 passed`
 - 可视化报告：`--format html` / `html-output`
 
@@ -26,7 +26,7 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-这两个命令当前都应输出 `0.1.10`。
+这两个命令当前都应输出 `0.1.11`。
 
 ## 它解决什么问题
 
@@ -152,13 +152,13 @@ npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 ```bash
 npx proof-pr@latest scan --diff-file examples/cases/missing-tests.diff --locale zh-CN
 npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.diff --locale zh-CN
-npx proof-pr@latest scan --diff-file examples/cases/secret-leak.diff --format sarif
+npx proof-pr@latest scan --diff-file examples/cases/secret-leak.diff --format sarif --output proofpr.sarif
 ```
 
 生成独立 HTML 可视化报告：
 
 ```bash
-npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html > proofpr-report.html
+npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html
 ```
 
 运行 benchmark：
@@ -197,7 +197,7 @@ evidence:
 如果想在 GitHub Action 里保存 HTML 面板：
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.10
+- uses: linsk27/proof-pr@v0.1.11
   with:
     html-output: proofpr-report.html
 - uses: actions/upload-artifact@v4

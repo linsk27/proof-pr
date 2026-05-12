@@ -12,7 +12,7 @@ ProofPR 是给开源维护者和工程团队使用的 PR 证据门禁。它在�
 npx proof-pr@latest --version
 ```
 
-当前应输出 `0.1.10`。
+当前应输出 `0.1.11`。
 
 初始化配置和 GitHub Action：
 
@@ -37,7 +37,7 @@ npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.
 生成独立 HTML 可视化报告：
 
 ```bash
-npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html > proofpr-report.html
+npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html
 ```
 
 运行 benchmark：
@@ -49,7 +49,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.10
+- uses: linsk27/proof-pr@v0.1.11
   with:
     fail-on: high
     comment: "true"
@@ -62,7 +62,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 - 证据评分：0-100 分。
 - Review 门禁：正常 review、重点 review、先补证据、风险处理前不要合并。
 - Review 行动清单：维护者可直接执行的 checklist。
-- 可选输出：GitHub annotations、SARIF、benchmark report、独立 HTML 可视化报告。
+- 可选输出：GitHub annotations、SARIF、benchmark report、独立 HTML 可视化报告；CLI 可用 `--output` 直接写文件。
 
 ## 常用预设
 

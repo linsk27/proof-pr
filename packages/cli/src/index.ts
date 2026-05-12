@@ -35,6 +35,7 @@ interface ScanCommandOptions {
   prBodyFile?: string;
   config: string;
   format: OutputFormat;
+  output?: string;
   locale?: ReportLocale;
   failOn: FailLevel;
 }
@@ -114,7 +115,7 @@ const program = new Command();
 program
   .name("proof-pr")
   .description("Review pull request evidence, scope, and safety before maintainers spend time on it.")
-  .version("0.1.10");
+  .version("0.1.11");
 
 program
   .command("scan", { isDefault: true })
@@ -127,6 +128,7 @@ program
   .option("--pr-body-file <path>", "Read a pull request body from a Markdown file.")
   .option("--config <path>", "Path to .proofpr.yml.", ".proofpr.yml")
   .option("--format <format>", "Output format: markdown, json, sarif, or html.", parseFormat, "markdown")
+  .option("--output <path>", "Write report output to a file instead of stdout.")
   .option("--locale <locale>", "Report language: en or zh-CN.")
   .option("--fail-on <level>", "Exit with code 1 on risk level: low, medium, high, or never.", parseFailLevel, "never")
   .action(async (options: ScanCommandOptions) => {
@@ -144,7 +146,12 @@ program
     const locale = parseLocale(options.locale, config.locale);
     const output = renderOutput(result, options.format, locale);
 
-    process.stdout.write(`${output}\n`);
+    if (options.output) {
+      await writeOutput(options.output, `${output}\n`);
+      process.stdout.write(`ProofPR ${options.format} report written to ${options.output}\n`);
+    } else {
+      process.stdout.write(`${output}\n`);
+    }
 
     if (riskMeetsThreshold(result.risk, options.failOn)) {
       process.exitCode = 1;
@@ -282,7 +289,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.10
+      - uses: linsk27/proof-pr@v0.1.11
         with:
           fail-on: ${failOn}
           comment: "true"

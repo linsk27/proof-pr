@@ -4,6 +4,11 @@
 
 暂无。
 
+## 0.1.11 - 2026-05-12
+
+- CLI `scan` 新增 `--output <path>`，可以直接把 Markdown、JSON、SARIF 或 HTML 报告写入文件。
+- 文档中的 HTML 和 SARIF 示例改为使用 `--output`，减少 shell 重定向带来的理解成本。
+
 ## 0.1.10 - 2026-05-12
 
 - 简化 `proof-pr init` 默认生成的配置文件，减少首次接入时看到的注释和高级选项。
