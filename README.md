@@ -13,9 +13,9 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 
 ## 现在能用吗
 
-- GitHub Release：[`v0.1.11`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.11)
-- npm：[`proof-pr@0.1.11`](https://www.npmjs.com/package/proof-pr)
-- GitHub Action：`linsk27/proof-pr@v0.1.11`
+- GitHub Release：[`v0.1.12`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.12)
+- npm：[`proof-pr@0.1.12`](https://www.npmjs.com/package/proof-pr)
+- GitHub Action：`linsk27/proof-pr@v0.1.12`
 - 当前 benchmark：`14/14 passed`
 - 可视化报告：`--format html` / `html-output`
 
@@ -26,7 +26,27 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-这两个命令当前都应输出 `0.1.11`。
+这两个命令当前都应输出 `0.1.12`。
+
+不知道该用哪个功能时，直接打开中文功能菜单：
+
+```bash
+npx proof-pr@latest
+# 或
+npx proof-pr@latest guide
+```
+
+![ProofPR 中文功能菜单](docs/screenshots/proofpr-guide-output.png)
+
+常用操作可以按目标复制：
+
+| 目标 | 命令 |
+| --- | --- |
+| 接入 GitHub PR 自动检查 | `npx proof-pr@latest init` |
+| 本地检查当前分支 | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN` |
+| 生成 HTML 可视化报告 | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html` |
+| 生成 SARIF | `npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif` |
+| 查看全部功能 | `npx proof-pr@latest guide` |
 
 ## 它解决什么问题
 
@@ -141,6 +161,12 @@ Benchmark 输出，证明规则样本仍按预期命中：
 
 ## 本地 CLI
 
+先看功能菜单：
+
+```bash
+npx proof-pr@latest guide
+```
+
 扫描当前分支 diff：
 
 ```bash
@@ -197,7 +223,7 @@ evidence:
 如果想在 GitHub Action 里保存 HTML 面板：
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.11
+- uses: linsk27/proof-pr@v0.1.12
   with:
     html-output: proofpr-report.html
 - uses: actions/upload-artifact@v4
@@ -233,6 +259,7 @@ ProofPR 的准确性不是“能不能发现所有代码 bug”。它做的是 *
 
 - [从 0 到 1 安装和验证](docs/zero-to-one.md)
 - [快速开始](docs/getting-started.md)
+- [功能和命令速查](docs/commands.md)
 - [配置说明](docs/configuration.md)
 - [规则说明](docs/rules.md)
 - [Benchmark 和准确性边界](benchmarks/README.md) / [当前报告](benchmarks/report.md)

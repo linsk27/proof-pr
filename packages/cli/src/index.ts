@@ -115,7 +115,14 @@ const program = new Command();
 program
   .name("proof-pr")
   .description("Review pull request evidence, scope, and safety before maintainers spend time on it.")
-  .version("0.1.11");
+  .version("0.1.12");
+
+program
+  .command("guide")
+  .description("Show a copy-paste friendly guide for common ProofPR tasks.")
+  .action(() => {
+    process.stdout.write(renderGuide());
+  });
 
 program
   .command("scan", { isDefault: true })
@@ -179,7 +186,7 @@ program
     await writeIfMissing(options.configPath, renderConfigTemplate(options.preset), options.force);
     await writeIfMissing(options.workflowPath, renderWorkflowTemplate(options.failOn), options.force);
     process.stdout.write(
-      `ProofPR initialized.\n\nCreated:\n- ${options.configPath}\n- ${options.workflowPath}\n\nNext:\n1. Commit these files.\n2. Open or update a pull request.\n3. Read the ProofPR comment or Actions summary.\n\nLocal check:\nnpx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN\n`
+      `ProofPR initialized.\n\nCreated:\n- ${options.configPath}\n- ${options.workflowPath}\n\nNext:\n1. Commit these files.\n2. Open or update a pull request.\n3. Read the ProofPR comment or Actions summary.\n\nLocal check:\nnpx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN\n\nNeed another task?\nnpx proof-pr@latest guide\n`
     );
   });
 
@@ -213,11 +220,55 @@ program
     }
   });
 
-program.parseAsync(process.argv).catch((error: unknown) => {
+const args = process.argv.slice(2);
+const parseTask =
+  args.length === 0
+    ? Promise.resolve(process.stdout.write(renderGuide()))
+    : program.parseAsync(process.argv);
+
+parseTask.catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);
   process.stderr.write(`ProofPR failed: ${message}\n`);
   process.exitCode = 1;
 });
+
+function renderGuide(): string {
+  return `ProofPR 功能菜单
+
+最推荐先做第 1 步。已经接入过的项目，按目标复制下面的命令即可。
+
+1. 接入 GitHub PR 自动检查
+   npx proof-pr@latest init
+   然后提交 .proofpr.yml 和 .github/workflows/proofpr.yml，打开 PR 后看评论和 Actions summary。
+
+2. 本地检查当前分支
+   npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
+   适合在发 PR 前先看风险、证据评分和 Review 行动清单。
+
+3. 生成可分享 HTML 报告
+   npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html
+   生成后用浏览器打开 proofpr-report.html。
+
+4. 生成 GitHub Code Scanning 的 SARIF
+   npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif
+   适合在 CI 里配合 github/codeql-action/upload-sarif 使用。
+
+5. 试跑内置风险案例
+   npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.diff --locale zh-CN
+   不需要改项目代码，也能快速看到 ProofPR 会抓什么风险。
+
+6. 验证规则样本是否仍然命中
+   npx proof-pr@latest benchmark --cases benchmarks/cases
+   适合维护 ProofPR 规则或发版前回归。
+
+7. 调整审查强度
+   打开 .proofpr.yml，把 preset 改成 security-strict、dependency-careful 或 mcp-security。
+
+结果在哪里看：
+- GitHub Action：PR Conversation 评论、Actions summary、Checks 状态。
+- 本地 CLI：终端输出；如果用了 --output，就看写出的 HTML / JSON / SARIF / Markdown 文件。
+`;
+}
 
 async function readGitDiff(base: string | undefined, head: string): Promise<string> {
   const args = ["diff", "--no-ext-diff", "--unified=0"];
@@ -289,7 +340,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.11
+      - uses: linsk27/proof-pr@v0.1.12
         with:
           fail-on: ${failOn}
           comment: "true"

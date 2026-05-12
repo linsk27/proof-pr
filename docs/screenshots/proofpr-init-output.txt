@@ -11,3 +11,6 @@ Next:
 
 Local check:
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
+
+Need another task?
+npx proof-pr@latest guide

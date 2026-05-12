@@ -5,17 +5,18 @@
 ## 推荐阅读顺序
 
 1. [快速开始](getting-started.md)
-2. [从 0 到 1 安装和验证](zero-to-one.md)
-3. [配置说明](configuration.md)
-4. [规则说明](rules.md)
-5. [Benchmark 和准确性边界](../benchmarks/README.md) / [当前报告](../benchmarks/report.md)
-6. [真实案例库](cases.md)
-7. [实现原理](how-it-works.md)
+2. [功能和命令速查](commands.md)
+3. [从 0 到 1 安装和验证](zero-to-one.md)
+4. [配置说明](configuration.md)
+5. [规则说明](rules.md)
+6. [Benchmark 和准确性边界](../benchmarks/README.md) / [当前报告](../benchmarks/report.md)
+7. [真实案例库](cases.md)
+8. [实现原理](how-it-works.md)
 
 ## 当前发布
 
-- GitHub Release：[`v0.1.11`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.11)
-- npm：[`proof-pr@0.1.11`](https://www.npmjs.com/package/proof-pr)
+- GitHub Release：[`v0.1.12`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.12)
+- npm：[`proof-pr@0.1.12`](https://www.npmjs.com/package/proof-pr)
 - 核心能力：Review Plan、规则预设、Evidence Contract、GitHub annotations、SARIF、benchmark、真实案例库、依赖大版本升级检查、包生命周期脚本检查、`pull_request_target` / PR head checkout 检查、独立 HTML 可视化报告、Marketplace 准备材料。
 
 确认本机拿到的 latest：
@@ -25,11 +26,21 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-当前都应输出 `0.1.11`。
+当前都应输出 `0.1.12`。
+
+不知道用哪个功能时：
+
+```bash
+npx proof-pr@latest
+# 或
+npx proof-pr@latest guide
+```
 
 ## 图示和截图
 
 真实运行截图：
+
+![ProofPR 中文功能菜单](screenshots/proofpr-guide-output.png)
 
 ![ProofPR 初始化输出](screenshots/proofpr-init-output.png)
 

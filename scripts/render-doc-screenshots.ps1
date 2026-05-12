@@ -167,6 +167,17 @@ Save-TerminalImage `
   -Path (Join-Path $OutDir "proofpr-init-output.png")
 Remove-Item -LiteralPath $initDir -Recurse -Force
 
+$guideText = Invoke-CommandText `
+  -File "node" `
+  -CommandArgs @((Join-Path $Repo "packages\cli\dist\index.js")) `
+  -WorkDir $Repo
+Set-Content -LiteralPath (Join-Path $OutDir "proofpr-guide-output.txt") -Value $guideText -Encoding UTF8
+Save-TerminalImage `
+  -Title "ProofPR guide" `
+  -Command "npx proof-pr@latest" `
+  -Text $guideText `
+  -Path (Join-Path $OutDir "proofpr-guide-output.png")
+
 $workflowText = Invoke-CommandText `
   -File "node" `
   -CommandArgs @((Join-Path $Repo "packages\cli\dist\index.js"), "scan", "--diff-file", "examples\cases\workflow-untrusted-checkout.diff", "--locale", "zh-CN") `

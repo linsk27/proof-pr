@@ -25,6 +25,18 @@ npx proof-pr@latest init
 
 把这两个文件提交到仓库，打开或更新 PR，就会自动生成报告。
 
+如果你不确定下一步该用哪个功能，可以直接看中文功能菜单：
+
+```bash
+npx proof-pr@latest
+# 或
+npx proof-pr@latest guide
+```
+
+![ProofPR 中文功能菜单](screenshots/proofpr-guide-output.png)
+
+更完整的复制式命令表见 [功能和命令速查](commands.md)。
+
 ## 生成的 workflow
 
 ```yaml
@@ -43,7 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.11
+      - uses: linsk27/proof-pr@v0.1.12
         with:
           fail-on: high
           comment: "true"
@@ -96,11 +108,12 @@ comment:
 
 ```bash
 npx proof-pr@latest --version
+npx proof-pr@latest guide
 npx proof-pr@latest init
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 ```
 
-如果第一行输出 `0.1.11`，说明你正在使用当前最新发布版。
+如果第一行输出 `0.1.12`，说明你正在使用当前最新发布版。
 
 也可以全局安装：
 
@@ -120,6 +133,12 @@ node packages/cli/dist/index.js scan --base origin/main --head HEAD --locale zh-
 ```
 
 ## 常用命令
+
+查看功能菜单：
+
+```bash
+proof-pr guide
+```
 
 初始化配置和 workflow：
 

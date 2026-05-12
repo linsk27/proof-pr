@@ -1,0 +1,124 @@
+# 功能和命令速查
+
+如果不知道该用哪个功能，先运行：
+
+```bash
+npx proof-pr@latest
+```
+
+或显式打开功能菜单：
+
+```bash
+npx proof-pr@latest guide
+```
+
+![ProofPR 中文功能菜单](screenshots/proofpr-guide-output.png)
+
+## 最常用路径
+
+| 你想做什么 | 什么时候用 | 复制这条命令 | 结果在哪里看 |
+| --- | --- | --- | --- |
+| 接入 GitHub PR 自动检查 | 第一次给仓库安装 ProofPR | `npx proof-pr@latest init` | PR 评论、Actions summary、Checks |
+| 本地检查当前分支 | 发 PR 前自查 | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN` | 当前终端 |
+| 生成 HTML 可视化报告 | 想把报告保存、发给别人或上传 artifact | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html` | `proofpr-report.html` |
+| 生成 SARIF | 想接入 GitHub Code Scanning | `npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif` | `proofpr.sarif` / Code Scanning |
+| 跑内置风险案例 | 想快速理解它会抓什么 | `npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.diff --locale zh-CN` | 当前终端 |
+| 跑 benchmark | 维护规则或发版前回归 | `npx proof-pr@latest benchmark --cases benchmarks/cases` | 当前终端 |
+| 调整审查强度 | 想更严格检查安全、依赖或 MCP | 修改 `.proofpr.yml` 里的 `preset` | 下一次扫描报告 |
+
+## 1. 接入 GitHub PR 自动检查
+
+执行：
+
+```bash
+npx proof-pr@latest init
+```
+
+它会生成：
+
+- `.proofpr.yml`
+- `.github/workflows/proofpr.yml`
+
+提交这两个文件后，打开或更新 Pull Request，ProofPR 会自动运行。默认触发时机是：
+
+- PR opened：第一次打开 PR。
+- PR synchronize：PR 分支继续 push。
+- PR reopened：关闭后重新打开。
+
+## 2. 本地扫描当前分支
+
+执行：
+
+```bash
+npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
+```
+
+适合在发 PR 前自查。它会对比 `origin/main...HEAD`，输出风险等级、证据评分、Review 门禁和行动清单。
+
+如果你的主分支叫 `master`，把 `origin/main` 换成 `origin/master`。
+
+## 3. 生成 HTML 可视化报告
+
+执行：
+
+```bash
+npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html
+```
+
+生成后，用浏览器打开 `proofpr-report.html`。这个文件适合：
+
+- 发给同事快速看风险。
+- 放进 CI artifact。
+- 截图放进文档或 issue。
+
+## 4. 生成 SARIF
+
+执行：
+
+```bash
+npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif
+```
+
+SARIF 主要给 GitHub Code Scanning 或其他安全平台读取。完整接入方式见 [SARIF / Code Scanning](sarif-code-scanning.md)。
+
+## 5. 跑内置风险案例
+
+执行：
+
+```bash
+npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.diff --locale zh-CN
+```
+
+这个命令不需要修改你的项目，只是读取仓库里的示例 diff，适合快速理解 ProofPR 会如何判断 workflow、依赖、secret、测试证据这些风险。
+
+## 6. 跑 benchmark
+
+执行：
+
+```bash
+npx proof-pr@latest benchmark --cases benchmarks/cases
+```
+
+benchmark 用来验证规则样本是否仍按预期命中。普通使用者不必每天跑它；维护 ProofPR 规则、准备发版或怀疑规则退化时再跑。
+
+## 7. 调整审查强度
+
+打开 `.proofpr.yml`，修改 `preset`：
+
+```yaml
+locale: zh-CN
+preset: open-source-maintainer
+
+comment:
+  enabled: true
+```
+
+常用值：
+
+| preset | 适合场景 |
+| --- | --- |
+| `open-source-maintainer` | 开源仓库默认推荐 |
+| `security-strict` | 安全敏感项目 |
+| `dependency-careful` | 特别关注依赖和 lockfile |
+| `mcp-security` | 特别关注 MCP / agent 配置 |
+| `ai-generated-pr` | AI 生成 PR 较多的仓库 |

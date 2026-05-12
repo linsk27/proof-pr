@@ -32,6 +32,14 @@ npx proof-pr@latest init
 
 默认配置已经会输出中文报告，并使用开源维护者预设。
 
+如果你中途忘了某个功能怎么用，运行：
+
+```bash
+npx proof-pr@latest guide
+```
+
+它会按“接入自动检查、本地扫描、HTML 报告、SARIF、benchmark”等目标列出命令。
+
 ## 第 2 步：提交两个文件
 
 ```bash
@@ -115,7 +123,7 @@ npx proof-pr@latest --version
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 ```
 
-第一行当前应输出 `0.1.11`，用于确认 npm latest 已经安装正确。
+第一行当前应输出 `0.1.12`，用于确认 npm latest 已经安装正确。
 
 扫描内置案例：
 
@@ -165,7 +173,7 @@ permissions:
 
 steps:
   - uses: actions/checkout@v4
-  - uses: linsk27/proof-pr@v0.1.11
+  - uses: linsk27/proof-pr@v0.1.12
     with:
       fail-on: high
       comment: "true"
