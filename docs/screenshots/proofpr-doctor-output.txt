@@ -1,0 +1,22 @@
+﻿ProofPR doctor
+
+状态：接入正常
+统计：0 fail, 0 warn, 10 checks
+
+Checks:
+[pass] .proofpr.yml 可读取
+       locale=zh-CN, preset=open-source-maintainer, riskThreshold=high
+[pass] PR 评论已启用
+       comment.enabled=true
+[pass] .github/workflows/proofpr.yml 已存在
+[pass] workflow 会在 Pull Request 事件运行
+[pass] GitHub Action 版本为 v0.1.13
+[pass] workflow 具备写 PR 评论权限
+[pass] workflow 具备读取仓库内容权限
+[pass] 当前目录位于 Git 仓库中
+[info] 当前分支：main
+[pass] 可以读取 origin/main...HEAD diff
+       当前没有可扫描的 diff。
+
+Next:
+- 当前接入状态正常；可以打开 PR，或运行 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN 做本地自查。

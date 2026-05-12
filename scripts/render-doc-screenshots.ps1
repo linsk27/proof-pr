@@ -132,9 +132,9 @@ function Save-TerminalImage {
     }
 
     $brush = $brushMuted
-    if ($line -match "PASS|100%|0\.1\.11|ProofPR initialized|完成|通过") {
+    if ($line -match "PASS|100%|0\.1\.13|\[pass\]|ProofPR initialized|状态：接入正常|完成|通过") {
       $brush = $brushAccent
-    } elseif ($line -match "高|风险|block-merge|pull_request_target|workflow-untrusted-checkout") {
+    } elseif ($line -match "\[warn\]|高|风险|block-merge|pull_request_target|workflow-untrusted-checkout") {
       $brush = $brushWarn
     } elseif ($line -match "^#|^##|Review|证据|Finding|Summary") {
       $brush = $brushText
@@ -177,6 +177,17 @@ Save-TerminalImage `
   -Command "npx proof-pr@latest" `
   -Text $guideText `
   -Path (Join-Path $OutDir "proofpr-guide-output.png")
+
+$doctorText = Invoke-CommandText `
+  -File "node" `
+  -CommandArgs @((Join-Path $Repo "packages\cli\dist\index.js"), "doctor") `
+  -WorkDir $Repo
+Set-Content -LiteralPath (Join-Path $OutDir "proofpr-doctor-output.txt") -Value $doctorText -Encoding UTF8
+Save-TerminalImage `
+  -Title "ProofPR doctor output" `
+  -Command "npx proof-pr@latest doctor" `
+  -Text $doctorText `
+  -Path (Join-Path $OutDir "proofpr-doctor-output.png")
 
 $workflowText = Invoke-CommandText `
   -File "node" `

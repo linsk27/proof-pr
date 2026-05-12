@@ -25,6 +25,14 @@ npx proof-pr@latest init
 
 把这两个文件提交到仓库，打开或更新 PR，就会自动生成报告。
 
+安装后可以先体检一次：
+
+```bash
+npx proof-pr@latest doctor
+```
+
+![ProofPR doctor 体检输出](screenshots/proofpr-doctor-output.png)
+
 如果你不确定下一步该用哪个功能，可以直接看中文功能菜单：
 
 ```bash
@@ -55,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.12
+      - uses: linsk27/proof-pr@v0.1.13
         with:
           fail-on: high
           comment: "true"
@@ -110,10 +118,11 @@ comment:
 npx proof-pr@latest --version
 npx proof-pr@latest guide
 npx proof-pr@latest init
+npx proof-pr@latest doctor
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 ```
 
-如果第一行输出 `0.1.12`，说明你正在使用当前最新发布版。
+如果第一行输出 `0.1.13`，说明你正在使用当前最新发布版。
 
 也可以全局安装：
 
@@ -138,6 +147,12 @@ node packages/cli/dist/index.js scan --base origin/main --head HEAD --locale zh-
 
 ```bash
 proof-pr guide
+```
+
+体检接入状态：
+
+```bash
+proof-pr doctor
 ```
 
 初始化配置和 workflow：

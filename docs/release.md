@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.12`。
+当前最新公开版本是 `0.1.13`。
 
 ## 发布前检查
 
@@ -33,8 +33,8 @@ GitHub Release 会先创建；随后 workflow 会检查该版本是否已经存�
 确认 `NPM_TOKEN` 已配置后：
 
 ```bash
-git tag v0.1.12
-git push origin v0.1.12
+git tag v0.1.13
+git push origin v0.1.13
 ```
 
 发布完成后需要检查：
@@ -47,25 +47,26 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.12
-npx proof-pr@latest --version -> 0.1.12
+npm view proof-pr version -> 0.1.13
+npx proof-pr@latest --version -> 0.1.13
 ```
 
-## `v0.1.12` 发布状态
+## `v0.1.13` 发布状态
 
-`v0.1.12` 已经完成：
+`v0.1.13` 已经完成：
 
-- Git tag：`v0.1.12`
-- GitHub Release：`v0.1.12`
-- npm：`proof-pr@0.1.12`
-- npm dist-tag：`latest -> 0.1.12`
+- Git tag：`v0.1.13`
+- GitHub Release：`v0.1.13`
+- npm：`proof-pr@0.1.13`
+- npm dist-tag：`latest -> 0.1.13`
 - GitHub Actions：Release workflow 和 main CI 均已通过。
 
 本次是功能增强版，重点包括：
 
 - 修复 CLI `--version` 仍显示旧版本的问题。
-- `proof-pr init` 生成的 GitHub Action 示例同步到 `v0.1.12`。
+- `proof-pr init` 生成的 GitHub Action 示例同步到 `v0.1.13`。
 - 新增 `proof-pr guide`；直接运行 `proof-pr` 也会显示中文功能菜单，按目标给出命令和结果位置。
+- 新增 `proof-pr doctor`，可检查配置、workflow、Action 版本、PR 权限和本地 diff 可读性。
 - CLI 支持 `--format html`，可生成独立 HTML 可视化报告。
 - CLI `scan` 支持 `--output`，可直接把 HTML、SARIF、JSON 或 Markdown 报告写入文件。
 - GitHub Action 支持 `html-output`，可把可视化报告上传为 artifact。
@@ -74,7 +75,7 @@ npx proof-pr@latest --version -> 0.1.12
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.12` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.13` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 

@@ -13,10 +13,11 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 
 ## 现在能用吗
 
-- GitHub Release：[`v0.1.12`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.12)
-- npm：[`proof-pr@0.1.12`](https://www.npmjs.com/package/proof-pr)
-- GitHub Action：`linsk27/proof-pr@v0.1.12`
+- GitHub Release：[`v0.1.13`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.13)
+- npm：[`proof-pr@0.1.13`](https://www.npmjs.com/package/proof-pr)
+- GitHub Action：`linsk27/proof-pr@v0.1.13`
 - 当前 benchmark：`14/14 passed`
+- 接入体检：`npx proof-pr@latest doctor`
 - 可视化报告：`--format html` / `html-output`
 
 验证你拿到的是最新版本：
@@ -26,7 +27,7 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-这两个命令当前都应输出 `0.1.12`。
+这两个命令当前都应输出 `0.1.13`。
 
 不知道该用哪个功能时，直接打开中文功能菜单：
 
@@ -43,6 +44,7 @@ npx proof-pr@latest guide
 | 目标 | 命令 |
 | --- | --- |
 | 接入 GitHub PR 自动检查 | `npx proof-pr@latest init` |
+| 体检当前仓库接入状态 | `npx proof-pr@latest doctor` |
 | 本地检查当前分支 | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN` |
 | 生成 HTML 可视化报告 | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html` |
 | 生成 SARIF | `npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif` |
@@ -77,7 +79,17 @@ npx proof-pr@latest init
 
 默认配置已经适合开源仓库试用，你一般不用先改配置。
 
-### 2. 提交并打开 PR
+### 2. 体检接入状态
+
+```bash
+npx proof-pr@latest doctor
+```
+
+![ProofPR doctor 体检输出](docs/screenshots/proofpr-doctor-output.png)
+
+`doctor` 会检查 `.proofpr.yml`、`.github/workflows/proofpr.yml`、Action 版本、PR 事件、评论权限和本地 diff 是否可读。它的目标是告诉新用户“装好了吗，还差哪一步”。
+
+### 3. 提交并打开 PR
 
 ```bash
 git add .proofpr.yml .github/workflows/proofpr.yml
@@ -90,7 +102,7 @@ ProofPR 会在这些时机运行：
 - PR synchronize：PR 分支继续 push。
 - PR reopened：重新打开 PR。
 
-### 3. 看报告
+### 4. 看报告
 
 报告主要出现在 PR 评论区和 GitHub Actions summary。想先本地试跑，也可以直接执行：
 
@@ -167,6 +179,12 @@ Benchmark 输出，证明规则样本仍按预期命中：
 npx proof-pr@latest guide
 ```
 
+体检仓库是否接入正确：
+
+```bash
+npx proof-pr@latest doctor
+```
+
 扫描当前分支 diff：
 
 ```bash
@@ -223,7 +241,7 @@ evidence:
 如果想在 GitHub Action 里保存 HTML 面板：
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.12
+- uses: linsk27/proof-pr@v0.1.13
   with:
     html-output: proofpr-report.html
 - uses: actions/upload-artifact@v4

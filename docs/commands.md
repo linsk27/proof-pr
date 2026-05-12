@@ -19,6 +19,7 @@ npx proof-pr@latest guide
 | 你想做什么 | 什么时候用 | 复制这条命令 | 结果在哪里看 |
 | --- | --- | --- | --- |
 | 接入 GitHub PR 自动检查 | 第一次给仓库安装 ProofPR | `npx proof-pr@latest init` | PR 评论、Actions summary、Checks |
+| 体检接入状态 | 安装后不知道是否配置正确 | `npx proof-pr@latest doctor` | 当前终端 |
 | 本地检查当前分支 | 发 PR 前自查 | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN` | 当前终端 |
 | 生成 HTML 可视化报告 | 想把报告保存、发给别人或上传 artifact | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html` | `proofpr-report.html` |
 | 生成 SARIF | 想接入 GitHub Code Scanning | `npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif` | `proofpr.sarif` / Code Scanning |
@@ -45,7 +46,32 @@ npx proof-pr@latest init
 - PR synchronize：PR 分支继续 push。
 - PR reopened：关闭后重新打开。
 
-## 2. 本地扫描当前分支
+## 2. 体检接入状态
+
+执行：
+
+```bash
+npx proof-pr@latest doctor
+```
+
+![ProofPR doctor 体检输出](screenshots/proofpr-doctor-output.png)
+
+它会检查：
+
+- `.proofpr.yml` 是否存在并能解析。
+- `.github/workflows/proofpr.yml` 是否存在。
+- workflow 是否监听 `pull_request`。
+- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.13`。
+- 是否具备 `pull-requests: write` 和 `contents: read` 权限。
+- 当前目录是否在 Git 仓库里，以及 `origin/main...HEAD` diff 是否可读。
+
+如果你的主分支不是 `main`，可以这样指定：
+
+```bash
+npx proof-pr@latest doctor --base origin/master
+```
+
+## 3. 本地扫描当前分支
 
 执行：
 
@@ -57,7 +83,7 @@ npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 
 如果你的主分支叫 `master`，把 `origin/main` 换成 `origin/master`。
 
-## 3. 生成 HTML 可视化报告
+## 4. 生成 HTML 可视化报告
 
 执行：
 
@@ -71,7 +97,7 @@ npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format 
 - 放进 CI artifact。
 - 截图放进文档或 issue。
 
-## 4. 生成 SARIF
+## 5. 生成 SARIF
 
 执行：
 
@@ -81,7 +107,7 @@ npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output 
 
 SARIF 主要给 GitHub Code Scanning 或其他安全平台读取。完整接入方式见 [SARIF / Code Scanning](sarif-code-scanning.md)。
 
-## 5. 跑内置风险案例
+## 6. 跑内置风险案例
 
 执行：
 
@@ -91,7 +117,7 @@ npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.
 
 这个命令不需要修改你的项目，只是读取仓库里的示例 diff，适合快速理解 ProofPR 会如何判断 workflow、依赖、secret、测试证据这些风险。
 
-## 6. 跑 benchmark
+## 7. 跑 benchmark
 
 执行：
 
@@ -101,7 +127,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 
 benchmark 用来验证规则样本是否仍按预期命中。普通使用者不必每天跑它；维护 ProofPR 规则、准备发版或怀疑规则退化时再跑。
 
-## 7. 调整审查强度
+## 8. 调整审查强度
 
 打开 `.proofpr.yml`，修改 `preset`：
 

@@ -40,7 +40,17 @@ npx proof-pr@latest guide
 
 它会按“接入自动检查、本地扫描、HTML 报告、SARIF、benchmark”等目标列出命令。
 
-## 第 2 步：提交两个文件
+## 第 2 步：体检接入状态
+
+```bash
+npx proof-pr@latest doctor
+```
+
+![ProofPR doctor 体检输出](screenshots/proofpr-doctor-output.png)
+
+如果看到 `状态：接入正常`，说明配置文件、workflow、PR 权限和本地 diff 检查都已经通过。如果有 `[warn]` 或 `[fail]`，按 `Next` 里的提示修复即可。
+
+## 第 3 步：提交两个文件
 
 ```bash
 git add .proofpr.yml .github/workflows/proofpr.yml
@@ -49,7 +59,7 @@ git commit -m "chore: add ProofPR"
 
 先不要急着改配置，默认已经够试用。ProofPR 只会在 PR 场景运行，不会因为普通分支 push 就刷屏。
 
-## 第 3 步：打开一个测试 PR
+## 第 4 步：打开一个测试 PR
 
 你可以在测试分支里做一个很小的改动，比如修改一个源码文件但不加测试。打开 PR 后，ProofPR 会在这些事件触发：
 
@@ -57,7 +67,7 @@ git commit -m "chore: add ProofPR"
 - PR synchronize：PR 分支继续 push 新提交。
 - PR reopened：关闭后重新打开。
 
-## 第 4 步：看 PR 评论
+## 第 5 步：看 PR 评论
 
 进入 PR 的 `Conversation`，找到 `ProofPR 审查报告`。
 
@@ -74,7 +84,7 @@ git commit -m "chore: add ProofPR"
 - `Review gate`：下一步动作建议。
 - `Review Plan`：维护者 checklist。
 
-## 第 5 步：看 Actions 和 annotations
+## 第 6 步：看 Actions 和 annotations
 
 进入仓库 `Actions`，点击 `ProofPR` workflow。
 
@@ -114,7 +124,7 @@ evidence:
       severity: medium
 ```
 
-## 第 6 步：本地 CLI 试跑
+## 第 7 步：本地 CLI 试跑
 
 不用开 PR，也可以本地扫描：
 
@@ -123,7 +133,7 @@ npx proof-pr@latest --version
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 ```
 
-第一行当前应输出 `0.1.12`，用于确认 npm latest 已经安装正确。
+第一行当前应输出 `0.1.13`，用于确认 npm latest 已经安装正确。
 
 扫描内置案例：
 
@@ -161,7 +171,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 
 ![ProofPR benchmark 输出](screenshots/proofpr-benchmark-output.png)
 
-## 第 7 步：可选接入 Code Scanning
+## 第 8 步：可选接入 Code Scanning
 
 如果你想让 finding 进入 GitHub 的安全看板，可以配置 SARIF：
 
@@ -173,7 +183,7 @@ permissions:
 
 steps:
   - uses: actions/checkout@v4
-  - uses: linsk27/proof-pr@v0.1.12
+  - uses: linsk27/proof-pr@v0.1.13
     with:
       fail-on: high
       comment: "true"

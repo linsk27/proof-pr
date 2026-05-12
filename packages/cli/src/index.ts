@@ -22,9 +22,11 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
+const CLI_VERSION = "0.1.13";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
+type DoctorLevel = "pass" | "warn" | "fail" | "info";
 
 interface ScanCommandOptions {
   base?: string;
@@ -46,6 +48,24 @@ interface InitCommandOptions {
   preset: ConfigPreset;
   failOn: FailLevel;
   force: boolean;
+}
+
+interface DoctorCommandOptions {
+  config: string;
+  workflowPath: string;
+  base: string;
+  head: string;
+}
+
+interface DoctorCheck {
+  level: DoctorLevel;
+  title: string;
+  detail?: string;
+}
+
+interface DoctorReport {
+  checks: DoctorCheck[];
+  nextSteps: string[];
 }
 
 type BenchmarkOutputFormat = "text" | "json" | "markdown";
@@ -115,13 +135,29 @@ const program = new Command();
 program
   .name("proof-pr")
   .description("Review pull request evidence, scope, and safety before maintainers spend time on it.")
-  .version("0.1.12");
+  .version(CLI_VERSION);
 
 program
   .command("guide")
   .description("Show a copy-paste friendly guide for common ProofPR tasks.")
   .action(() => {
     process.stdout.write(renderGuide());
+  });
+
+program
+  .command("doctor")
+  .description("Check whether ProofPR is installed correctly in the current repository.")
+  .option("--config <path>", "Path to .proofpr.yml.", ".proofpr.yml")
+  .option("--workflow-path <path>", "Path to the GitHub Actions workflow.", ".github/workflows/proofpr.yml")
+  .option("--base <ref>", "Base git ref used for local diff checks.", "origin/main")
+  .option("--head <ref>", "Head git ref used for local diff checks.", "HEAD")
+  .action(async (options: DoctorCommandOptions) => {
+    const report = await runDoctor(options);
+    process.stdout.write(renderDoctorReport(report));
+
+    if (report.checks.some((check) => check.level === "fail")) {
+      process.exitCode = 1;
+    }
   });
 
 program
@@ -241,32 +277,196 @@ function renderGuide(): string {
    npx proof-pr@latest init
    然后提交 .proofpr.yml 和 .github/workflows/proofpr.yml，打开 PR 后看评论和 Actions summary。
 
-2. 本地检查当前分支
+2. 体检当前仓库接入状态
+   npx proof-pr@latest doctor
+   检查配置文件、workflow、Action 版本、PR 权限和本地 diff 是否正常。
+
+3. 本地检查当前分支
    npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
    适合在发 PR 前先看风险、证据评分和 Review 行动清单。
 
-3. 生成可分享 HTML 报告
+4. 生成可分享 HTML 报告
    npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html
    生成后用浏览器打开 proofpr-report.html。
 
-4. 生成 GitHub Code Scanning 的 SARIF
+5. 生成 GitHub Code Scanning 的 SARIF
    npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif
    适合在 CI 里配合 github/codeql-action/upload-sarif 使用。
 
-5. 试跑内置风险案例
+6. 试跑内置风险案例
    npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.diff --locale zh-CN
    不需要改项目代码，也能快速看到 ProofPR 会抓什么风险。
 
-6. 验证规则样本是否仍然命中
+7. 验证规则样本是否仍然命中
    npx proof-pr@latest benchmark --cases benchmarks/cases
    适合维护 ProofPR 规则或发版前回归。
 
-7. 调整审查强度
+8. 调整审查强度
    打开 .proofpr.yml，把 preset 改成 security-strict、dependency-careful 或 mcp-security。
 
 结果在哪里看：
 - GitHub Action：PR Conversation 评论、Actions summary、Checks 状态。
 - 本地 CLI：终端输出；如果用了 --output，就看写出的 HTML / JSON / SARIF / Markdown 文件。
+`;
+}
+
+async function runDoctor(options: DoctorCommandOptions): Promise<DoctorReport> {
+  const checks: DoctorCheck[] = [];
+  const nextSteps = new Set<string>();
+
+  if (await pathExists(options.config)) {
+    try {
+      const config = await loadConfig(options.config);
+      checks.push({
+        level: "pass",
+        title: `${options.config} 可读取`,
+        detail: `locale=${config.locale}, preset=${config.preset}, riskThreshold=${config.riskThreshold}`
+      });
+
+      if (config.comment.enabled) {
+        checks.push({ level: "pass", title: "PR 评论已启用", detail: "comment.enabled=true" });
+      } else {
+        checks.push({ level: "warn", title: "PR 评论未启用", detail: "comment.enabled=false" });
+        nextSteps.add("如果希望在 PR Conversation 里看到报告，把 .proofpr.yml 的 comment.enabled 改成 true。");
+      }
+    } catch (error) {
+      checks.push({
+        level: "fail",
+        title: `${options.config} 解析失败`,
+        detail: error instanceof Error ? error.message : String(error)
+      });
+      nextSteps.add("修复 .proofpr.yml 的 YAML 格式，或重新运行 npx proof-pr@latest init --force。");
+    }
+  } else {
+    checks.push({ level: "fail", title: `缺少 ${options.config}` });
+    nextSteps.add("运行 npx proof-pr@latest init 生成 .proofpr.yml 和 GitHub Actions workflow。");
+  }
+
+  if (await pathExists(options.workflowPath)) {
+    const workflow = await readFile(options.workflowPath, "utf8");
+    checks.push({ level: "pass", title: `${options.workflowPath} 已存在` });
+    inspectWorkflow(workflow, checks, nextSteps);
+  } else {
+    checks.push({ level: "fail", title: `缺少 ${options.workflowPath}` });
+    nextSteps.add("运行 npx proof-pr@latest init 生成 .github/workflows/proofpr.yml。");
+  }
+
+  await inspectGitDiff(options, checks, nextSteps);
+
+  if (nextSteps.size === 0) {
+    nextSteps.add("当前接入状态正常；可以打开 PR，或运行 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN 做本地自查。");
+  }
+
+  return { checks, nextSteps: [...nextSteps] };
+}
+
+function inspectWorkflow(workflow: string, checks: DoctorCheck[], nextSteps: Set<string>): void {
+  if (/pull_request\s*:/.test(workflow)) {
+    checks.push({ level: "pass", title: "workflow 会在 Pull Request 事件运行" });
+  } else {
+    checks.push({ level: "fail", title: "workflow 没有监听 pull_request" });
+    nextSteps.add("确认 .github/workflows/proofpr.yml 包含 on.pull_request。");
+  }
+
+  const actionVersion = workflow.match(/linsk27\/proof-pr@(v[0-9]+\.[0-9]+\.[0-9]+)/)?.[1];
+  if (!actionVersion) {
+    checks.push({ level: "fail", title: "workflow 没有使用 linsk27/proof-pr Action" });
+    nextSteps.add(`把 workflow step 更新为 uses: linsk27/proof-pr@v${CLI_VERSION}。`);
+  } else if (actionVersion === `v${CLI_VERSION}`) {
+    checks.push({ level: "pass", title: `GitHub Action 版本为 ${actionVersion}` });
+  } else {
+    checks.push({
+      level: "warn",
+      title: `GitHub Action 版本较旧：${actionVersion}`,
+      detail: `当前 CLI 版本是 v${CLI_VERSION}`
+    });
+    nextSteps.add(`把 workflow 里的 uses 更新为 linsk27/proof-pr@v${CLI_VERSION}。`);
+  }
+
+  if (/pull-requests\s*:\s*write/.test(workflow)) {
+    checks.push({ level: "pass", title: "workflow 具备写 PR 评论权限" });
+  } else {
+    checks.push({ level: "warn", title: "workflow 可能缺少 pull-requests: write 权限" });
+    nextSteps.add("如果需要自动评论 PR，在 workflow permissions 中加入 pull-requests: write。");
+  }
+
+  if (/contents\s*:\s*read/.test(workflow)) {
+    checks.push({ level: "pass", title: "workflow 具备读取仓库内容权限" });
+  } else {
+    checks.push({ level: "warn", title: "workflow 未显式声明 contents: read" });
+    nextSteps.add("建议在 workflow permissions 中加入 contents: read。");
+  }
+}
+
+async function inspectGitDiff(
+  options: DoctorCommandOptions,
+  checks: DoctorCheck[],
+  nextSteps: Set<string>
+): Promise<void> {
+  try {
+    const { stdout } = await execFileAsync("git", ["rev-parse", "--is-inside-work-tree"]);
+    if (stdout.trim() !== "true") {
+      checks.push({ level: "warn", title: "当前目录不是 Git 仓库" });
+      nextSteps.add("进入项目 Git 仓库根目录后再运行 npx proof-pr@latest doctor。");
+      return;
+    }
+  } catch {
+    checks.push({ level: "warn", title: "当前目录不是 Git 仓库" });
+    nextSteps.add("进入项目 Git 仓库根目录后再运行 npx proof-pr@latest doctor。");
+    return;
+  }
+
+  checks.push({ level: "pass", title: "当前目录位于 Git 仓库中" });
+
+  try {
+    const branch = (await execFileAsync("git", ["branch", "--show-current"])).stdout.trim();
+    checks.push({
+      level: "info",
+      title: branch ? `当前分支：${branch}` : "当前处于 detached HEAD"
+    });
+  } catch {
+    checks.push({ level: "info", title: "无法读取当前分支名" });
+  }
+
+  try {
+    const diff = await readGitDiff(options.base, options.head);
+    checks.push({
+      level: "pass",
+      title: `可以读取 ${options.base}...${options.head} diff`,
+      detail: diff.length === 0 ? "当前没有可扫描的 diff。" : `diff 大小约 ${diff.length} 字符。`
+    });
+  } catch (error) {
+    checks.push({
+      level: "warn",
+      title: `无法读取 ${options.base}...${options.head} diff`,
+      detail: error instanceof Error ? error.message : String(error)
+    });
+    nextSteps.add(`运行 git fetch origin 后重试；如果主分支不是 main，请使用 --base origin/master 或你的实际主分支。`);
+  }
+}
+
+function renderDoctorReport(report: DoctorReport): string {
+  const failCount = report.checks.filter((check) => check.level === "fail").length;
+  const warnCount = report.checks.filter((check) => check.level === "warn").length;
+  const status = failCount > 0 ? "需要先修复" : warnCount > 0 ? "基本可用，但建议优化" : "接入正常";
+  const checks = report.checks
+    .map((check) => {
+      const detail = check.detail ? `\n       ${check.detail}` : "";
+      return `[${check.level}] ${check.title}${detail}`;
+    })
+    .join("\n");
+  const nextSteps = report.nextSteps.map((step) => `- ${step}`).join("\n");
+
+  return `ProofPR doctor
+
+状态：${status}
+统计：${failCount} fail, ${warnCount} warn, ${report.checks.length} checks
+
+Checks:
+${checks}
+
+Next:
+${nextSteps}
 `;
 }
 
@@ -340,7 +540,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.12
+      - uses: linsk27/proof-pr@v${CLI_VERSION}
         with:
           fail-on: ${failOn}
           comment: "true"

@@ -4,6 +4,12 @@
 
 暂无。
 
+## 0.1.13 - 2026-05-12
+
+- 新增 `doctor` 体检命令，检查 `.proofpr.yml`、GitHub Actions workflow、Action 版本、PR 权限和本地 diff 可读性。
+- `guide` 功能菜单补充 `doctor`，让首次接入后可以一条命令确认安装状态。
+- README、快速开始和命令速查文档补充体检流程、结果位置和截图。
+
 ## 0.1.12 - 2026-05-12
 
 - 新增 `guide` 功能菜单；直接运行 `proof-pr` 或 `proof-pr guide` 会按“我想做什么”列出常用命令和结果位置。
