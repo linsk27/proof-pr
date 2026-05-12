@@ -22,15 +22,18 @@
    npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif
    适合在 CI 里配合 github/codeql-action/upload-sarif 使用。
 
-6. 试跑内置风险案例
-   npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.diff --locale zh-CN
-   不需要改项目代码，也能快速看到 ProofPR 会抓什么风险。
+6. 不接入仓库，先试跑内置案例
+   npx proof-pr@latest demo workflow --locale zh-CN
+   不需要 clone 仓库或寻找 examples 文件，也能快速看到 ProofPR 会抓什么风险。
 
-7. 验证规则样本是否仍然命中
+7. 查看所有内置案例
+   npx proof-pr@latest demo --list
+
+8. 验证规则样本是否仍然命中
    npx proof-pr@latest benchmark --cases benchmarks/cases
    适合维护 ProofPR 规则或发版前回归。
 
-8. 调整审查强度
+9. 调整审查强度
    打开 .proofpr.yml，把 preset 改成 security-strict、dependency-careful 或 mcp-security。
 
 结果在哪里看：

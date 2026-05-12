@@ -13,9 +13,9 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 
 ## 现在能用吗
 
-- GitHub Release：[`v0.1.13`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.13)
-- npm：[`proof-pr@0.1.13`](https://www.npmjs.com/package/proof-pr)
-- GitHub Action：`linsk27/proof-pr@v0.1.13`
+- GitHub Release：[`v0.1.14`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.14)
+- npm：[`proof-pr@0.1.14`](https://www.npmjs.com/package/proof-pr)
+- GitHub Action：`linsk27/proof-pr@v0.1.14`
 - 当前 benchmark：`14/14 passed`
 - 接入体检：`npx proof-pr@latest doctor`
 - 可视化报告：`--format html` / `html-output`
@@ -27,7 +27,7 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-这两个命令当前都应输出 `0.1.13`。
+这两个命令当前都应输出 `0.1.14`。
 
 不知道该用哪个功能时，直接打开中文功能菜单：
 
@@ -43,6 +43,7 @@ npx proof-pr@latest guide
 
 | 目标 | 命令 |
 | --- | --- |
+| 不接入仓库，先体验报告 | `npx proof-pr@latest demo workflow --locale zh-CN` |
 | 接入 GitHub PR 自动检查 | `npx proof-pr@latest init` |
 | 体检当前仓库接入状态 | `npx proof-pr@latest doctor` |
 | 本地检查当前分支 | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN` |
@@ -63,6 +64,20 @@ npx proof-pr@latest guide
 | 想把扫描结果做成可分享页面。 | 输出独立 HTML 风险面板，适合保存为 artifact 或贴进文档。 |
 
 ## 最快开始
+
+### 0. 先体验，不改仓库
+
+```bash
+npx proof-pr@latest demo workflow --locale zh-CN
+```
+
+![ProofPR demo 输出](docs/screenshots/proofpr-demo-output.png)
+
+想看所有内置案例：
+
+```bash
+npx proof-pr@latest demo --list
+```
 
 ### 1. 生成配置和 workflow
 
@@ -194,9 +209,9 @@ npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 扫描内置案例：
 
 ```bash
-npx proof-pr@latest scan --diff-file examples/cases/missing-tests.diff --locale zh-CN
-npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.diff --locale zh-CN
-npx proof-pr@latest scan --diff-file examples/cases/secret-leak.diff --format sarif --output proofpr.sarif
+npx proof-pr@latest demo workflow --locale zh-CN
+npx proof-pr@latest demo secret --locale zh-CN
+npx proof-pr@latest demo ui-evidence --locale zh-CN
 ```
 
 生成独立 HTML 可视化报告：
@@ -241,7 +256,7 @@ evidence:
 如果想在 GitHub Action 里保存 HTML 面板：
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.13
+- uses: linsk27/proof-pr@v0.1.14
   with:
     html-output: proofpr-report.html
 - uses: actions/upload-artifact@v4

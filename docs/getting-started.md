@@ -12,7 +12,15 @@ ProofPR 初始化输出：
 
 ## 最短路径
 
-大多数用户只需要一条命令：
+只是想先看效果，不想改仓库：
+
+```bash
+npx proof-pr@latest demo workflow --locale zh-CN
+```
+
+![ProofPR demo 输出](screenshots/proofpr-demo-output.png)
+
+真正接入仓库时，大多数用户只需要一条命令：
 
 ```bash
 npx proof-pr@latest init
@@ -63,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.13
+      - uses: linsk27/proof-pr@v0.1.14
         with:
           fail-on: high
           comment: "true"
@@ -117,12 +125,13 @@ comment:
 ```bash
 npx proof-pr@latest --version
 npx proof-pr@latest guide
+npx proof-pr@latest demo workflow --locale zh-CN
 npx proof-pr@latest init
 npx proof-pr@latest doctor
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 ```
 
-如果第一行输出 `0.1.13`，说明你正在使用当前最新发布版。
+如果第一行输出 `0.1.14`，说明你正在使用当前最新发布版。
 
 也可以全局安装：
 
@@ -153,6 +162,13 @@ proof-pr guide
 
 ```bash
 proof-pr doctor
+```
+
+运行内置案例：
+
+```bash
+proof-pr demo workflow --locale zh-CN
+proof-pr demo --list
 ```
 
 初始化配置和 workflow：

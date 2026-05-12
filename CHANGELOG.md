@@ -4,6 +4,12 @@
 
 暂无。
 
+## 0.1.14 - 2026-05-12
+
+- 新增 `demo` 命令，用户无需 clone 仓库即可运行内置风险案例，例如 `npx proof-pr@latest demo workflow --locale zh-CN`。
+- `guide`、README 和命令速查改为优先推荐 `demo` 试用路径，减少 examples 文件路径带来的理解成本。
+- Release workflow 在没有可用 npm token 时不再让 GitHub Release 整体失败，会提示改用本地 token 发布。
+
 ## 0.1.13 - 2026-05-12
 
 - 新增 `doctor` 体检命令，检查 `.proofpr.yml`、GitHub Actions workflow、Action 版本、PR 权限和本地 diff 可读性。

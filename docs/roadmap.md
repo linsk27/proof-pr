@@ -18,6 +18,7 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 - Evidence Contract：仓库可以定义路径级证据要求。
 - Benchmark：用样本 case 验证规则命中、风险等级和 Review 门禁，并在 CI 中自动运行。
 - Doctor：一条命令体检 `.proofpr.yml`、workflow、Action 版本、PR 权限和本地 diff。
+- Demo：无需 clone 仓库即可运行内置案例，适合首次体验和文档传播。
 - Marketplace 准备：补充 action branding、安装说明和上架文案。
 - 内置规则：改动规模、敏感路径、缺少测试、PR 描述、复现上下文、secret、依赖、大版本升级、包生命周期脚本、workflow 权限、`pull_request_target`、PR head checkout、MCP 配置。
 
@@ -27,7 +28,7 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
    代码侧材料已准备好，下一步需要仓库所有者在 GitHub 网页上确认发布。
 
 2. 真实截图刷新
-   用 `v0.1.13` 的 annotations / SARIF 能力重新跑一个 demo PR，补充新版效果图。
+   用 `v0.1.14` 的 annotations / SARIF 能力重新跑一个 demo PR，补充新版效果图。
 
 3. 真实项目样例扩展
    继续补充 React、Python、Go、Rust 等不同生态的真实 diff 示例，让用户能更快理解规则价值。

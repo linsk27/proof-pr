@@ -22,7 +22,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.13";
+const CLI_VERSION = "0.1.14";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -66,6 +66,25 @@ interface DoctorCheck {
 interface DoctorReport {
   checks: DoctorCheck[];
   nextSteps: string[];
+}
+
+interface DemoCase {
+  id: string;
+  title: string;
+  description: string;
+  diffText: string;
+  config?: Partial<ProofPRConfig>;
+  pullRequest?: {
+    title?: string;
+    body?: string;
+  };
+}
+
+interface DemoCommandOptions {
+  list: boolean;
+  format: OutputFormat;
+  output?: string;
+  locale?: ReportLocale;
 }
 
 type BenchmarkOutputFormat = "text" | "json" | "markdown";
@@ -130,6 +149,131 @@ interface BenchmarkReport {
   results: BenchmarkCaseResult[];
 }
 
+const DEMO_CASES: DemoCase[] = [
+  {
+    id: "workflow",
+    title: "高权限 workflow 运行不可信 PR 代码",
+    description: "演示 pull_request_target 与 PR head checkout 组合风险。",
+    diffText: `diff --git a/.github/workflows/pr.yml b/.github/workflows/pr.yml
+index 1111111..2222222 100644
+--- a/.github/workflows/pr.yml
++++ b/.github/workflows/pr.yml
+@@ -1,7 +1,17 @@
+ name: PR automation
+ on:
++  pull_request_target:
++    types: [opened, synchronize]
++
+ jobs:
+   test:
+     runs-on: ubuntu-latest
+     steps:
+-      - uses: actions/checkout@v4
++      - uses: actions/checkout@v4
++        with:
++          repository: \${{ github.event.pull_request.head.repo.full_name }}
++          ref: \${{ github.event.pull_request.head.sha }}
++      - run: pnpm install
++      - run: pnpm test
+`
+  },
+  {
+    id: "secret",
+    title: "疑似 secret 被提交",
+    description: "演示 .env、OpenAI key、数据库连接串等敏感内容会被拦截。",
+    diffText: `diff --git a/.env b/.env
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/.env
+@@ -0,0 +1,2 @@
++OPENAI_API_KEY=sk-proj-examplevalueexamplevalue1234567890
++DATABASE_URL=postgres://demo:super-secret-password@example.com:5432/app
+`
+  },
+  {
+    id: "dependency",
+    title: "依赖大版本升级",
+    description: "演示依赖 major upgrade 需要 changelog、迁移说明和验证证据。",
+    diffText: `diff --git a/package.json b/package.json
+index 1111111..2222222 100644
+--- a/package.json
++++ b/package.json
+@@ -1,8 +1,8 @@
+ {
+   "dependencies": {
+-    "react": "^18.2.0",
++    "react": "^19.0.0",
+     "zod": "^3.25.1"
+   },
+   "devDependencies": {
+     "typescript": "^5.9.3"
+   }
+ }
+`
+  },
+  {
+    id: "mcp",
+    title: "MCP 本地命令和凭据面",
+    description: "演示 MCP / agent 配置中的 command、args、env 风险。",
+    diffText: `diff --git a/.cursor/mcp.json b/.cursor/mcp.json
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/.cursor/mcp.json
+@@ -0,0 +1,11 @@
++{
++  "mcpServers": {
++    "local-admin": {
++      "command": "node",
++      "args": ["scripts/admin-server.js"],
++      "env": {
++        "API_TOKEN": "\${LOCAL_API_TOKEN}"
++      }
++    }
++  }
++}
+`,
+    config: { preset: "mcp-security" }
+  },
+  {
+    id: "ui-evidence",
+    title: "UI 改动缺少截图证据",
+    description: "演示 Evidence Contract：组件改动必须提供截图和验证说明。",
+    diffText: `diff --git a/src/components/Button.tsx b/src/components/Button.tsx
+index 1111111..2222222 100644
+--- a/src/components/Button.tsx
++++ b/src/components/Button.tsx
+@@ -1,3 +1,7 @@
+ export function Button() {
+-  return <button>Save</button>;
++  return (
++    <button className="primary">
++      Save
++    </button>
++  );
+ }
+`,
+    config: {
+      evidence: {
+        contracts: [
+          {
+            id: "ui-screenshot",
+            title: "UI changes need screenshots",
+            paths: ["src/components/**"],
+            requires: ["screenshot", "verification"],
+            severity: "medium"
+          }
+        ]
+      }
+    },
+    pullRequest: {
+      title: "Update button styling",
+      body: "This updates the primary button style and spacing so the layout is easier to scan."
+    }
+  }
+];
+
 const program = new Command();
 
 program
@@ -157,6 +301,40 @@ program
 
     if (report.checks.some((check) => check.level === "fail")) {
       process.exitCode = 1;
+    }
+  });
+
+program
+  .command("demo")
+  .description("Run a built-in ProofPR demo case without cloning this repository.")
+  .argument("[case]", "Demo case id. Use --list to see available cases.", "workflow")
+  .option("--list", "List built-in demo cases.", false)
+  .option("--format <format>", "Output format: markdown, json, sarif, or html.", parseFormat, "markdown")
+  .option("--output <path>", "Write demo report output to a file instead of stdout.")
+  .option("--locale <locale>", "Report language: en or zh-CN.", "zh-CN")
+  .action(async (caseId: string, options: DemoCommandOptions) => {
+    if (options.list) {
+      process.stdout.write(renderDemoList());
+      return;
+    }
+
+    const demoCase = DEMO_CASES.find((item) => item.id === caseId);
+    if (!demoCase) {
+      throw new Error(`Unknown demo case "${caseId}". Run "proof-pr demo --list" to see available cases.`);
+    }
+
+    const result = scanDiff(demoCase.diffText, {
+      config: demoCase.config,
+      pullRequest: demoCase.pullRequest
+    });
+    const locale = parseLocale(options.locale, "zh-CN");
+    const output = renderDemoOutput(demoCase, result, options.format, locale);
+
+    if (options.output) {
+      await writeOutput(options.output, `${output}\n`);
+      process.stdout.write(`ProofPR demo ${options.format} report written to ${options.output}\n`);
+    } else {
+      process.stdout.write(`${output}\n`);
     }
   });
 
@@ -293,21 +471,69 @@ function renderGuide(): string {
    npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif
    适合在 CI 里配合 github/codeql-action/upload-sarif 使用。
 
-6. 试跑内置风险案例
-   npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.diff --locale zh-CN
-   不需要改项目代码，也能快速看到 ProofPR 会抓什么风险。
+6. 不接入仓库，先试跑内置案例
+   npx proof-pr@latest demo workflow --locale zh-CN
+   不需要 clone 仓库或寻找 examples 文件，也能快速看到 ProofPR 会抓什么风险。
 
-7. 验证规则样本是否仍然命中
+7. 查看所有内置案例
+   npx proof-pr@latest demo --list
+
+8. 验证规则样本是否仍然命中
    npx proof-pr@latest benchmark --cases benchmarks/cases
    适合维护 ProofPR 规则或发版前回归。
 
-8. 调整审查强度
+9. 调整审查强度
    打开 .proofpr.yml，把 preset 改成 security-strict、dependency-careful 或 mcp-security。
 
 结果在哪里看：
 - GitHub Action：PR Conversation 评论、Actions summary、Checks 状态。
 - 本地 CLI：终端输出；如果用了 --output，就看写出的 HTML / JSON / SARIF / Markdown 文件。
 `;
+}
+
+function renderDemoList(): string {
+  const rows = DEMO_CASES.map((item) => `- ${item.id}: ${item.title}\n  ${item.description}`).join("\n");
+
+  return `ProofPR 内置案例
+
+用法：
+npx proof-pr@latest demo <case> --locale zh-CN
+
+可用案例：
+${rows}
+`;
+}
+
+function renderDemoOutput(
+  demoCase: DemoCase,
+  result: ReturnType<typeof scanDiff>,
+  format: OutputFormat,
+  locale: ReportLocale
+): string {
+  if (format === "json") {
+    return JSON.stringify(
+      {
+        demo: {
+          id: demoCase.id,
+          title: demoCase.title,
+          description: demoCase.description
+        },
+        result
+      },
+      null,
+      2
+    );
+  }
+
+  if (format === "markdown") {
+    return `# ProofPR demo: ${demoCase.title}
+
+${demoCase.description}
+
+${renderMarkdownReport(result, locale)}`;
+  }
+
+  return renderOutput(result, format, locale);
 }
 
 async function runDoctor(options: DoctorCommandOptions): Promise<DoctorReport> {

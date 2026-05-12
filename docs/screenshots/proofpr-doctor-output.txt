@@ -10,7 +10,7 @@ Checks:
        comment.enabled=true
 [pass] .github/workflows/proofpr.yml 已存在
 [pass] workflow 会在 Pull Request 事件运行
-[pass] GitHub Action 版本为 v0.1.13
+[pass] GitHub Action 版本为 v0.1.14
 [pass] workflow 具备写 PR 评论权限
 [pass] workflow 具备读取仓库内容权限
 [pass] 当前目录位于 Git 仓库中

@@ -43,8 +43,21 @@ jobs:
           else
             echo "published=false" >> "$GITHUB_OUTPUT"
           fi
-      - name: Publish CLI to npm
+      - name: Check npm token
+        id: npm-token
         if: startsWith(github.ref, 'refs/tags/v') && steps.npm-version.outputs.published != 'true'
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -n "$NODE_AUTH_TOKEN" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::NPM_TOKEN is not configured. GitHub Release was created; publish npm locally or add the secret and rerun."
+          fi
+      - name: Publish CLI to npm
+        if: startsWith(github.ref, 'refs/tags/v') && steps.npm-version.outputs.published != 'true' && steps.npm-token.outputs.available == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm --filter proof-pr exec npm publish --access public --provenance --registry https://registry.npmjs.org

@@ -6,6 +6,14 @@
 
 ## 第 0 步：你会得到什么
 
+如果只是想先看效果，不想改仓库，可以先运行：
+
+```bash
+npx proof-pr@latest demo workflow --locale zh-CN
+```
+
+![ProofPR demo 输出](screenshots/proofpr-demo-output.png)
+
 安装后，每个 Pull Request 会得到：
 
 - 一条 `ProofPR 审查报告` PR 评论。
@@ -133,7 +141,7 @@ npx proof-pr@latest --version
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 ```
 
-第一行当前应输出 `0.1.13`，用于确认 npm latest 已经安装正确。
+第一行当前应输出 `0.1.14`，用于确认 npm latest 已经安装正确。
 
 扫描内置案例：
 
@@ -183,7 +191,7 @@ permissions:
 
 steps:
   - uses: actions/checkout@v4
-  - uses: linsk27/proof-pr@v0.1.13
+  - uses: linsk27/proof-pr@v0.1.14
     with:
       fail-on: high
       comment: "true"
