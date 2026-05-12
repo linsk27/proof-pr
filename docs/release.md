@@ -21,16 +21,35 @@ pnpm release:check
 
 - 触发条件：推送 `v*.*.*` tag。
 - npm 包：`proof-pr`。
-- 发布命令：`npm publish --access public --provenance`。
-- 需要仓库 secret：`NPM_TOKEN`。
+- 发布命令：`npm publish --access public`。
+- 推荐认证方式：npm Trusted Publishing，通过 GitHub OIDC 发布，不需要长期 npm token。
+- 兼容认证方式：仓库 secret `NPM_TOKEN`，仅作为 trusted publishing 未配置时的兜底。
 
 GitHub Release 会先创建；随后 workflow 会检查该版本是否已经存在于 npm。只有 npm 还没有该版本时，才会执行发布步骤。
 
-如果没有配置 `NPM_TOKEN`，GitHub Release 仍然可以创建，但 npm 发布步骤会失败。
+workflow 使用 Node 24 和 npm 11。npm 11 会在 GitHub OIDC 环境里优先使用 Trusted Publishing；如果 npm 包没有配置 trusted publisher，才会退回 `NPM_TOKEN`。
+
+## npm Trusted Publishing 设置
+
+在 npm 网站给 `proof-pr` 配置 trusted publisher：
+
+- Provider：GitHub Actions
+- Repository：`linsk27/proof-pr`
+- Workflow file：`release.yml`
+- Environment：留空，除非以后给 release job 配 GitHub environment
+
+也可以在本机用 npm CLI 配置：
+
+```bash
+npm install -g npm@^11.10.0
+npm trust github proof-pr --repo linsk27/proof-pr --file release.yml
+```
+
+npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm trust` 命令需要 npm 11.10+。配置完成后，后续推 tag 应该能自动发布 npm，不再需要本地粘贴 token。
 
 ## 正式发布命令
 
-确认 `NPM_TOKEN` 已配置后：
+确认 trusted publisher 已配置后：
 
 ```bash
 git tag v0.1.16
@@ -59,7 +78,7 @@ npx proof-pr@latest --version -> 0.1.16
 - GitHub Release：`v0.1.16`
 - npm：`proof-pr@0.1.16`
 - npm dist-tag：`latest -> 0.1.16`
-- GitHub Actions：Release workflow 和 main CI 均已通过。
+- GitHub Actions：main CI 已通过；Release workflow 创建 GitHub Release 成功，但旧发布逻辑在 npm token fallback 步骤失败，npm 已通过本地安全 token 发布。
 
 本次是功能增强版，重点包括：
 
@@ -72,7 +91,7 @@ npx proof-pr@latest --version -> 0.1.16
 - 新增 `proof-pr doctor`，可检查配置、workflow、Action 版本、PR 权限和本地 diff 可读性。
 - 新增 `proof-pr demo`，无需 clone 仓库即可运行内置风险案例。
 - 新增 `proof-pr template`，并让 `proof-pr init` 默认生成 PR 模板，帮助贡献者提前补充证据。
-- Release workflow 缺少 npm token 时会保留 GitHub Release 成功状态，并提示本地发布 npm。
+- Release workflow 已改为 OIDC trusted publishing 优先，`NPM_TOKEN` 只作为兼容兜底。
 - CLI 支持 `--format html`，可生成独立 HTML 可视化报告。
 - CLI `scan` 支持 `--output`，可直接把 HTML、SARIF、JSON 或 Markdown 报告写入文件。
 - GitHub Action 支持 `html-output`，可把可视化报告上传为 artifact。

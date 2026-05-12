@@ -20,9 +20,11 @@ jobs:
           version: 10.33.3
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: pnpm
           registry-url: https://registry.npmjs.org
+      - name: Use npm 11 for trusted publishing
+        run: npm install -g npm@^11.10.0
       - run: pnpm install --frozen-lockfile
       - run: pnpm release:check
       - name: Pack CLI
@@ -43,21 +45,27 @@ jobs:
           else
             echo "published=false" >> "$GITHUB_OUTPUT"
           fi
-      - name: Check npm token
-        id: npm-token
+      - name: Select npm publish auth mode
+        id: npm-auth
         if: startsWith(github.ref, 'refs/tags/v') && steps.npm-version.outputs.published != 'true'
         shell: bash
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           if [ -n "$NODE_AUTH_TOKEN" ]; then
-            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "mode=token-fallback" >> "$GITHUB_OUTPUT"
+            echo "::notice::NPM_TOKEN is configured. npm 11 will still prefer trusted publishing when npm has a matching publisher; otherwise it can fall back to the token."
           else
-            echo "available=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::NPM_TOKEN is not configured. GitHub Release was created; publish npm locally or add the secret and rerun."
+            echo "mode=trusted-publishing" >> "$GITHUB_OUTPUT"
+            echo "::notice::NPM_TOKEN is not configured. Publishing will use npm trusted publishing via GitHub OIDC."
           fi
-      - name: Publish CLI to npm
-        if: startsWith(github.ref, 'refs/tags/v') && steps.npm-version.outputs.published != 'true' && steps.npm-token.outputs.available == 'true'
+      - name: Publish CLI to npm with trusted publishing
+        if: startsWith(github.ref, 'refs/tags/v') && steps.npm-version.outputs.published != 'true' && steps.npm-auth.outputs.mode == 'trusted-publishing'
+        working-directory: packages/cli
+        run: npm publish --access public --registry https://registry.npmjs.org
+      - name: Publish CLI to npm with token fallback
+        if: startsWith(github.ref, 'refs/tags/v') && steps.npm-version.outputs.published != 'true' && steps.npm-auth.outputs.mode == 'token-fallback'
+        working-directory: packages/cli
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm --filter proof-pr exec npm publish --access public --provenance --registry https://registry.npmjs.org
+        run: npm publish --access public --registry https://registry.npmjs.org
