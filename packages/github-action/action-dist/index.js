@@ -50701,6 +50701,7 @@ function renderHtmlReport(result, locale = "en") {
     const scoreGrade = formatEvidenceGrade(result.evidenceScore.grade, locale);
     const findingsBySeverity = countFindingsBySeverity(result.findings);
     const ruleCounts = countFindingsByRule(result.findings);
+    const fixPrompt = renderContributorFixPrompt(result, locale);
     const evidenceSignals = [
         [labels.prDescription, locale === "zh-CN" ? translateDescriptionState(result.summary.pullRequestDescription) : result.summary.pullRequestDescription, result.summary.pullRequestDescription === "present"],
         [labels.verification, yesNo(result.summary.verificationEvidence, locale), result.summary.verificationEvidence],
@@ -50872,6 +50873,69 @@ function renderHtmlReport(result, locale = "en") {
       gap: 10px;
     }
 
+    .fix-panel {
+      display: grid;
+      gap: 12px;
+    }
+
+    .fix-text {
+      margin: 0;
+      white-space: pre-wrap;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfd;
+      padding: 12px;
+      color: var(--ink);
+      overflow-x: auto;
+    }
+
+    .copy-button, .filter-button {
+      appearance: none;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--ink);
+      font: inherit;
+      font-size: 13px;
+      padding: 8px 11px;
+      cursor: pointer;
+    }
+
+    .copy-button {
+      justify-self: flex-start;
+      border-color: #b8d5f4;
+      background: var(--soft-blue);
+      color: var(--blue);
+      font-weight: 680;
+    }
+
+    .filterbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+
+    .filter-button.active {
+      border-color: #b8d5f4;
+      background: var(--soft-blue);
+      color: var(--blue);
+      font-weight: 680;
+    }
+
+    .finding-search {
+      min-width: min(320px, 100%);
+      flex: 1 1 240px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 13px;
+      padding: 8px 11px;
+    }
+
     .signal, .action, .focus, .deduction, .rule-row {
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -50950,12 +51014,20 @@ function renderHtmlReport(result, locale = "en") {
       background: #fff;
     }
 
+    .finding[hidden] { display: none; }
+
     .finding-head {
       display: flex;
       justify-content: space-between;
       gap: 12px;
       align-items: flex-start;
       margin-bottom: 8px;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .finding-head::-webkit-details-marker {
+      display: none;
     }
 
     code {
@@ -51045,6 +51117,15 @@ function renderHtmlReport(result, locale = "en") {
         </div>
       </article>
 
+      <article class="card full">
+        <h2>${labels.quickFix}</h2>
+        <div class="fix-panel">
+          <p class="muted">${labels.quickFixHint}</p>
+          <pre class="fix-text" id="proofpr-fix-prompt">${escapeHtml(fixPrompt)}</pre>
+          <button class="copy-button" type="button" data-copy-target="proofpr-fix-prompt" data-label="${escapeHtml(labels.copyFix)}" data-copied="${escapeHtml(labels.copiedFix)}">${labels.copyFix}</button>
+        </div>
+      </article>
+
       <article class="card wide">
         <h2>${labels.reviewPlan}</h2>
         <div class="action-list">
@@ -51105,16 +51186,77 @@ function renderHtmlReport(result, locale = "en") {
 
       <article class="card full">
         <h2>${labels.findings}</h2>
+        <div class="filterbar" aria-label="${labels.findingFilters}">
+          ${findingFilterButton(labels.allFindings, "all", result.findings.length, true)}
+          ${findingFilterButton(labels.high, "high", findingsBySeverity.high)}
+          ${findingFilterButton(labels.medium, "medium", findingsBySeverity.medium)}
+          ${findingFilterButton(labels.low, "low", findingsBySeverity.low)}
+          ${findingFilterButton(labels.info, "info", findingsBySeverity.info)}
+          <input class="finding-search" id="proofpr-finding-search" type="search" placeholder="${escapeHtml(labels.searchFindings)}">
+        </div>
         <div class="finding-list">
           ${result.findings.length > 0
         ? result.findings.map((finding) => htmlFinding(finding, locale)).join("\n")
         : `<div class="muted">${labels.noFindings}</div>`}
+          <div class="muted" id="proofpr-empty-filter" hidden>${labels.noFilteredFindings}</div>
         </div>
       </article>
     </section>
 
     <p class="footer">${labels.footer}</p>
   </main>
+  <script>
+    (() => {
+      const buttons = Array.from(document.querySelectorAll("[data-filter-severity]"));
+      const search = document.getElementById("proofpr-finding-search");
+      const findings = Array.from(document.querySelectorAll("[data-finding]"));
+      const empty = document.getElementById("proofpr-empty-filter");
+      let activeSeverity = "all";
+
+      const applyFilters = () => {
+        const query = (search?.value || "").trim().toLowerCase();
+        let visible = 0;
+
+        for (const finding of findings) {
+          const severity = finding.getAttribute("data-severity") || "";
+          const haystack = finding.getAttribute("data-search") || "";
+          const severityMatches = activeSeverity === "all" || severity === activeSeverity;
+          const queryMatches = query === "" || haystack.includes(query);
+          const show = severityMatches && queryMatches;
+          finding.hidden = !show;
+          if (show) visible += 1;
+        }
+
+        if (empty) empty.hidden = visible !== 0 || findings.length === 0;
+      };
+
+      for (const button of buttons) {
+        button.addEventListener("click", () => {
+          activeSeverity = button.getAttribute("data-filter-severity") || "all";
+          for (const item of buttons) item.classList.toggle("active", item === button);
+          applyFilters();
+        });
+      }
+
+      search?.addEventListener("input", applyFilters);
+
+      for (const button of Array.from(document.querySelectorAll("[data-copy-target]"))) {
+        button.addEventListener("click", async () => {
+          const target = document.getElementById(button.getAttribute("data-copy-target") || "");
+          const text = target?.textContent || "";
+          try {
+            await navigator.clipboard.writeText(text);
+            button.textContent = button.getAttribute("data-copied") || button.textContent;
+            setTimeout(() => {
+              button.textContent = button.getAttribute("data-label") || button.textContent;
+            }, 1200);
+          } catch {
+            button.textContent = text;
+          }
+        });
+      }
+    })();
+  </script>
 </body>
 </html>
 `;
@@ -51167,9 +51309,14 @@ function renderEnglishMarkdownReport(result) {
         REPORT_MARKER,
         "# ProofPR Review",
         "",
-        `Risk: **${result.risk}**`,
-        `Evidence score: **${result.evidenceScore.value}/100 (${formatEvidenceGrade(result.evidenceScore.grade, "en")})**`,
-        `Review gate: **${formatReviewDecision(result.reviewDecision, "en")}**`,
+        "## Summary",
+        "",
+        "| Item | Result |",
+        "| --- | --- |",
+        `| Risk | **${result.risk}** |`,
+        `| Evidence score | **${result.evidenceScore.value}/100 (${formatEvidenceGrade(result.evidenceScore.grade, "en")})** |`,
+        `| Review gate | **${formatReviewDecision(result.reviewDecision, "en")}** |`,
+        `| Findings | ${result.findings.length} |`,
         "",
         "## Evidence",
         "",
@@ -51187,6 +51334,7 @@ function renderEnglishMarkdownReport(result) {
         ""
     ];
     appendEvidenceScoreSection(lines, result, "en");
+    appendQuickFixSection(lines, result, "en");
     appendReviewPlanSection(lines, result, "en");
     if (result.findings.length === 0) {
         lines.push("## Findings", "", "No review-risk findings detected by the enabled rules.", "");
@@ -51204,9 +51352,14 @@ function renderChineseMarkdownReport(result) {
         REPORT_MARKER,
         "# ProofPR 审查报告",
         "",
-        `风险等级：**${translateRisk(result.risk)}**`,
-        `证据评分：**${result.evidenceScore.value}/100（${formatEvidenceGrade(result.evidenceScore.grade, "zh-CN")}）**`,
-        `Review 门禁：**${formatReviewDecision(result.reviewDecision, "zh-CN")}**`,
+        "## 总览",
+        "",
+        "| 项目 | 结果 |",
+        "| --- | --- |",
+        `| 风险等级 | **${translateRisk(result.risk)}** |`,
+        `| 证据评分 | **${result.evidenceScore.value}/100（${formatEvidenceGrade(result.evidenceScore.grade, "zh-CN")}）** |`,
+        `| Review 门禁 | **${formatReviewDecision(result.reviewDecision, "zh-CN")}** |`,
+        `| 风险发现 | ${result.findings.length} |`,
         "",
         "## 证据概览",
         "",
@@ -51224,6 +51377,7 @@ function renderChineseMarkdownReport(result) {
         ""
     ];
     appendEvidenceScoreSection(lines, result, "zh-CN");
+    appendQuickFixSection(lines, result, "zh-CN");
     appendReviewPlanSection(lines, result, "zh-CN");
     if (result.findings.length === 0) {
         lines.push("## 风险发现", "", "启用的规则没有发现需要优先关注的 review 风险。", "");
@@ -51260,6 +51414,13 @@ function appendEvidenceScoreSection(lines, result, locale) {
     }
     lines.push("");
 }
+function appendQuickFixSection(lines, result, locale) {
+    lines.push(locale === "zh-CN" ? "## 可复制补证清单" : "## Copyable Fix Checklist", "");
+    lines.push(locale === "zh-CN"
+        ? "贡献者可以直接复制下面内容补到 PR 描述里，维护者也可以把它作为 review 回复。"
+        : "Contributors can paste this into the PR description; maintainers can also use it as a review reply.");
+    lines.push("", "```md", renderContributorFixPrompt(result, locale), "```", "");
+}
 function appendReviewPlanSection(lines, result, locale) {
     lines.push(locale === "zh-CN" ? "## Review 行动清单" : "## Review Plan", "");
     if (result.reviewPlan.actionItems.length > 0) {
@@ -51281,6 +51442,97 @@ function appendReviewPlanSection(lines, result, locale) {
         }
     }
     lines.push("");
+}
+function renderContributorFixPrompt(result, locale) {
+    const missingEvidence = missingEvidenceLabels(result, locale);
+    const actions = result.reviewPlan.actionItems.slice(0, 6);
+    const focusFiles = result.reviewPlan.focusFiles.slice(0, 5);
+    if (locale === "zh-CN") {
+        const lines = [
+            "请在这个 PR 描述中补充以下内容，方便维护者继续 review：",
+            missingEvidence.length > 0 ? `ProofPR 当前最缺：${missingEvidence.join("、")}。` : "ProofPR 当前没有发现必须补充的证据项，可以保留关键验证记录。",
+            "",
+            "## 验证方式",
+            "- 自动化测试：",
+            "- 手动验证：",
+            "- 未覆盖或不适用的部分：",
+            "",
+            "## 复现 / Before & After",
+            "- 复现步骤或改动前状态：",
+            "- 改动后结果：",
+            "- 截图 / 录屏 / 日志链接：",
+            "",
+            "## 风险说明",
+            "- 依赖 / CI / 权限 / MCP 变更原因：",
+            "- 发布影响、迁移说明或回滚方案："
+        ];
+        if (actions.length > 0) {
+            lines.push("", "## ProofPR 需要处理的点");
+            for (const action of actions) {
+                lines.push(`- ${translateReviewActionTitle(action.actionId, action.title)}：${translateReviewActionDetail(action.actionId, action.detail)}`);
+            }
+        }
+        if (focusFiles.length > 0) {
+            lines.push("", "## 重点文件");
+            for (const file of focusFiles) {
+                lines.push(`- ${file.path}：${translateFocusReason(file.reasonId, file.reason)}`);
+            }
+        }
+        return lines.join("\n");
+    }
+    const lines = [
+        "Please add the following context to this PR so maintainers can continue review:",
+        missingEvidence.length > 0 ? `ProofPR is currently missing: ${missingEvidence.join(", ")}.` : "ProofPR did not find required missing evidence; keep the key verification notes visible.",
+        "",
+        "## Verification",
+        "- Automated tests:",
+        "- Manual verification:",
+        "- Not covered or not applicable:",
+        "",
+        "## Reproduction / Before & After",
+        "- Reproduction steps or previous state:",
+        "- Result after this change:",
+        "- Screenshot / recording / log link:",
+        "",
+        "## Risk Notes",
+        "- Dependency / CI / permission / MCP rationale:",
+        "- Release impact, migration notes, or rollback plan:"
+    ];
+    if (actions.length > 0) {
+        lines.push("", "## ProofPR Items To Resolve");
+        for (const action of actions) {
+            lines.push(`- ${action.title}: ${action.detail}`);
+        }
+    }
+    if (focusFiles.length > 0) {
+        lines.push("", "## Focus Files");
+        for (const file of focusFiles) {
+            lines.push(`- ${file.path}: ${file.reason}`);
+        }
+    }
+    return lines.join("\n");
+}
+function missingEvidenceLabels(result, locale) {
+    const labels = [];
+    if (result.summary.pullRequestDescription !== "present") {
+        labels.push(locale === "zh-CN" ? "清楚的 PR 描述" : "clear PR description");
+    }
+    if (!result.summary.verificationEvidence) {
+        labels.push(locale === "zh-CN" ? "测试或手动验证" : "test or manual verification");
+    }
+    if (!result.summary.reproductionEvidence) {
+        labels.push(locale === "zh-CN" ? "复现步骤或 before/after" : "reproduction steps or before/after context");
+    }
+    if (!result.summary.screenshotEvidence && result.findings.some((finding) => finding.ruleId.includes("screenshot"))) {
+        labels.push(locale === "zh-CN" ? "截图或录屏" : "screenshot or recording");
+    }
+    if (!result.summary.changelogEvidence && result.findings.some((finding) => finding.ruleId.includes("dependency-major-upgrade"))) {
+        labels.push(locale === "zh-CN" ? "changelog 或迁移说明" : "changelog or migration notes");
+    }
+    if (!result.summary.permissionRationaleEvidence && result.findings.some((finding) => finding.ruleId.includes("workflow"))) {
+        labels.push(locale === "zh-CN" ? "权限变更理由" : "permission rationale");
+    }
+    return labels;
 }
 function formatEnglishFinding(finding) {
     const lines = [
@@ -51683,7 +51935,15 @@ function htmlLabels(locale) {
             permissionRationale: "权限理由",
             reviewPlan: "Review 行动清单",
             noActions: "没有额外行动项。",
+            quickFix: "一键补证建议",
+            quickFixHint: "复制这段内容到 PR 描述或评论里，贡献者按空白项补齐即可。",
+            copyFix: "复制补证清单",
+            copiedFix: "已复制",
             findingDistribution: "Finding 分布",
+            findingFilters: "筛选风险发现",
+            allFindings: "全部",
+            searchFindings: "搜索规则、文件或详情",
+            noFilteredFindings: "当前筛选条件下没有风险发现。",
             high: "高",
             medium: "中",
             low: "低",
@@ -51731,7 +51991,15 @@ function htmlLabels(locale) {
         permissionRationale: "Permission rationale",
         reviewPlan: "Review plan",
         noActions: "No additional action items.",
+        quickFix: "One-click evidence fix",
+        quickFixHint: "Copy this into the PR description or a review reply, then fill the blanks.",
+        copyFix: "Copy checklist",
+        copiedFix: "Copied",
         findingDistribution: "Finding distribution",
+        findingFilters: "Filter findings",
+        allFindings: "All",
+        searchFindings: "Search rules, files, or details",
+        noFilteredFindings: "No findings match the current filter.",
         high: "High",
         medium: "Medium",
         low: "Low",
@@ -51761,9 +52029,25 @@ function signalItem(name, state, ok) {
 function severityItem(severity, value, label) {
     return `<div class="severity ${severity === "high" ? "tone-high" : severity === "medium" ? "tone-medium" : severity === "low" ? "tone-low" : ""}"><strong>${value}</strong><span>${escapeHtml(label)}</span></div>`;
 }
+function findingFilterButton(label, severity, count, active = false) {
+    return `<button class="filter-button${active ? " active" : ""}" type="button" data-filter-severity="${escapeHtml(severity)}">${escapeHtml(label)} <span class="muted">${count}</span></button>`;
+}
 function htmlFinding(finding, locale) {
     const labels = htmlLabels(locale);
     const translated = locale === "zh-CN" ? translateFinding(finding) : finding;
+    const searchText = [
+        finding.ruleId,
+        finding.severity,
+        finding.path,
+        translated.title,
+        translated.message,
+        translated.recommendation,
+        ...(finding.evidence ?? [])
+    ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .replace(/\s+/g, " ");
     const evidence = finding.evidence && finding.evidence.length > 0
         ? `<ul class="evidence-list">${finding.evidence
             .map((item) => `<li><code>${escapeHtml(locale === "zh-CN" ? translateEvidence(item) : item)}</code></li>`)
@@ -51775,19 +52059,19 @@ function htmlFinding(finding, locale) {
     const recommendation = translated.recommendation
         ? `<div class="muted">${labels.recommendation}: ${escapeHtml(translated.recommendation)}</div>`
         : "";
-    return `<div class="finding">
-    <div class="finding-head">
+    return `<details class="finding" open data-finding data-severity="${escapeHtml(finding.severity)}" data-search="${escapeHtml(searchText)}">
+    <summary class="finding-head">
       <div>
         <div class="finding-title">${escapeHtml(translated.title)}</div>
         <div class="muted">${labels.rule}: <code>${escapeHtml(finding.ruleId)}</code></div>
       </div>
       <span class="pill ${finding.severity === "high" ? "tone-high" : finding.severity === "medium" ? "tone-medium" : "tone-low"}">${escapeHtml(locale === "zh-CN" ? translateSeverity(finding.severity) : finding.severity)}</span>
-    </div>
+    </summary>
     ${path}
     <div class="muted">${labels.detail}: ${escapeHtml(translated.message)}</div>
     ${evidence}
     ${recommendation}
-  </div>`;
+  </details>`;
 }
 function countFindingsBySeverity(findings) {
     return findings.reduce((counts, finding) => {

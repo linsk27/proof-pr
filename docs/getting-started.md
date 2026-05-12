@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.15
+      - uses: linsk27/proof-pr@v0.1.16
         with:
           fail-on: high
           comment: "true"
@@ -133,7 +133,7 @@ npx proof-pr@latest template
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 ```
 
-如果第一行输出 `0.1.15`，说明你正在使用当前最新发布版。
+如果第一行输出 `0.1.16`，说明你正在使用当前最新发布版。
 
 也可以全局安装：
 
@@ -198,6 +198,8 @@ proof-pr benchmark --cases benchmarks/cases
 ```bash
 proof-pr scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html
 ```
+
+HTML 报告支持按风险严重程度筛选、搜索规则/文件/详情，并复制“补证清单”给贡献者。
 
 ![ProofPR HTML 可视化报告](screenshots/proofpr-visual-report.png)
 

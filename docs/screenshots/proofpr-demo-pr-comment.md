@@ -1,4 +1,4 @@
-﻿<!-- proof-pr-report -->
+<!-- proof-pr-report -->
 # ProofPR Review
 
 Risk: **high**

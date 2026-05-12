@@ -13,13 +13,13 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 
 ## 现在能用吗
 
-- GitHub Release：[`v0.1.15`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.15)
-- npm：[`proof-pr@0.1.15`](https://www.npmjs.com/package/proof-pr)
-- GitHub Action：`linsk27/proof-pr@v0.1.15`
+- GitHub Release：[`v0.1.16`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.16)
+- npm：[`proof-pr@0.1.16`](https://www.npmjs.com/package/proof-pr)
+- GitHub Action：`linsk27/proof-pr@v0.1.16`
 - 当前 benchmark：`14/14 passed`
 - 接入体检：`npx proof-pr@latest doctor`
 - PR 模板：`npx proof-pr@latest template`
-- 可视化报告：`--format html` / `html-output`
+- 可视化报告：`--format html` / `html-output`，支持筛选风险和复制补证清单
 
 验证你拿到的是最新版本：
 
@@ -28,7 +28,7 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-这两个命令当前都应输出 `0.1.15`。
+这两个命令当前都应输出 `0.1.16`。
 
 不知道该用哪个功能时，直接打开中文功能菜单：
 
@@ -63,7 +63,7 @@ npx proof-pr@latest guide
 | 新增依赖、大版本升级、`postinstall` 脚本。 | 提醒核查供应链风险、changelog、迁移说明和 lockfile。 |
 | 使用 `pull_request_target` 并 checkout PR head。 | 标记为高风险组合，避免高权限上下文运行不可信 PR 代码。 |
 | 团队想要求 UI 改动必须有截图。 | 用 Evidence Contract 声明路径级证据要求。 |
-| 想把扫描结果做成可分享页面。 | 输出独立 HTML 风险面板，适合保存为 artifact 或贴进文档。 |
+| 想把扫描结果做成可分享页面。 | 输出可搜索、可筛选、可复制补证清单的独立 HTML 风险面板。 |
 
 ## 最快开始
 
@@ -164,6 +164,7 @@ Benchmark 输出，证明规则样本仍按预期命中：
 | `Evidence score` / `证据评分` | 0-100 分，越高代表 PR 证据越充分。 |
 | `Review gate` / `Review 门禁` | 建议正常 review、重点 review、先补证据，或风险处理前不要合并。 |
 | `Review Plan` / `Review 行动清单` | 可直接执行的维护者 checklist 和重点文件。 |
+| `一键补证建议` | 可复制给贡献者的 PR 描述补充模板，减少来回追问。 |
 
 报告会出现在：
 
@@ -171,7 +172,7 @@ Benchmark 输出，证明规则样本仍按预期命中：
 - GitHub Actions job summary。
 - Workflow annotations / PR 文件视图。
 - 可选 GitHub Code Scanning，见 [SARIF 文档](docs/sarif-code-scanning.md)。
-- 可选 HTML 可视化报告，适合上传为 workflow artifact。
+- 可选 HTML 可视化报告，适合上传为 workflow artifact；报告里可以按严重程度筛选、搜索文件/规则，并复制补证清单。
 
 ## 它会检查什么
 
@@ -223,6 +224,8 @@ npx proof-pr@latest demo ui-evidence --locale zh-CN
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html
 ```
 
+HTML 报告不是静态截图：它可以按高/中/低风险筛选、搜索规则或文件，并把“需要贡献者补什么”一键复制到 PR 描述或评论里。
+
 运行 benchmark：
 
 ```bash
@@ -259,7 +262,7 @@ evidence:
 如果想在 GitHub Action 里保存 HTML 面板：
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.15
+- uses: linsk27/proof-pr@v0.1.16
   with:
     html-output: proofpr-report.html
 - uses: actions/upload-artifact@v4

@@ -460,6 +460,7 @@ index 0000000..1111111 100644
     expect(report).toContain("风险等级");
     expect(report).toContain("证据评分");
     expect(report).toContain("Review 门禁");
+    expect(report).toContain("可复制补证清单");
     expect(report).toContain("Review 行动清单");
     expect(report).toContain("风险发现");
   });
@@ -478,6 +479,8 @@ index 0000000..1111111 100644
     expect(html).toContain("<!doctype html>");
     expect(html).toContain("ProofPR 可视化报告");
     expect(html).toContain("证据评分");
+    expect(html).toContain("一键补证建议");
+    expect(html).toContain("data-filter-severity");
     expect(html).toContain("Review 行动清单");
     expect(html).toContain("missing-tests");
   });

@@ -23,7 +23,7 @@ npx proof-pr@latest guide
 | 体检接入状态 | 安装后不知道是否配置正确 | `npx proof-pr@latest doctor` | 当前终端 |
 | 单独补 PR 模板 | 已接入仓库但缺少 PR 模板 | `npx proof-pr@latest template` | `.github/pull_request_template.md` |
 | 本地检查当前分支 | 发 PR 前自查 | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN` | 当前终端 |
-| 生成 HTML 可视化报告 | 想把报告保存、发给别人或上传 artifact | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html` | `proofpr-report.html` |
+| 生成 HTML 可视化报告 | 想把报告保存、筛选风险、复制补证清单或上传 artifact | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html` | `proofpr-report.html` |
 | 生成 SARIF | 想接入 GitHub Code Scanning | `npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif` | `proofpr.sarif` / Code Scanning |
 | 查看所有内置案例 | 想快速理解它会抓什么 | `npx proof-pr@latest demo --list` | 当前终端 |
 | 跑 benchmark | 维护规则或发版前回归 | `npx proof-pr@latest benchmark --cases benchmarks/cases` | 当前终端 |
@@ -101,7 +101,7 @@ npx proof-pr@latest doctor
 - `.github/workflows/proofpr.yml` 是否存在。
 - `.github/pull_request_template.md` 是否存在，以及是否提示验证、复现、截图或权限理由。
 - workflow 是否监听 `pull_request`。
-- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.15`。
+- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.16`。
 - 是否具备 `pull-requests: write` 和 `contents: read` 权限。
 - 当前目录是否在 Git 仓库里，以及 `origin/main...HEAD` diff 是否可读。
 
@@ -136,6 +136,8 @@ npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format 
 - 发给同事快速看风险。
 - 放进 CI artifact。
 - 截图放进文档或 issue。
+- 在页面里按高/中/低风险筛选，搜索规则、文件或详情。
+- 一键复制“补证清单”，发给贡献者补 PR 描述。
 
 ## 6. 生成 SARIF
 

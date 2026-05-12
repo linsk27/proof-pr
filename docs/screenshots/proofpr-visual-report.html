@@ -161,6 +161,69 @@
       gap: 10px;
     }
 
+    .fix-panel {
+      display: grid;
+      gap: 12px;
+    }
+
+    .fix-text {
+      margin: 0;
+      white-space: pre-wrap;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfd;
+      padding: 12px;
+      color: var(--ink);
+      overflow-x: auto;
+    }
+
+    .copy-button, .filter-button {
+      appearance: none;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--ink);
+      font: inherit;
+      font-size: 13px;
+      padding: 8px 11px;
+      cursor: pointer;
+    }
+
+    .copy-button {
+      justify-self: flex-start;
+      border-color: #b8d5f4;
+      background: var(--soft-blue);
+      color: var(--blue);
+      font-weight: 680;
+    }
+
+    .filterbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+
+    .filter-button.active {
+      border-color: #b8d5f4;
+      background: var(--soft-blue);
+      color: var(--blue);
+      font-weight: 680;
+    }
+
+    .finding-search {
+      min-width: min(320px, 100%);
+      flex: 1 1 240px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 13px;
+      padding: 8px 11px;
+    }
+
     .signal, .action, .focus, .deduction, .rule-row {
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -239,12 +302,20 @@
       background: #fff;
     }
 
+    .finding[hidden] { display: none; }
+
     .finding-head {
       display: flex;
       justify-content: space-between;
       gap: 12px;
       align-items: flex-start;
       margin-bottom: 8px;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .finding-head::-webkit-details-marker {
+      display: none;
     }
 
     code {
@@ -336,6 +407,41 @@
 <div class="signal"><span class="signal-name">截图证据</span><span class="signal-state tone-medium">无</span></div>
 <div class="signal"><span class="signal-name">Changelog</span><span class="signal-state tone-medium">无</span></div>
 <div class="signal"><span class="signal-name">权限理由</span><span class="signal-state tone-medium">无</span></div>
+        </div>
+      </article>
+
+      <article class="card full">
+        <h2>一键补证建议</h2>
+        <div class="fix-panel">
+          <p class="muted">复制这段内容到 PR 描述或评论里，贡献者按空白项补齐即可。</p>
+          <pre class="fix-text" id="proofpr-fix-prompt">请在这个 PR 描述中补充以下内容，方便维护者继续 review：
+ProofPR 当前最缺：清楚的 PR 描述、测试或手动验证、复现步骤或 before/after、权限变更理由。
+
+## 验证方式
+- 自动化测试：
+- 手动验证：
+- 未覆盖或不适用的部分：
+
+## 复现 / Before &amp; After
+- 复现步骤或改动前状态：
+- 改动后结果：
+- 截图 / 录屏 / 日志链接：
+
+## 风险说明
+- 依赖 / CI / 权限 / MCP 变更原因：
+- 发布影响、迁移说明或回滚方案：
+
+## ProofPR 需要处理的点
+- 风险处理前不要合并：在高风险 finding 被解释、降低或移除前，把这个 PR 视为不可合并。
+- 安排敏感文件重点 review：合并前由维护者有意识地检查敏感文件改动。
+- 审查 pull_request_target 高权限触发器：确认 workflow 不会用写权限 token、secret 或仓库权限执行不可信 PR 代码。
+- 审查 PR head checkout 的权限边界：确认 job 不会在写权限 token、仓库 secret 或 pull_request_target 高权限上下文中运行不可信 PR 代码。
+- 要求补充更清楚的 PR 描述：贡献者应说明为什么改、改了什么、如何验证，以及是否有发布或兼容性风险。
+- 要求补充测试或手动验证证据：要求测试输出、CI 链接、截图，或简短的手动验证说明。
+
+## 重点文件
+- .github/workflows/pr.yml：敏感路径发生变更</pre>
+          <button class="copy-button" type="button" data-copy-target="proofpr-fix-prompt" data-label="复制补证清单" data-copied="已复制">复制补证清单</button>
         </div>
       </article>
 
@@ -455,51 +561,112 @@
 
       <article class="card full">
         <h2>风险发现</h2>
+        <div class="filterbar" aria-label="筛选风险发现">
+          <button class="filter-button active" type="button" data-filter-severity="all">全部 <span class="muted">3</span></button>
+          <button class="filter-button" type="button" data-filter-severity="high">高 <span class="muted">3</span></button>
+          <button class="filter-button" type="button" data-filter-severity="medium">中 <span class="muted">0</span></button>
+          <button class="filter-button" type="button" data-filter-severity="low">低 <span class="muted">0</span></button>
+          <button class="filter-button" type="button" data-filter-severity="info">信息 <span class="muted">0</span></button>
+          <input class="finding-search" id="proofpr-finding-search" type="search" placeholder="搜索规则、文件或详情">
+        </div>
         <div class="finding-list">
-          <div class="finding">
-    <div class="finding-head">
+          <details class="finding" open data-finding data-severity="high" data-search="sensitive-path high .github/workflows/pr.yml 敏感文件发生变更 .github/workflows/pr.yml 命中了敏感路径配置。 请重点审查权限、凭证、发布、依赖和 ci 相关变更。 +9 -1">
+    <summary class="finding-head">
       <div>
         <div class="finding-title">敏感文件发生变更</div>
         <div class="muted">规则: <code>sensitive-path</code></div>
       </div>
       <span class="pill tone-high">高</span>
-    </div>
+    </summary>
     <div class="muted">路径: <code>.github/workflows/pr.yml</code></div>
     <div class="muted">详情: .github/workflows/pr.yml 命中了敏感路径配置。</div>
     <ul class="evidence-list"><li><code>+9 -1</code></li></ul>
     <div class="muted">建议: 请重点审查权限、凭证、发布、依赖和 CI 相关变更。</div>
-  </div>
-<div class="finding">
-    <div class="finding-head">
+  </details>
+<details class="finding" open data-finding data-severity="high" data-search="workflow-dangerous-trigger high .github/workflows/pr.yml workflow 使用了 pull_request_target .github/workflows/pr.yml 新增了 pull_request_target 触发器。 请确认该 workflow 不会用高权限 token、secret 或写权限执行不可信 pr 代码。 line 3: pull_request_target:">
+    <summary class="finding-head">
       <div>
         <div class="finding-title">Workflow 使用了 pull_request_target</div>
         <div class="muted">规则: <code>workflow-dangerous-trigger</code></div>
       </div>
       <span class="pill tone-high">高</span>
-    </div>
+    </summary>
     <div class="muted">路径: <code>.github/workflows/pr.yml</code></div>
     <div class="muted">详情: .github/workflows/pr.yml 新增了 pull_request_target 触发器。</div>
     <ul class="evidence-list"><li><code>第 3 行：pull_request_target:</code></li></ul>
     <div class="muted">建议: 请确认该 workflow 不会用高权限 token、secret 或写权限执行不可信 PR 代码。</div>
-  </div>
-<div class="finding">
-    <div class="finding-head">
+  </details>
+<details class="finding" open data-finding data-severity="high" data-search="workflow-untrusted-checkout high .github/workflows/pr.yml workflow checkout 了 pr head .github/workflows/pr.yml 引用了 pr head 代码来源，需要审查它是否会在高权限上下文中执行。 避免在 pull_request_target、写权限 token 或可读取 secret 的上下文中运行不可信 pr 代码。 line 12: repository: ${{ github.event.pull_request.head.repo.full_name }} line 13: ref: ${{ github.event.pull_request.head.sha }}">
+    <summary class="finding-head">
       <div>
         <div class="finding-title">Workflow checkout 了 PR head</div>
         <div class="muted">规则: <code>workflow-untrusted-checkout</code></div>
       </div>
       <span class="pill tone-high">高</span>
-    </div>
+    </summary>
     <div class="muted">路径: <code>.github/workflows/pr.yml</code></div>
     <div class="muted">详情: .github/workflows/pr.yml 引用了 PR head 代码来源，需要审查它是否会在高权限上下文中执行。</div>
     <ul class="evidence-list"><li><code>第 12 行：repository: ${{ github.event.pull_request.head.repo.full_name }}</code></li><li><code>第 13 行：ref: ${{ github.event.pull_request.head.sha }}</code></li></ul>
     <div class="muted">建议: 避免在 pull_request_target、写权限 token 或可读取 secret 的上下文中运行不可信 PR 代码。</div>
-  </div>
+  </details>
+          <div class="muted" id="proofpr-empty-filter" hidden>当前筛选条件下没有风险发现。</div>
         </div>
       </article>
     </section>
 
     <p class="footer">ProofPR 不替代人工 review，它帮助维护者先判断证据是否足够、风险边界是否清楚。</p>
   </main>
+  <script>
+    (() => {
+      const buttons = Array.from(document.querySelectorAll("[data-filter-severity]"));
+      const search = document.getElementById("proofpr-finding-search");
+      const findings = Array.from(document.querySelectorAll("[data-finding]"));
+      const empty = document.getElementById("proofpr-empty-filter");
+      let activeSeverity = "all";
+
+      const applyFilters = () => {
+        const query = (search?.value || "").trim().toLowerCase();
+        let visible = 0;
+
+        for (const finding of findings) {
+          const severity = finding.getAttribute("data-severity") || "";
+          const haystack = finding.getAttribute("data-search") || "";
+          const severityMatches = activeSeverity === "all" || severity === activeSeverity;
+          const queryMatches = query === "" || haystack.includes(query);
+          const show = severityMatches && queryMatches;
+          finding.hidden = !show;
+          if (show) visible += 1;
+        }
+
+        if (empty) empty.hidden = visible !== 0 || findings.length === 0;
+      };
+
+      for (const button of buttons) {
+        button.addEventListener("click", () => {
+          activeSeverity = button.getAttribute("data-filter-severity") || "all";
+          for (const item of buttons) item.classList.toggle("active", item === button);
+          applyFilters();
+        });
+      }
+
+      search?.addEventListener("input", applyFilters);
+
+      for (const button of Array.from(document.querySelectorAll("[data-copy-target]"))) {
+        button.addEventListener("click", async () => {
+          const target = document.getElementById(button.getAttribute("data-copy-target") || "");
+          const text = target?.textContent || "";
+          try {
+            await navigator.clipboard.writeText(text);
+            button.textContent = button.getAttribute("data-copied") || button.textContent;
+            setTimeout(() => {
+              button.textContent = button.getAttribute("data-label") || button.textContent;
+            }, 1200);
+          } catch {
+            button.textContent = text;
+          }
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

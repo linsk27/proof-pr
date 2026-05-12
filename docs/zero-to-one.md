@@ -142,7 +142,7 @@ npx proof-pr@latest --version
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 ```
 
-第一行当前应输出 `0.1.15`，用于确认 npm latest 已经安装正确。
+第一行当前应输出 `0.1.16`，用于确认 npm latest 已经安装正确。
 
 扫描内置案例：
 
@@ -170,6 +170,8 @@ npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.
 npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.diff --locale zh-CN --format html --output proofpr-report.html
 ```
 
+这个页面可以按高/中/低风险筛选、搜索规则或文件，并复制一段“补证清单”给贡献者。
+
 ![ProofPR HTML 可视化报告](screenshots/proofpr-visual-report.png)
 
 验证规则样本是否仍按预期命中：
@@ -192,7 +194,7 @@ permissions:
 
 steps:
   - uses: actions/checkout@v4
-  - uses: linsk27/proof-pr@v0.1.15
+  - uses: linsk27/proof-pr@v0.1.16
     with:
       fail-on: high
       comment: "true"
