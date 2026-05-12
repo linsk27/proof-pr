@@ -19,86 +19,27 @@
 
 ![ProofPR 初始化输出](screenshots/proofpr-init-output.png)
 
-## 第 1 步：添加 GitHub Action
+## 第 1 步：一条命令生成配置
 
-在目标仓库创建文件：
-
-```txt
-.github/workflows/proofpr.yml
+```bash
+npx proof-pr@latest init
 ```
 
-写入：
+这个命令会生成：
 
-```yaml
-name: ProofPR
+- `.proofpr.yml`
+- `.github/workflows/proofpr.yml`
 
-on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+默认配置已经会输出中文报告，并使用开源维护者预设。
 
-permissions:
-  contents: read
-  pull-requests: write
+## 第 2 步：提交两个文件
 
-jobs:
-  proofpr:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.9
-        with:
-          fail-on: high
-          comment: "true"
-          annotations: "true"
+```bash
+git add .proofpr.yml .github/workflows/proofpr.yml
+git commit -m "chore: add ProofPR"
 ```
 
-提交这个文件后，ProofPR 只会在 PR 场景运行，不会因为普通分支 push 就刷屏。
-
-## 第 2 步：添加中文配置
-
-在仓库根目录创建：
-
-```txt
-.proofpr.yml
-```
-
-推荐先用开源维护者预设：
-
-```yaml
-locale: zh-CN
-preset: open-source-maintainer
-
-comment:
-  enabled: true
-```
-
-如果你的项目更关注安全、依赖或 MCP，可以换成：
-
-```yaml
-preset: security-strict
-```
-
-```yaml
-preset: dependency-careful
-```
-
-```yaml
-preset: mcp-security
-```
-
-如果你想让仓库自己定义证据要求，可以加 Evidence Contract。比如 UI 改动必须有截图和验证说明：
-
-```yaml
-evidence:
-  contracts:
-    - id: ui-screenshot
-      paths:
-        - "src/components/**"
-      requires:
-        - screenshot
-        - verification
-      severity: medium
-```
+先不要急着改配置，默认已经够试用。ProofPR 只会在 PR 场景运行，不会因为普通分支 push 就刷屏。
 
 ## 第 3 步：打开一个测试 PR
 
@@ -135,6 +76,36 @@ evidence:
 - annotations：高风险 finding 会变成 GitHub 注解。
 - 如果 finding 有行号，例如 MCP 的 `command`、`args`、`env`，annotation 会尽量定位到具体行。
 
+## 可选：以后再调规则
+
+如果你的项目更关注安全、依赖或 MCP，只需要把 `.proofpr.yml` 里的 `preset` 改成下面其中一个：
+
+```yaml
+preset: security-strict
+```
+
+```yaml
+preset: dependency-careful
+```
+
+```yaml
+preset: mcp-security
+```
+
+如果你想让仓库自己定义证据要求，可以加 Evidence Contract。比如 UI 改动必须有截图和验证说明：
+
+```yaml
+evidence:
+  contracts:
+    - id: ui-screenshot
+      paths:
+        - "src/components/**"
+      requires:
+        - screenshot
+        - verification
+      severity: medium
+```
+
 ## 第 6 步：本地 CLI 试跑
 
 不用开 PR，也可以本地扫描：
@@ -144,7 +115,7 @@ npx proof-pr@latest --version
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 ```
 
-第一行当前应输出 `0.1.9`，用于确认 npm latest 已经安装正确。
+第一行当前应输出 `0.1.10`，用于确认 npm latest 已经安装正确。
 
 扫描内置案例：
 
@@ -194,7 +165,7 @@ permissions:
 
 steps:
   - uses: actions/checkout@v4
-  - uses: linsk27/proof-pr@v0.1.9
+  - uses: linsk27/proof-pr@v0.1.10
     with:
       fail-on: high
       comment: "true"

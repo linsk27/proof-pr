@@ -12,13 +12,15 @@ ProofPR 是给开源维护者和工程团队使用的 PR 证据门禁。它在�
 npx proof-pr@latest --version
 ```
 
-当前应输出 `0.1.9`。
+当前应输出 `0.1.10`。
 
 初始化配置和 GitHub Action：
 
 ```bash
-npx proof-pr@latest init --preset open-source-maintainer
+npx proof-pr@latest init
 ```
+
+这个命令会生成 `.proofpr.yml` 和 `.github/workflows/proofpr.yml`，提交后打开 PR 即可看到报告。
 
 本地扫描当前分支：
 
@@ -47,7 +49,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.9
+- uses: linsk27/proof-pr@v0.1.10
   with:
     fail-on: high
     comment: "true"

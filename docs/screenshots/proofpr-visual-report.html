@@ -349,7 +349,6 @@
               <div class="muted">在高风险 finding 被解释、降低或移除前，把这个 PR 视为不可合并。</div>
             </div>
           </div>
-
           <div class="action">
             <span class="box"></span>
             <div>
@@ -357,7 +356,6 @@
               <div class="muted">合并前由维护者有意识地检查敏感文件改动。</div>
             </div>
           </div>
-
           <div class="action">
             <span class="box"></span>
             <div>
@@ -365,7 +363,6 @@
               <div class="muted">确认 workflow 不会用写权限 token、secret 或仓库权限执行不可信 PR 代码。</div>
             </div>
           </div>
-
           <div class="action">
             <span class="box"></span>
             <div>
@@ -373,7 +370,6 @@
               <div class="muted">确认 job 不会在写权限 token、仓库 secret 或 pull_request_target 高权限上下文中运行不可信 PR 代码。</div>
             </div>
           </div>
-
           <div class="action">
             <span class="box"></span>
             <div>
@@ -381,7 +377,6 @@
               <div class="muted">贡献者应说明为什么改、改了什么、如何验证，以及是否有发布或兼容性风险。</div>
             </div>
           </div>
-
           <div class="action">
             <span class="box"></span>
             <div>
@@ -389,7 +384,6 @@
               <div class="muted">要求测试输出、CI 链接、截图，或简短的手动验证说明。</div>
             </div>
           </div>
-
           <div class="action">
             <span class="box"></span>
             <div>
@@ -427,27 +421,22 @@
             <strong>-10</strong>
             <div class="muted">扫描时没有可用的 PR 描述上下文。</div>
           </div>
-
           <div class="deduction">
             <strong>-20</strong>
             <div class="muted">没有检测到测试或手动验证证据。</div>
           </div>
-
           <div class="deduction">
             <strong>-15</strong>
             <div class="muted">没有检测到复现步骤、before/after 或预期/实际上下文。</div>
           </div>
-
           <div class="deduction">
             <strong>-20</strong>
             <div class="muted">高敏感文件发生变更，需要重点 review。</div>
           </div>
-
           <div class="deduction">
             <strong>-30</strong>
             <div class="muted">pull_request_target workflow 需要重点审查高权限触发路径。</div>
           </div>
-
           <div class="deduction">
             <strong>-30</strong>
             <div class="muted">Workflow checkout PR head 代码，需要审查权限边界。</div>

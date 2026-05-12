@@ -13,9 +13,9 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 
 ## 现在能用吗
 
-- GitHub Release：[`v0.1.9`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.9)
-- npm：[`proof-pr@0.1.9`](https://www.npmjs.com/package/proof-pr)
-- GitHub Action：`linsk27/proof-pr@v0.1.9`
+- GitHub Release：[`v0.1.10`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.10)
+- npm：[`proof-pr@0.1.10`](https://www.npmjs.com/package/proof-pr)
+- GitHub Action：`linsk27/proof-pr@v0.1.10`
 - 当前 benchmark：`14/14 passed`
 - 可视化报告：`--format html` / `html-output`
 
@@ -26,7 +26,7 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-这两个命令当前都应输出 `0.1.9`。
+这两个命令当前都应输出 `0.1.10`。
 
 ## 它解决什么问题
 
@@ -40,49 +40,29 @@ npx proof-pr@latest --version
 | 团队想要求 UI 改动必须有截图。 | 用 Evidence Contract 声明路径级证据要求。 |
 | 想把扫描结果做成可分享页面。 | 输出独立 HTML 风险面板，适合保存为 artifact 或贴进文档。 |
 
-## 从 0 到 1
+## 最快开始
 
-### 1. 初始化配置
+### 1. 生成配置和 workflow
 
 ```bash
-npx proof-pr@latest init --preset open-source-maintainer
+npx proof-pr@latest init
 ```
 
 ![ProofPR 初始化输出](docs/screenshots/proofpr-init-output.png)
 
-这个命令会生成：
+这个命令会一次生成两个文件：
 
 - `.proofpr.yml`
 - `.github/workflows/proofpr.yml`
 
-### 2. 安装 GitHub Action
+默认配置已经适合开源仓库试用，你一般不用先改配置。
 
-如果你想手动创建 workflow，可以复制下面的最小配置：
+### 2. 提交并打开 PR
 
-```yaml
-name: ProofPR
-
-on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-
-permissions:
-  contents: read
-  pull-requests: write
-
-jobs:
-  proofpr:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.9
-        with:
-          fail-on: high
-          comment: "true"
-          annotations: "true"
+```bash
+git add .proofpr.yml .github/workflows/proofpr.yml
+git commit -m "chore: add ProofPR"
 ```
-
-### 3. 打开或更新 PR
 
 ProofPR 会在这些时机运行：
 
@@ -90,7 +70,13 @@ ProofPR 会在这些时机运行：
 - PR synchronize：PR 分支继续 push。
 - PR reopened：重新打开 PR。
 
-### 4. 看报告
+### 3. 看报告
+
+报告主要出现在 PR 评论区和 GitHub Actions summary。想先本地试跑，也可以直接执行：
+
+```bash
+npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
+```
 
 真实 PR 评论截图来自 [demo PR #1](https://github.com/linsk27/proof-pr/pull/1)：
 
@@ -211,7 +197,7 @@ evidence:
 如果想在 GitHub Action 里保存 HTML 面板：
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.9
+- uses: linsk27/proof-pr@v0.1.10
   with:
     html-output: proofpr-report.html
 - uses: actions/upload-artifact@v4

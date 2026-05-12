@@ -132,7 +132,7 @@ function Save-TerminalImage {
     }
 
     $brush = $brushMuted
-    if ($line -match "PASS|100%|0\.1\.7|ProofPR initialized|完成|通过") {
+    if ($line -match "PASS|100%|0\.1\.10|ProofPR initialized|完成|通过") {
       $brush = $brushAccent
     } elseif ($line -match "高|风险|block-merge|pull_request_target|workflow-untrusted-checkout") {
       $brush = $brushWarn
@@ -157,12 +157,12 @@ New-Item -ItemType Directory -Path $initDir | Out-Null
 
 $initText = Invoke-CommandText `
   -File "node" `
-  -CommandArgs @((Join-Path $Repo "packages\cli\dist\index.js"), "init", "--config-path", ".proofpr.yml", "--workflow-path", ".github\workflows\proofpr.yml", "--preset", "open-source-maintainer") `
+  -CommandArgs @((Join-Path $Repo "packages\cli\dist\index.js"), "init") `
   -WorkDir $initDir
 Set-Content -LiteralPath (Join-Path $OutDir "proofpr-init-output.txt") -Value $initText -Encoding UTF8
 Save-TerminalImage `
   -Title "ProofPR init output" `
-  -Command "npx proof-pr@latest init --preset open-source-maintainer" `
+  -Command "npx proof-pr@latest init" `
   -Text $initText `
   -Path (Join-Path $OutDir "proofpr-init-output.png")
 Remove-Item -LiteralPath $initDir -Recurse -Force

@@ -114,7 +114,7 @@ const program = new Command();
 program
   .name("proof-pr")
   .description("Review pull request evidence, scope, and safety before maintainers spend time on it.")
-  .version("0.1.9");
+  .version("0.1.10");
 
 program
   .command("scan", { isDefault: true })
@@ -172,7 +172,7 @@ program
     await writeIfMissing(options.configPath, renderConfigTemplate(options.preset), options.force);
     await writeIfMissing(options.workflowPath, renderWorkflowTemplate(options.failOn), options.force);
     process.stdout.write(
-      `ProofPR initialized:\n- ${options.configPath}\n- ${options.workflowPath}\n`
+      `ProofPR initialized.\n\nCreated:\n- ${options.configPath}\n- ${options.workflowPath}\n\nNext:\n1. Commit these files.\n2. Open or update a pull request.\n3. Read the ProofPR comment or Actions summary.\n\nLocal check:\nnpx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN\n`
     );
   });
 
@@ -261,61 +261,8 @@ preset: ${preset}
 comment:
   enabled: true
 
-# 如需更严格或更宽松，可以先换 preset：
-# preset: security-strict
-#
-# 可用预设：
-# - balanced
-# - open-source-maintainer
-# - security-strict
-# - ai-generated-pr
-# - mcp-security
-# - dependency-careful
-#
-# 也可以取消注释下面这些字段，覆盖 preset 的默认值。
-# riskThreshold: high
-#
-# sensitivePaths:
-#   - ".github/workflows/**"
-#   - ".github/actions/**"
-#   - "**/.env*"
-#   - "**/mcp*.json"
-#   - "**/*mcp*.json"
-#   - "Dockerfile"
-#   - "**/Dockerfile"
-#   - "package.json"
-#   - "pnpm-lock.yaml"
-#   - "package-lock.json"
-#   - "yarn.lock"
-#   - "bun.lockb"
-#
-# requireTests:
-#   enabled: true
-#   paths:
-#     - "src/**"
-#     - "packages/**/src/**"
-#     - "app/**"
-#     - "lib/**"
-#
-# secrets:
-#   enabled: true
-#
-# dependencies:
-#   flagNewPackages: true
-#   flagMajorUpgrades: true
-#   flagLifecycleScripts: true
-#
-# evidence:
-#   contracts:
-#     - id: ui-screenshot
-#       title: UI changes need screenshots
-#       paths:
-#         - "src/components/**"
-#         - "app/**"
-#       requires:
-#         - screenshot
-#         - verification
-#       severity: medium
+# 想更严格时，把 preset 改成 security-strict / dependency-careful / mcp-security。
+# 详细配置见 docs/configuration.md。
 `;
 }
 
@@ -335,7 +282,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.9
+      - uses: linsk27/proof-pr@v0.1.10
         with:
           fail-on: ${failOn}
           comment: "true"

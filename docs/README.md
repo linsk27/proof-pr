@@ -1,11 +1,11 @@
 # ProofPR 文档
 
-这里是 ProofPR 的中文文档入口。第一次使用建议先看“从 0 到 1”，只想复制安装配置可以看“快速开始”。
+这里是 ProofPR 的中文文档入口。第一次使用建议先看“快速开始”，它只保留最短安装路径。
 
 ## 推荐阅读顺序
 
-1. [从 0 到 1 安装和验证](zero-to-one.md)
-2. [快速开始](getting-started.md)
+1. [快速开始](getting-started.md)
+2. [从 0 到 1 安装和验证](zero-to-one.md)
 3. [配置说明](configuration.md)
 4. [规则说明](rules.md)
 5. [Benchmark 和准确性边界](../benchmarks/README.md) / [当前报告](../benchmarks/report.md)
@@ -14,8 +14,8 @@
 
 ## 当前发布
 
-- GitHub Release：[`v0.1.9`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.9)
-- npm：[`proof-pr@0.1.9`](https://www.npmjs.com/package/proof-pr)
+- GitHub Release：[`v0.1.10`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.10)
+- npm：[`proof-pr@0.1.10`](https://www.npmjs.com/package/proof-pr)
 - 核心能力：Review Plan、规则预设、Evidence Contract、GitHub annotations、SARIF、benchmark、真实案例库、依赖大版本升级检查、包生命周期脚本检查、`pull_request_target` / PR head checkout 检查、独立 HTML 可视化报告、Marketplace 准备材料。
 
 确认本机拿到的 latest：
@@ -25,7 +25,7 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-当前都应输出 `0.1.9`。
+当前都应输出 `0.1.10`。
 
 ## 图示和截图
 

@@ -26,7 +26,7 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
    代码侧材料已准备好，下一步需要仓库所有者在 GitHub 网页上确认发布。
 
 2. 真实截图刷新
-   用 `v0.1.9` 的 annotations / SARIF 能力重新跑一个 demo PR，补充新版效果图。
+   用 `v0.1.10` 的 annotations / SARIF 能力重新跑一个 demo PR，补充新版效果图。
 
 3. 真实项目样例扩展
    继续补充 React、Python、Go、Rust 等不同生态的真实 diff 示例，让用户能更快理解规则价值。

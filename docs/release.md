@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.9`。
+当前最新公开版本是 `0.1.10`。
 
 ## 发布前检查
 
@@ -33,8 +33,8 @@ GitHub Release 会先创建；随后 workflow 会检查该版本是否已经存�
 确认 `NPM_TOKEN` 已配置后：
 
 ```bash
-git tag v0.1.9
-git push origin v0.1.9
+git tag v0.1.10
+git push origin v0.1.10
 ```
 
 发布完成后需要检查：
@@ -47,24 +47,24 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.9
-npx proof-pr@latest --version -> 0.1.9
+npm view proof-pr version -> 0.1.10
+npx proof-pr@latest --version -> 0.1.10
 ```
 
-## `v0.1.9` 发布状态
+## `v0.1.10` 发布状态
 
-`v0.1.9` 已经完成：
+`v0.1.10` 已经完成：
 
-- Git tag：`v0.1.9`
-- GitHub Release：`v0.1.9`
-- npm：`proof-pr@0.1.9`
-- npm dist-tag：`latest -> 0.1.9`
+- Git tag：`v0.1.10`
+- GitHub Release：`v0.1.10`
+- npm：`proof-pr@0.1.10`
+- npm dist-tag：`latest -> 0.1.10`
 - GitHub Actions：Release workflow 和 main CI 均已通过。
 
 本次是功能增强版，重点包括：
 
 - 修复 CLI `--version` 仍显示旧版本的问题。
-- `proof-pr init` 生成的 GitHub Action 示例同步到 `v0.1.9`。
+- `proof-pr init` 生成的 GitHub Action 示例同步到 `v0.1.10`。
 - CLI 支持 `--format html`，可生成独立 HTML 可视化报告。
 - GitHub Action 支持 `html-output`，可把可视化报告上传为 artifact。
 - README 和中文文档补充真实截图、从 0 到 1 使用路径和报告解释。
@@ -72,7 +72,7 @@ npx proof-pr@latest --version -> 0.1.9
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.9` 已修复这个问题，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.10` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 

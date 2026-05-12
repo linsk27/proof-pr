@@ -51049,14 +51049,13 @@ function renderHtmlReport(result, locale = "en") {
         <h2>${labels.reviewPlan}</h2>
         <div class="action-list">
           ${result.reviewPlan.actionItems.length > 0
-        ? result.reviewPlan.actionItems.map((action) => `
-          <div class="action">
+        ? result.reviewPlan.actionItems.map((action) => `<div class="action">
             <span class="box"></span>
             <div>
               <div class="action-title">${escapeHtml(localizeActionTitle(action.actionId, action.title, locale))}<span class="priority">${escapeHtml(formatPriority(action.priority, locale))}</span></div>
               <div class="muted">${escapeHtml(localizeActionDetail(action.actionId, action.detail, locale))}</div>
             </div>
-          </div>`).join("\n")
+          </div>`).join("\n          ")
         : `<div class="muted">${labels.noActions}</div>`}
         </div>
       </article>
@@ -51075,11 +51074,10 @@ function renderHtmlReport(result, locale = "en") {
         <h2>${labels.focusFiles}</h2>
         <div class="focus-list">
           ${result.reviewPlan.focusFiles.length > 0
-        ? result.reviewPlan.focusFiles.map((file) => `
-          <div class="focus">
+        ? result.reviewPlan.focusFiles.map((file) => `<div class="focus">
             <div><code>${escapeHtml(file.path)}</code></div>
             <div class="muted">${escapeHtml(localizeFocusReason(file.reasonId, file.reason, locale))}</div>
-          </div>`).join("\n")
+          </div>`).join("\n          ")
         : `<div class="muted">${labels.noFocusFiles}</div>`}
         </div>
       </article>
@@ -51088,11 +51086,10 @@ function renderHtmlReport(result, locale = "en") {
         <h2>${labels.scoreDetails}</h2>
         <div class="deduction-list">
           ${result.evidenceScore.deductions.length > 0
-        ? result.evidenceScore.deductions.map((deduction) => `
-          <div class="deduction">
+        ? result.evidenceScore.deductions.map((deduction) => `<div class="deduction">
             <strong>-${deduction.points}</strong>
             <div class="muted">${escapeHtml(localizeDeduction(deduction.reasonId, deduction.message, locale))}</div>
-          </div>`).join("\n")
+          </div>`).join("\n          ")
         : `<div class="muted">${labels.noDeductions}</div>`}
         </div>
       </article>
