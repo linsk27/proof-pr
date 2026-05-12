@@ -37,8 +37,9 @@ npx proof-pr@latest init
 
 - `.proofpr.yml`
 - `.github/workflows/proofpr.yml`
+- `.github/pull_request_template.md`
 
-默认配置已经会输出中文报告，并使用开源维护者预设。
+默认配置已经会输出中文报告，并使用开源维护者预设。PR 模板会引导贡献者补充验证、复现、截图、changelog 和权限理由。
 
 如果你中途忘了某个功能怎么用，运行：
 
@@ -56,12 +57,12 @@ npx proof-pr@latest doctor
 
 ![ProofPR doctor 体检输出](screenshots/proofpr-doctor-output.png)
 
-如果看到 `状态：接入正常`，说明配置文件、workflow、PR 权限和本地 diff 检查都已经通过。如果有 `[warn]` 或 `[fail]`，按 `Next` 里的提示修复即可。
+如果看到 `状态：接入正常`，说明配置文件、workflow、PR 模板、PR 权限和本地 diff 检查都已经通过。如果有 `[warn]` 或 `[fail]`，按 `Next` 里的提示修复即可。
 
 ## 第 3 步：提交两个文件
 
 ```bash
-git add .proofpr.yml .github/workflows/proofpr.yml
+git add .proofpr.yml .github/workflows/proofpr.yml .github/pull_request_template.md
 git commit -m "chore: add ProofPR"
 ```
 
@@ -141,7 +142,7 @@ npx proof-pr@latest --version
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 ```
 
-第一行当前应输出 `0.1.14`，用于确认 npm latest 已经安装正确。
+第一行当前应输出 `0.1.15`，用于确认 npm latest 已经安装正确。
 
 扫描内置案例：
 
@@ -191,7 +192,7 @@ permissions:
 
 steps:
   - uses: actions/checkout@v4
-  - uses: linsk27/proof-pr@v0.1.14
+  - uses: linsk27/proof-pr@v0.1.15
     with:
       fail-on: high
       comment: "true"

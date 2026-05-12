@@ -21,6 +21,7 @@ npx proof-pr@latest guide
 | 不接入仓库，先体验报告 | 第一次了解 ProofPR | `npx proof-pr@latest demo workflow --locale zh-CN` | 当前终端 |
 | 接入 GitHub PR 自动检查 | 第一次给仓库安装 ProofPR | `npx proof-pr@latest init` | PR 评论、Actions summary、Checks |
 | 体检接入状态 | 安装后不知道是否配置正确 | `npx proof-pr@latest doctor` | 当前终端 |
+| 单独补 PR 模板 | 已接入仓库但缺少 PR 模板 | `npx proof-pr@latest template` | `.github/pull_request_template.md` |
 | 本地检查当前分支 | 发 PR 前自查 | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN` | 当前终端 |
 | 生成 HTML 可视化报告 | 想把报告保存、发给别人或上传 artifact | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html` | `proofpr-report.html` |
 | 生成 SARIF | 想接入 GitHub Code Scanning | `npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif` | `proofpr.sarif` / Code Scanning |
@@ -68,8 +69,17 @@ npx proof-pr@latest init
 
 - `.proofpr.yml`
 - `.github/workflows/proofpr.yml`
+- `.github/pull_request_template.md`
 
-提交这两个文件后，打开或更新 Pull Request，ProofPR 会自动运行。默认触发时机是：
+提交这些文件后，打开或更新 Pull Request，ProofPR 会自动运行。PR 模板会提醒贡献者补充验证、复现、截图、changelog 和权限理由。
+
+如果你的仓库已经接入过 ProofPR，只想单独补 PR 模板：
+
+```bash
+npx proof-pr@latest template
+```
+
+默认触发时机是：
 
 - PR opened：第一次打开 PR。
 - PR synchronize：PR 分支继续 push。
@@ -89,8 +99,9 @@ npx proof-pr@latest doctor
 
 - `.proofpr.yml` 是否存在并能解析。
 - `.github/workflows/proofpr.yml` 是否存在。
+- `.github/pull_request_template.md` 是否存在，以及是否提示验证、复现、截图或权限理由。
 - workflow 是否监听 `pull_request`。
-- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.14`。
+- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.15`。
 - 是否具备 `pull-requests: write` 和 `contents: read` 权限。
 - 当前目录是否在 Git 仓库里，以及 `origin/main...HEAD` diff 是否可读。
 

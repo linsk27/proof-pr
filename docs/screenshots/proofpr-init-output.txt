@@ -3,6 +3,7 @@
 Created:
 - .proofpr.yml
 - .github/workflows/proofpr.yml
+- .github/pull_request_template.md
 
 Next:
 1. Commit these files.

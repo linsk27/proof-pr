@@ -13,11 +13,12 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 
 ## 现在能用吗
 
-- GitHub Release：[`v0.1.14`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.14)
-- npm：[`proof-pr@0.1.14`](https://www.npmjs.com/package/proof-pr)
-- GitHub Action：`linsk27/proof-pr@v0.1.14`
+- GitHub Release：[`v0.1.15`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.15)
+- npm：[`proof-pr@0.1.15`](https://www.npmjs.com/package/proof-pr)
+- GitHub Action：`linsk27/proof-pr@v0.1.15`
 - 当前 benchmark：`14/14 passed`
 - 接入体检：`npx proof-pr@latest doctor`
+- PR 模板：`npx proof-pr@latest template`
 - 可视化报告：`--format html` / `html-output`
 
 验证你拿到的是最新版本：
@@ -27,7 +28,7 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-这两个命令当前都应输出 `0.1.14`。
+这两个命令当前都应输出 `0.1.15`。
 
 不知道该用哪个功能时，直接打开中文功能菜单：
 
@@ -46,6 +47,7 @@ npx proof-pr@latest guide
 | 不接入仓库，先体验报告 | `npx proof-pr@latest demo workflow --locale zh-CN` |
 | 接入 GitHub PR 自动检查 | `npx proof-pr@latest init` |
 | 体检当前仓库接入状态 | `npx proof-pr@latest doctor` |
+| 已接入仓库，单独补 PR 模板 | `npx proof-pr@latest template` |
 | 本地检查当前分支 | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN` |
 | 生成 HTML 可视化报告 | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html` |
 | 生成 SARIF | `npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif` |
@@ -87,12 +89,13 @@ npx proof-pr@latest init
 
 ![ProofPR 初始化输出](docs/screenshots/proofpr-init-output.png)
 
-这个命令会一次生成两个文件：
+这个命令会一次生成三份接入文件：
 
 - `.proofpr.yml`
 - `.github/workflows/proofpr.yml`
+- `.github/pull_request_template.md`
 
-默认配置已经适合开源仓库试用，你一般不用先改配置。
+默认配置已经适合开源仓库试用；PR 模板会引导贡献者补充验证、复现、截图、changelog 和权限理由。
 
 ### 2. 体检接入状态
 
@@ -102,12 +105,12 @@ npx proof-pr@latest doctor
 
 ![ProofPR doctor 体检输出](docs/screenshots/proofpr-doctor-output.png)
 
-`doctor` 会检查 `.proofpr.yml`、`.github/workflows/proofpr.yml`、Action 版本、PR 事件、评论权限和本地 diff 是否可读。它的目标是告诉新用户“装好了吗，还差哪一步”。
+`doctor` 会检查 `.proofpr.yml`、`.github/workflows/proofpr.yml`、PR 模板、Action 版本、PR 事件、评论权限和本地 diff 是否可读。它的目标是告诉新用户“装好了吗，还差哪一步”。
 
 ### 3. 提交并打开 PR
 
 ```bash
-git add .proofpr.yml .github/workflows/proofpr.yml
+git add .proofpr.yml .github/workflows/proofpr.yml .github/pull_request_template.md
 git commit -m "chore: add ProofPR"
 ```
 
@@ -256,7 +259,7 @@ evidence:
 如果想在 GitHub Action 里保存 HTML 面板：
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.14
+- uses: linsk27/proof-pr@v0.1.15
   with:
     html-output: proofpr-report.html
 - uses: actions/upload-artifact@v4

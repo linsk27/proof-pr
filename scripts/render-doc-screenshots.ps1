@@ -132,7 +132,7 @@ function Save-TerminalImage {
     }
 
     $brush = $brushMuted
-    if ($line -match "PASS|100%|0\.1\.14|\[pass\]|ProofPR initialized|状态：接入正常|完成|通过") {
+    if ($line -match "PASS|100%|0\.1\.15|\[pass\]|ProofPR initialized|状态：接入正常|完成|通过") {
       $brush = $brushAccent
     } elseif ($line -match "\[warn\]|高|风险|block-merge|pull_request_target|workflow-untrusted-checkout") {
       $brush = $brushWarn

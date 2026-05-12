@@ -22,7 +22,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.14";
+const CLI_VERSION = "0.1.15";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -45,6 +45,8 @@ interface ScanCommandOptions {
 interface InitCommandOptions {
   configPath: string;
   workflowPath: string;
+  prTemplate: boolean;
+  prTemplatePath: string;
   preset: ConfigPreset;
   failOn: FailLevel;
   force: boolean;
@@ -53,8 +55,14 @@ interface InitCommandOptions {
 interface DoctorCommandOptions {
   config: string;
   workflowPath: string;
+  prTemplatePath: string;
   base: string;
   head: string;
+}
+
+interface TemplateCommandOptions {
+  output: string;
+  force: boolean;
 }
 
 interface DoctorCheck {
@@ -293,6 +301,7 @@ program
   .description("Check whether ProofPR is installed correctly in the current repository.")
   .option("--config <path>", "Path to .proofpr.yml.", ".proofpr.yml")
   .option("--workflow-path <path>", "Path to the GitHub Actions workflow.", ".github/workflows/proofpr.yml")
+  .option("--pr-template-path <path>", "Path to the pull request template.", ".github/pull_request_template.md")
   .option("--base <ref>", "Base git ref used for local diff checks.", "origin/main")
   .option("--head <ref>", "Head git ref used for local diff checks.", "HEAD")
   .action(async (options: DoctorCommandOptions) => {
@@ -302,6 +311,18 @@ program
     if (report.checks.some((check) => check.level === "fail")) {
       process.exitCode = 1;
     }
+  });
+
+program
+  .command("template")
+  .description("Create a ProofPR-friendly pull request template.")
+  .option("--output <path>", "Path to write the pull request template.", ".github/pull_request_template.md")
+  .option("--force", "Overwrite the existing template.", false)
+  .action(async (options: TemplateCommandOptions) => {
+    await writeIfMissing(options.output, renderPullRequestTemplate(), options.force);
+    process.stdout.write(
+      `ProofPR pull request template written to ${options.output}\n\nNext:\n1. Commit the template.\n2. Ask contributors to fill verification, reproduction, screenshot, changelog, and permission rationale sections when relevant.\n3. Run npx proof-pr@latest doctor to check setup.\n`
+    );
   });
 
 program
@@ -388,6 +409,12 @@ program
     "Path to write the GitHub Actions workflow.",
     ".github/workflows/proofpr.yml"
   )
+  .option("--no-pr-template", "Skip creating .github/pull_request_template.md.")
+  .option(
+    "--pr-template-path <path>",
+    "Path to write the pull request template.",
+    ".github/pull_request_template.md"
+  )
   .option(
     "--preset <preset>",
     `Config preset: ${listConfigPresets().join(", ")}.`,
@@ -399,8 +426,25 @@ program
   .action(async (options: InitCommandOptions) => {
     await writeIfMissing(options.configPath, renderConfigTemplate(options.preset), options.force);
     await writeIfMissing(options.workflowPath, renderWorkflowTemplate(options.failOn), options.force);
+    const created = [options.configPath, options.workflowPath];
+    const skipped: string[] = [];
+
+    if (options.prTemplate) {
+      const wroteTemplate = await writeIfMissingSoft(
+        options.prTemplatePath,
+        renderPullRequestTemplate(),
+        options.force
+      );
+
+      if (wroteTemplate) {
+        created.push(options.prTemplatePath);
+      } else {
+        skipped.push(`${options.prTemplatePath} already exists`);
+      }
+    }
+
     process.stdout.write(
-      `ProofPR initialized.\n\nCreated:\n- ${options.configPath}\n- ${options.workflowPath}\n\nNext:\n1. Commit these files.\n2. Open or update a pull request.\n3. Read the ProofPR comment or Actions summary.\n\nLocal check:\nnpx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN\n\nNeed another task?\nnpx proof-pr@latest guide\n`
+      `ProofPR initialized.\n\nCreated:\n${created.map((item) => `- ${item}`).join("\n")}${skipped.length > 0 ? `\n\nSkipped:\n${skipped.map((item) => `- ${item}`).join("\n")}` : ""}\n\nNext:\n1. Commit these files.\n2. Open or update a pull request.\n3. Read the ProofPR comment or Actions summary.\n\nLocal check:\nnpx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN\n\nNeed another task?\nnpx proof-pr@latest guide\n`
     );
   });
 
@@ -453,36 +497,40 @@ function renderGuide(): string {
 
 1. 接入 GitHub PR 自动检查
    npx proof-pr@latest init
-   然后提交 .proofpr.yml 和 .github/workflows/proofpr.yml，打开 PR 后看评论和 Actions summary。
+   然后提交 .proofpr.yml、.github/workflows/proofpr.yml 和 .github/pull_request_template.md，打开 PR 后看评论和 Actions summary。
 
 2. 体检当前仓库接入状态
    npx proof-pr@latest doctor
-   检查配置文件、workflow、Action 版本、PR 权限和本地 diff 是否正常。
+   检查配置文件、workflow、PR 模板、Action 版本、PR 权限和本地 diff 是否正常。
 
-3. 本地检查当前分支
+3. 已接入仓库，单独补 PR 模板
+   npx proof-pr@latest template
+   引导贡献者填写验证、复现、截图、changelog 和权限理由。
+
+4. 本地检查当前分支
    npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
    适合在发 PR 前先看风险、证据评分和 Review 行动清单。
 
-4. 生成可分享 HTML 报告
+5. 生成可分享 HTML 报告
    npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html
    生成后用浏览器打开 proofpr-report.html。
 
-5. 生成 GitHub Code Scanning 的 SARIF
+6. 生成 GitHub Code Scanning 的 SARIF
    npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif
    适合在 CI 里配合 github/codeql-action/upload-sarif 使用。
 
-6. 不接入仓库，先试跑内置案例
+7. 不接入仓库，先试跑内置案例
    npx proof-pr@latest demo workflow --locale zh-CN
    不需要 clone 仓库或寻找 examples 文件，也能快速看到 ProofPR 会抓什么风险。
 
-7. 查看所有内置案例
+8. 查看所有内置案例
    npx proof-pr@latest demo --list
 
-8. 验证规则样本是否仍然命中
+9. 验证规则样本是否仍然命中
    npx proof-pr@latest benchmark --cases benchmarks/cases
    适合维护 ProofPR 规则或发版前回归。
 
-9. 调整审查强度
+10. 调整审查强度
    打开 .proofpr.yml，把 preset 改成 security-strict、dependency-careful 或 mcp-security。
 
 结果在哪里看：
@@ -577,6 +625,7 @@ async function runDoctor(options: DoctorCommandOptions): Promise<DoctorReport> {
     nextSteps.add("运行 npx proof-pr@latest init 生成 .github/workflows/proofpr.yml。");
   }
 
+  await inspectPullRequestTemplate(options.prTemplatePath, checks, nextSteps);
   await inspectGitDiff(options, checks, nextSteps);
 
   if (nextSteps.size === 0) {
@@ -621,6 +670,35 @@ function inspectWorkflow(workflow: string, checks: DoctorCheck[], nextSteps: Set
   } else {
     checks.push({ level: "warn", title: "workflow 未显式声明 contents: read" });
     nextSteps.add("建议在 workflow permissions 中加入 contents: read。");
+  }
+}
+
+async function inspectPullRequestTemplate(
+  path: string,
+  checks: DoctorCheck[],
+  nextSteps: Set<string>
+): Promise<void> {
+  if (!(await pathExists(path))) {
+    checks.push({ level: "warn", title: `缺少 ${path}` });
+    nextSteps.add("运行 npx proof-pr@latest template 生成 PR 模板，引导贡献者补充验证、复现、截图和权限理由。");
+    return;
+  }
+
+  const template = await readFile(path, "utf8");
+  checks.push({ level: "pass", title: `${path} 已存在` });
+
+  if (/验证|verification|test/i.test(template)) {
+    checks.push({ level: "pass", title: "PR 模板会提示验证证据" });
+  } else {
+    checks.push({ level: "warn", title: "PR 模板没有明显的验证证据提示" });
+    nextSteps.add("在 PR 模板中加入“验证方式”栏目，减少 ProofPR 报告里的证据不足。");
+  }
+
+  if (/复现|reproduction|before|after|截图|screenshot|权限|permission/i.test(template)) {
+    checks.push({ level: "pass", title: "PR 模板覆盖复现、截图或权限理由提示" });
+  } else {
+    checks.push({ level: "warn", title: "PR 模板缺少复现、截图或权限理由提示" });
+    nextSteps.add("在 PR 模板中加入复现、截图、changelog、权限理由等可选栏目。");
   }
 }
 
@@ -724,6 +802,16 @@ async function writeIfMissing(path: string, contents: string, force: boolean): P
   await writeFile(path, contents, "utf8");
 }
 
+async function writeIfMissingSoft(path: string, contents: string, force: boolean): Promise<boolean> {
+  if (!force && (await pathExists(path))) {
+    return false;
+  }
+
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, contents, "utf8");
+  return true;
+}
+
 async function writeOutput(path: string, contents: string): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, contents, "utf8");
@@ -771,6 +859,34 @@ jobs:
           fail-on: ${failOn}
           comment: "true"
           annotations: "true"
+`;
+}
+
+function renderPullRequestTemplate(): string {
+  return `## 变更说明
+
+请说明这个 PR 为什么需要、改了什么、影响范围是什么。
+
+## 验证方式
+
+- [ ] 已运行自动化测试：
+- [ ] 已完成手动验证：
+- [ ] 不需要测试，原因：
+
+## 复现 / Before & After
+
+如果是 bug fix，请写复现步骤、预期结果和实际结果。
+如果是 UI 改动，请附 before/after 截图或录屏。
+
+## 依赖 / CI / 权限 / MCP 变更
+
+如果改了依赖、lockfile、GitHub Actions、MCP、环境变量或权限，请说明原因和安全影响。
+
+## 发布风险
+
+- [ ] 无破坏性变更
+- [ ] 需要迁移说明 / changelog
+- [ ] 需要灰度或回滚方案
 `;
 }
 

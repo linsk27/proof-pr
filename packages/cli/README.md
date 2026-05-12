@@ -12,7 +12,7 @@ ProofPR 是给开源维护者和工程团队使用的 PR 证据门禁。它在�
 npx proof-pr@latest --version
 ```
 
-当前应输出 `0.1.14`。
+当前应输出 `0.1.15`。
 
 不知道用哪个功能时：
 
@@ -35,7 +35,13 @@ npx proof-pr@latest demo --list
 npx proof-pr@latest init
 ```
 
-这个命令会生成 `.proofpr.yml` 和 `.github/workflows/proofpr.yml`，提交后打开 PR 即可看到报告。
+这个命令会生成 `.proofpr.yml`、`.github/workflows/proofpr.yml` 和 `.github/pull_request_template.md`，提交后打开 PR 即可看到报告。
+
+已接入仓库单独补 PR 模板：
+
+```bash
+npx proof-pr@latest template
+```
 
 体检接入状态：
 
@@ -43,7 +49,7 @@ npx proof-pr@latest init
 npx proof-pr@latest doctor
 ```
 
-这个命令会检查配置文件、workflow、Action 版本、PR 权限和本地 diff 是否可读。
+这个命令会检查配置文件、workflow、PR 模板、Action 版本、PR 权限和本地 diff 是否可读。
 
 本地扫描当前分支：
 
@@ -54,7 +60,7 @@ npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 扫描内置案例：
 
 ```bash
-npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.diff --locale zh-CN
+npx proof-pr@latest demo workflow --locale zh-CN
 ```
 
 生成独立 HTML 可视化报告：
@@ -72,7 +78,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.14
+- uses: linsk27/proof-pr@v0.1.15
   with:
     fail-on: high
     comment: "true"

@@ -4,36 +4,40 @@
 
 1. 接入 GitHub PR 自动检查
    npx proof-pr@latest init
-   然后提交 .proofpr.yml 和 .github/workflows/proofpr.yml，打开 PR 后看评论和 Actions summary。
+   然后提交 .proofpr.yml、.github/workflows/proofpr.yml 和 .github/pull_request_template.md，打开 PR 后看评论和 Actions summary。
 
 2. 体检当前仓库接入状态
    npx proof-pr@latest doctor
-   检查配置文件、workflow、Action 版本、PR 权限和本地 diff 是否正常。
+   检查配置文件、workflow、PR 模板、Action 版本、PR 权限和本地 diff 是否正常。
 
-3. 本地检查当前分支
+3. 已接入仓库，单独补 PR 模板
+   npx proof-pr@latest template
+   引导贡献者填写验证、复现、截图、changelog 和权限理由。
+
+4. 本地检查当前分支
    npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
    适合在发 PR 前先看风险、证据评分和 Review 行动清单。
 
-4. 生成可分享 HTML 报告
+5. 生成可分享 HTML 报告
    npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html
    生成后用浏览器打开 proofpr-report.html。
 
-5. 生成 GitHub Code Scanning 的 SARIF
+6. 生成 GitHub Code Scanning 的 SARIF
    npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif
    适合在 CI 里配合 github/codeql-action/upload-sarif 使用。
 
-6. 不接入仓库，先试跑内置案例
+7. 不接入仓库，先试跑内置案例
    npx proof-pr@latest demo workflow --locale zh-CN
    不需要 clone 仓库或寻找 examples 文件，也能快速看到 ProofPR 会抓什么风险。
 
-7. 查看所有内置案例
+8. 查看所有内置案例
    npx proof-pr@latest demo --list
 
-8. 验证规则样本是否仍然命中
+9. 验证规则样本是否仍然命中
    npx proof-pr@latest benchmark --cases benchmarks/cases
    适合维护 ProofPR 规则或发版前回归。
 
-9. 调整审查强度
+10. 调整审查强度
    打开 .proofpr.yml，把 preset 改成 security-strict、dependency-careful 或 mcp-security。
 
 结果在哪里看：

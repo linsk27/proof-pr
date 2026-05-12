@@ -4,6 +4,12 @@
 
 暂无。
 
+## 0.1.15 - 2026-05-12
+
+- `init` 默认生成 `.github/pull_request_template.md`，帮助贡献者在开 PR 时补充验证、复现、截图、changelog 和权限理由。
+- 新增 `template` 命令，可为已接入的仓库单独补 PR 模板：`npx proof-pr@latest template`。
+- `doctor` 新增 PR 模板体检，提醒模板是否包含验证证据、复现、截图或权限理由栏目。
+
 ## 0.1.14 - 2026-05-12
 
 - 新增 `demo` 命令，用户无需 clone 仓库即可运行内置风险案例，例如 `npx proof-pr@latest demo workflow --locale zh-CN`。

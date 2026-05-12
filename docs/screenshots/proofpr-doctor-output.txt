@@ -1,7 +1,7 @@
 ﻿ProofPR doctor
 
 状态：接入正常
-统计：0 fail, 0 warn, 10 checks
+统计：0 fail, 0 warn, 13 checks
 
 Checks:
 [pass] .proofpr.yml 可读取
@@ -10,9 +10,12 @@ Checks:
        comment.enabled=true
 [pass] .github/workflows/proofpr.yml 已存在
 [pass] workflow 会在 Pull Request 事件运行
-[pass] GitHub Action 版本为 v0.1.14
+[pass] GitHub Action 版本为 v0.1.15
 [pass] workflow 具备写 PR 评论权限
 [pass] workflow 具备读取仓库内容权限
+[pass] .github/pull_request_template.md 已存在
+[pass] PR 模板会提示验证证据
+[pass] PR 模板覆盖复现、截图或权限理由提示
 [pass] 当前目录位于 Git 仓库中
 [info] 当前分支：main
 [pass] 可以读取 origin/main...HEAD diff

@@ -30,8 +30,9 @@ npx proof-pr@latest init
 
 - `.proofpr.yml`
 - `.github/workflows/proofpr.yml`
+- `.github/pull_request_template.md`
 
-把这两个文件提交到仓库，打开或更新 PR，就会自动生成报告。
+把这些文件提交到仓库，打开或更新 PR，就会自动生成报告。PR 模板会提醒贡献者写清验证、复现、截图、changelog 和权限理由。
 
 安装后可以先体检一次：
 
@@ -71,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.14
+      - uses: linsk27/proof-pr@v0.1.15
         with:
           fail-on: high
           comment: "true"
@@ -128,10 +129,11 @@ npx proof-pr@latest guide
 npx proof-pr@latest demo workflow --locale zh-CN
 npx proof-pr@latest init
 npx proof-pr@latest doctor
+npx proof-pr@latest template
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 ```
 
-如果第一行输出 `0.1.14`，说明你正在使用当前最新发布版。
+如果第一行输出 `0.1.15`，说明你正在使用当前最新发布版。
 
 也可以全局安装：
 
@@ -162,6 +164,12 @@ proof-pr guide
 
 ```bash
 proof-pr doctor
+```
+
+单独补 PR 模板：
+
+```bash
+proof-pr template
 ```
 
 运行内置案例：
