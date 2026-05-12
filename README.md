@@ -21,6 +21,14 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 - PR 模板：`npx proof-pr@latest template`
 - 可视化报告：`--format html` / `html-output`，支持筛选风险和复制补证清单
 
+项目当前状态：
+
+- **已可正式试用**：CLI、GitHub Action、npm 包、GitHub Release、中文文档和截图都已经打通。
+- **核心差异点明确**：ProofPR 不做“玄学代码质量判断”，只做确定性 PR 证据门禁，帮助维护者先判断是否值得 review。
+- **发布链路已完善**：Release workflow 已改为 npm Trusted Publishing / GitHub OIDC 优先，`NPM_TOKEN` 只作为兜底。
+- **还差一次网页配置**：npm 包需要在 npm 网站配置 trusted publisher，之后推 tag 才能自动发 npm，不再需要本地粘贴 token。
+- **下一步增长点**：GitHub Marketplace 上架、更多真实项目案例、更多截图和更丰富 benchmark。
+
 验证你拿到的是最新版本：
 
 ```bash

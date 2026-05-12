@@ -20,6 +20,8 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 - Doctor：一条命令体检 `.proofpr.yml`、workflow、Action 版本、PR 权限和本地 diff。
 - Demo：无需 clone 仓库即可运行内置案例，适合首次体验和文档传播。
 - PR 模板：`init` 默认生成模板，`template` 可单独补模板，帮助贡献者提前提供证据。
+- 可交互 HTML 报告：支持风险筛选、搜索 finding、折叠详情和复制补证清单。
+- npm 发布自动化：Release workflow 已改为 npm Trusted Publishing / GitHub OIDC 优先，`NPM_TOKEN` 只作为兜底。
 - Marketplace 准备：补充 action branding、安装说明和上架文案。
 - 内置规则：改动规模、敏感路径、缺少测试、PR 描述、复现上下文、secret、依赖、大版本升级、包生命周期脚本、workflow 权限、`pull_request_target`、PR head checkout、MCP 配置。
 
@@ -28,14 +30,14 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 1. GitHub Marketplace 上架
    代码侧材料已准备好，下一步需要仓库所有者在 GitHub 网页上确认发布。
 
-2. 真实截图刷新
+2. npm Trusted Publishing 网页配置
+   在 npm 包设置中添加 GitHub Actions trusted publisher：仓库 `linsk27/proof-pr`，workflow file `release.yml`。配置后用下一个 tag 验证 npm 自动发布。
+
+3. 真实截图刷新
    用 `v0.1.16` 的 annotations / SARIF 能力重新跑一个 demo PR，补充新版效果图。
 
-3. 真实项目样例扩展
+4. 真实项目样例扩展
    继续补充 React、Python、Go、Rust 等不同生态的真实 diff 示例，让用户能更快理解规则价值。
-
-4. GitHub Release 页面发布说明自动化
-   当前 npm 已发布，后续要让 release workflow 在 npm 失败时也能创建 GitHub Release 页面。
 
 ## 中期方向
 
