@@ -19,6 +19,7 @@ npx proof-pr@latest demo workflow --locale zh-CN
 - 一条 `ProofPR 审查报告` PR 评论。
 - 一份 GitHub Actions job summary。
 - 一组 GitHub annotations，用来定位具体 finding。
+- 一个 `proofpr-report` artifact，里面是可搜索、可筛选的 HTML 可视化报告。
 - 可选的 SARIF 文件，上传到 GitHub Code Scanning。
 
 ![ProofPR 输出位置示意图](assets/proofpr-output-locations.svg)
@@ -39,7 +40,7 @@ npx proof-pr@latest init
 - `.github/workflows/proofpr.yml`
 - `.github/pull_request_template.md`
 
-默认配置已经会输出中文报告，并使用开源维护者预设。PR 模板会引导贡献者补充验证、复现、截图、changelog 和权限理由。
+默认配置已经会输出中文报告、上传 HTML 可视化报告，并使用开源维护者预设。PR 模板会引导贡献者补充验证、复现、截图、changelog 和权限理由。
 
 如果你中途忘了某个功能怎么用，运行：
 
@@ -101,6 +102,7 @@ git commit -m "chore: add ProofPR"
 
 - job summary：完整 Markdown 报告。
 - annotations：高风险 finding 会变成 GitHub 注解。
+- artifact：默认名为 `proofpr-report`，下载后打开 `proofpr-report.html`，可以筛选风险、搜索文件/规则，并复制补证清单。
 - 如果 finding 有行号，例如 MCP 的 `command`、`args`、`env`，annotation 会尽量定位到具体行。
 
 ## 可选：以后再调规则
@@ -218,6 +220,7 @@ steps:
 
 - PR 评论区有 `ProofPR 审查报告`。
 - Actions 的 `ProofPR` workflow 成功运行。
+- Actions 运行详情里有 `proofpr-report` artifact。
 - 报告里有 `风险等级`、`证据评分`、`Review 门禁`、`Review 行动清单`。
 
 如果没有评论，优先检查 workflow 权限：

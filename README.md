@@ -20,6 +20,7 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 - 接入体检：`npx proof-pr@latest doctor`
 - PR 模板：`npx proof-pr@latest template`
 - 可视化报告：`--format html` / `html-output`，支持筛选风险和复制补证清单
+- 默认接入体验：`init` 生成的 workflow 会自动上传 `proofpr-report.html` artifact
 
 项目当前状态：
 
@@ -104,6 +105,7 @@ npx proof-pr@latest init
 - `.github/pull_request_template.md`
 
 默认配置已经适合开源仓库试用；PR 模板会引导贡献者补充验证、复现、截图、changelog 和权限理由。
+生成的 workflow 还会默认保存 `proofpr-report.html` artifact，维护者可以在 Actions 页面直接下载可视化报告。
 
 ### 2. 体检接入状态
 
@@ -130,7 +132,7 @@ ProofPR 会在这些时机运行：
 
 ### 4. 看报告
 
-报告主要出现在 PR 评论区和 GitHub Actions summary。想先本地试跑，也可以直接执行：
+报告主要出现在 PR 评论区、GitHub Actions summary、workflow annotations 和 `proofpr-report` artifact。想先本地试跑，也可以直接执行：
 
 ```bash
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
@@ -179,8 +181,9 @@ Benchmark 输出，证明规则样本仍按预期命中：
 - PR `Conversation` 评论区。
 - GitHub Actions job summary。
 - Workflow annotations / PR 文件视图。
+- GitHub Actions artifact：默认的 `proofpr-report.html` 可视化报告。
 - 可选 GitHub Code Scanning，见 [SARIF 文档](docs/sarif-code-scanning.md)。
-- 可选 HTML 可视化报告，适合上传为 workflow artifact；报告里可以按严重程度筛选、搜索文件/规则，并复制补证清单。
+- 本地 HTML 可视化报告；报告里可以按严重程度筛选、搜索文件/规则，并复制补证清单。
 
 ## 它会检查什么
 
@@ -267,7 +270,7 @@ evidence:
       severity: medium
 ```
 
-如果想在 GitHub Action 里保存 HTML 面板：
+`init` 默认已经会在 GitHub Action 里保存 HTML 面板，对应 workflow 片段如下：
 
 ```yaml
 - uses: linsk27/proof-pr@v0.1.16

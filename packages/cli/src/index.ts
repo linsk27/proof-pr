@@ -47,6 +47,8 @@ interface InitCommandOptions {
   workflowPath: string;
   prTemplate: boolean;
   prTemplatePath: string;
+  htmlReport: boolean;
+  htmlOutput: string;
   preset: ConfigPreset;
   failOn: FailLevel;
   force: boolean;
@@ -415,6 +417,8 @@ program
     "Path to write the pull request template.",
     ".github/pull_request_template.md"
   )
+  .option("--no-html-report", "Skip writing and uploading the default HTML visual report artifact.")
+  .option("--html-output <path>", "Path for the HTML report generated in GitHub Actions.", "proofpr-report.html")
   .option(
     "--preset <preset>",
     `Config preset: ${listConfigPresets().join(", ")}.`,
@@ -425,7 +429,11 @@ program
   .option("--force", "Overwrite existing files.", false)
   .action(async (options: InitCommandOptions) => {
     await writeIfMissing(options.configPath, renderConfigTemplate(options.preset), options.force);
-    await writeIfMissing(options.workflowPath, renderWorkflowTemplate(options.failOn), options.force);
+    await writeIfMissing(
+      options.workflowPath,
+      renderWorkflowTemplate(options.failOn, options.htmlReport, options.htmlOutput),
+      options.force
+    );
     const created = [options.configPath, options.workflowPath];
     const skipped: string[] = [];
 
@@ -444,7 +452,7 @@ program
     }
 
     process.stdout.write(
-      `ProofPR initialized.\n\nCreated:\n${created.map((item) => `- ${item}`).join("\n")}${skipped.length > 0 ? `\n\nSkipped:\n${skipped.map((item) => `- ${item}`).join("\n")}` : ""}\n\nNext:\n1. Commit these files.\n2. Open or update a pull request.\n3. Read the ProofPR comment or Actions summary.\n\nLocal check:\nnpx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN\n\nNeed another task?\nnpx proof-pr@latest guide\n`
+      `ProofPR initialized.\n\nCreated:\n${created.map((item) => `- ${item}`).join("\n")}${skipped.length > 0 ? `\n\nSkipped:\n${skipped.map((item) => `- ${item}`).join("\n")}` : ""}\n\nNext:\n1. Commit these files.\n2. Open or update a pull request.\n3. Read the ProofPR comment, Actions summary, annotations${options.htmlReport ? `, and ${options.htmlOutput} artifact` : ""}.\n\nLocal check:\nnpx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN\n\nNeed another task?\nnpx proof-pr@latest guide\n`
     );
   });
 
@@ -497,7 +505,7 @@ function renderGuide(): string {
 
 1. 接入 GitHub PR 自动检查
    npx proof-pr@latest init
-   然后提交 .proofpr.yml、.github/workflows/proofpr.yml 和 .github/pull_request_template.md，打开 PR 后看评论和 Actions summary。
+   然后提交 .proofpr.yml、.github/workflows/proofpr.yml 和 .github/pull_request_template.md，打开 PR 后看评论、Actions summary、annotations 和 HTML artifact。
 
 2. 体检当前仓库接入状态
    npx proof-pr@latest doctor
@@ -534,7 +542,7 @@ function renderGuide(): string {
    打开 .proofpr.yml，把 preset 改成 security-strict、dependency-careful 或 mcp-security。
 
 结果在哪里看：
-- GitHub Action：PR Conversation 评论、Actions summary、Checks 状态。
+- GitHub Action：PR Conversation 评论、Actions summary、Checks 状态、workflow annotations、proofpr-report artifact。
 - 本地 CLI：终端输出；如果用了 --output，就看写出的 HTML / JSON / SARIF / Markdown 文件。
 `;
 }
@@ -670,6 +678,20 @@ function inspectWorkflow(workflow: string, checks: DoctorCheck[], nextSteps: Set
   } else {
     checks.push({ level: "warn", title: "workflow 未显式声明 contents: read" });
     nextSteps.add("建议在 workflow permissions 中加入 contents: read。");
+  }
+
+  if (/html-output\s*:/.test(workflow)) {
+    checks.push({ level: "pass", title: "workflow 会生成 HTML 可视化报告" });
+
+    if (/actions\/upload-artifact@v\d+/.test(workflow)) {
+      checks.push({ level: "pass", title: "workflow 会上传 proofpr-report artifact" });
+    } else {
+      checks.push({ level: "warn", title: "HTML 报告已生成，但没有上传为 artifact" });
+      nextSteps.add("在 workflow 里加入 actions/upload-artifact@v4，把 proofpr-report.html 上传为 proofpr-report。");
+    }
+  } else {
+    checks.push({ level: "warn", title: "workflow 未启用 HTML 可视化报告 artifact" });
+    nextSteps.add("想让新用户更直观看报告时，重新运行 npx proof-pr@latest init --force，或在 Action step 中加入 html-output: proofpr-report.html。");
   }
 }
 
@@ -838,7 +860,18 @@ comment:
 `;
 }
 
-function renderWorkflowTemplate(failOn: FailLevel): string {
+function renderWorkflowTemplate(failOn: FailLevel, htmlReport: boolean, htmlOutput: string): string {
+  const htmlReportSteps = htmlReport
+    ? `          html-output: ${htmlOutput}
+      - name: Upload ProofPR visual report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: proofpr-report
+          path: ${htmlOutput}
+`
+    : "";
+
   return `name: ProofPR
 
 on:
@@ -859,7 +892,7 @@ jobs:
           fail-on: ${failOn}
           comment: "true"
           annotations: "true"
-`;
+${htmlReportSteps}`;
 }
 
 function renderPullRequestTemplate(): string {

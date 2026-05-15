@@ -1,7 +1,7 @@
 ﻿ProofPR doctor
 
-状态：基本可用，但建议优化
-统计：0 fail, 1 warn, 13 checks
+状态：接入正常
+统计：0 fail, 0 warn, 15 checks
 
 Checks:
 [pass] .proofpr.yml 可读取
@@ -10,10 +10,11 @@ Checks:
        comment.enabled=true
 [pass] .github/workflows/proofpr.yml 已存在
 [pass] workflow 会在 Pull Request 事件运行
-[warn] GitHub Action 版本较旧：v0.1.15
-       当前 CLI 版本是 v0.1.16
+[pass] GitHub Action 版本为 v0.1.16
 [pass] workflow 具备写 PR 评论权限
 [pass] workflow 具备读取仓库内容权限
+[pass] workflow 会生成 HTML 可视化报告
+[pass] workflow 会上传 proofpr-report artifact
 [pass] .github/pull_request_template.md 已存在
 [pass] PR 模板会提示验证证据
 [pass] PR 模板覆盖复现、截图或权限理由提示
@@ -23,4 +24,4 @@ Checks:
        当前没有可扫描的 diff。
 
 Next:
-- 把 workflow 里的 uses 更新为 linsk27/proof-pr@v0.1.16。
+- 当前接入状态正常；可以打开 PR，或运行 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN 做本地自查。

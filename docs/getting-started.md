@@ -32,7 +32,7 @@ npx proof-pr@latest init
 - `.github/workflows/proofpr.yml`
 - `.github/pull_request_template.md`
 
-把这些文件提交到仓库，打开或更新 PR，就会自动生成报告。PR 模板会提醒贡献者写清验证、复现、截图、changelog 和权限理由。
+把这些文件提交到仓库，打开或更新 PR，就会自动生成报告。默认会同时输出 PR 评论、Actions summary、workflow annotations 和 `proofpr-report.html` artifact。PR 模板会提醒贡献者写清验证、复现、截图、changelog 和权限理由。
 
 安装后可以先体检一次：
 
@@ -77,9 +77,16 @@ jobs:
           fail-on: high
           comment: "true"
           annotations: "true"
+          html-output: proofpr-report.html
+      - name: Upload ProofPR visual report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: proofpr-report
+          path: proofpr-report.html
 ```
 
-这个默认配置已经够试用：只在 PR 事件运行，风险达到 `high` 时才让检查失败。
+这个默认配置已经够试用：只在 PR 事件运行，风险达到 `high` 时才让检查失败，并把 HTML 可视化报告保存成 workflow artifact。
 
 ## 它什么时候运行？
 
@@ -106,6 +113,7 @@ on:
 - 仓库 `Actions` 页面：这里可以看到 `ProofPR` workflow 的运行日志和 job summary。
 - PR 顶部的 checks 状态：如果风险达到 `fail-on` 阈值，检查项会失败，提醒维护者先处理风险。
 - GitHub annotations：`v0.1.5` 起会把 finding 输出为 workflow annotations，方便在 PR 文件视图里定位。
+- Actions artifact：默认会上传 `proofpr-report`，里面是可搜索、可筛选、可复制补证清单的 `proofpr-report.html`。
 
 ## 生成的配置
 

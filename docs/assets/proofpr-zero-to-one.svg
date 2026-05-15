@@ -60,7 +60,7 @@
     <text class="num" x="22" y="36" fill="#dc2626">4</text>
     <text class="title" x="24" y="72">查看结果</text>
     <text class="body" x="24" y="104">PR 评论 + job summary</text>
-    <text class="body" x="24" y="132">Annotations 定位文件行</text>
+    <text class="body" x="24" y="132">Annotations + HTML artifact</text>
     <text class="body" x="24" y="160">可选 SARIF / Code Scanning</text>
   </g>
 

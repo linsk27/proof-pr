@@ -13,7 +13,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.15
+      - uses: linsk27/proof-pr@v0.1.16
         with:
           fail-on: high
           comment: "true"
+          annotations: "true"
+          html-output: proofpr-report.html
+      - name: Upload ProofPR visual report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: proofpr-report
+          path: proofpr-report.html

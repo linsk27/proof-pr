@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-暂无。
+- `init` 生成的 GitHub workflow 默认写出 `proofpr-report.html` 并上传为 `proofpr-report` artifact，让首次接入就能看到可视化报告。
+- `doctor` 新增 HTML artifact 体检，提醒 workflow 是否启用了 `html-output` 和 `actions/upload-artifact`。
+- README、快速开始、从 0 到 1 文档和输出位置图同步说明 PR 评论、Actions summary、annotations、HTML artifact 的查看路径。
 
 ## 0.1.16 - 2026-05-12
 

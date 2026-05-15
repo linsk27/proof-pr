@@ -8,7 +8,7 @@ Created:
 Next:
 1. Commit these files.
 2. Open or update a pull request.
-3. Read the ProofPR comment or Actions summary.
+3. Read the ProofPR comment, Actions summary, annotations, and proofpr-report.html artifact.
 
 Local check:
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN

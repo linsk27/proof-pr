@@ -4,7 +4,7 @@
 
 1. 接入 GitHub PR 自动检查
    npx proof-pr@latest init
-   然后提交 .proofpr.yml、.github/workflows/proofpr.yml 和 .github/pull_request_template.md，打开 PR 后看评论和 Actions summary。
+   然后提交 .proofpr.yml、.github/workflows/proofpr.yml 和 .github/pull_request_template.md，打开 PR 后看评论、Actions summary、annotations 和 HTML artifact。
 
 2. 体检当前仓库接入状态
    npx proof-pr@latest doctor
@@ -41,5 +41,5 @@
    打开 .proofpr.yml，把 preset 改成 security-strict、dependency-careful 或 mcp-security。
 
 结果在哪里看：
-- GitHub Action：PR Conversation 评论、Actions summary、Checks 状态。
+- GitHub Action：PR Conversation 评论、Actions summary、Checks 状态、workflow annotations、proofpr-report artifact。
 - 本地 CLI：终端输出；如果用了 --output，就看写出的 HTML / JSON / SARIF / Markdown 文件。
