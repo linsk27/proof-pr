@@ -1,6 +1,8 @@
-# 功能和命令速查
+# 命令速查
 
-如果不知道该用哪个功能，先运行：
+ProofPR 不是通用扫描器。它是 PR 证据门禁，默认只围绕一件事工作：判断 PR 有没有足够证据，值得维护者开始 review。
+
+如果不知道怎么开始，先运行：
 
 ```bash
 npx proof-pr@latest
@@ -14,20 +16,25 @@ npx proof-pr@latest guide
 
 ![ProofPR 中文功能菜单](screenshots/proofpr-guide-output.png)
 
-## 最常用路径
+## 默认路径
 
-| 你想做什么 | 什么时候用 | 复制这条命令 | 结果在哪里看 |
-| --- | --- | --- | --- |
-| 不接入仓库，先体验报告 | 第一次了解 ProofPR | `npx proof-pr@latest demo workflow --locale zh-CN` | 当前终端 |
-| 接入 GitHub PR 自动检查 | 第一次给仓库安装 ProofPR | `npx proof-pr@latest init` | PR 评论、Actions summary、Checks、HTML artifact |
-| 体检接入状态 | 安装后不知道是否配置正确 | `npx proof-pr@latest doctor` | 当前终端 |
-| 单独补 PR 模板 | 已接入仓库但缺少 PR 模板 | `npx proof-pr@latest template` | `.github/pull_request_template.md` |
-| 本地检查当前分支 | 发 PR 前自查 | `npx proof-pr@latest check` | 当前终端 |
-| 生成 HTML 可视化报告 | 想把报告保存、筛选风险、复制补证清单或上传 artifact | `npx proof-pr@latest check --format html --output proofpr-report.html` | `proofpr-report.html` |
-| 生成 SARIF | 想接入 GitHub Code Scanning | `npx proof-pr@latest check --format sarif --output proofpr.sarif` | `proofpr.sarif` / Code Scanning |
-| 查看所有内置案例 | 想快速理解它会抓什么 | `npx proof-pr@latest demo --list` | 当前终端 |
-| 跑 benchmark | 维护规则或发版前回归 | `npx proof-pr@latest benchmark --cases benchmarks/cases` | 当前终端 |
-| 调整审查强度 | 想更严格检查安全、依赖或 MCP | 修改 `.proofpr.yml` 里的 `preset` | 下一次扫描报告 |
+| 目标 | 命令 | 结果在哪里看 |
+| --- | --- | --- |
+| 先看效果，不改仓库 | `npx proof-pr@latest demo workflow --locale zh-CN` | 当前终端 |
+| 接入 GitHub PR 自动检查 | `npx proof-pr@latest init` | PR 评论、Actions summary、Checks、HTML artifact |
+| 发 PR 前本地自查 | `npx proof-pr@latest check` | 当前终端 |
+
+## 辅助命令
+
+| 场景 | 命令 | 结果在哪里看 |
+| --- | --- | --- |
+| 不确定是否装好 | `npx proof-pr@latest doctor` | 当前终端 |
+| 已接入仓库但缺少 PR 模板 | `npx proof-pr@latest template` | `.github/pull_request_template.md` |
+| 想把报告保存成页面 | `npx proof-pr@latest check --format html --output proofpr-report.html` | `proofpr-report.html` |
+| 想接入 GitHub Code Scanning | `npx proof-pr@latest check --format sarif --output proofpr.sarif` | `proofpr.sarif` / Code Scanning |
+| 查看所有内置案例 | `npx proof-pr@latest demo --list` | 当前终端 |
+| 维护规则或发版前回归 | `npx proof-pr@latest benchmark --cases benchmarks/cases` | 当前终端 |
+| 调整审查强度 | 修改 `.proofpr.yml` 里的 `preset` | 下一次扫描报告 |
 
 ## 1. 不接入仓库，先体验报告
 
@@ -107,7 +114,7 @@ npx proof-pr@latest doctor
 - `.github/workflows/proofpr.yml` 是否存在。
 - `.github/pull_request_template.md` 是否存在，以及是否提示验证、复现、截图或权限理由。
 - workflow 是否监听 `pull_request`。
-- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.22`。
+- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.23`。
 - 是否具备 `pull-requests: write` 和 `contents: read` 权限。
 - 是否启用了 `html-output` 和 `actions/upload-artifact`，方便下载 HTML 可视化报告。
 - 当前目录是否在 Git 仓库里，以及自动识别出的 base...HEAD diff 是否可读。

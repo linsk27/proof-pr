@@ -44,7 +44,7 @@ npx proof-pr@latest doctor
 
 ![ProofPR doctor 体检输出](screenshots/proofpr-doctor-output.png)
 
-如果你不确定下一步该用哪个功能，可以直接看中文功能菜单：
+如果你不确定下一步该做什么，可以直接看中文向导。它会把默认路径收敛成“先看效果、接入仓库、本地自查”三步：
 
 ```bash
 npx proof-pr@latest
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.22
+      - uses: linsk27/proof-pr@v0.1.23
         with:
           fail-on: high
           comment: "true"
@@ -139,14 +139,12 @@ npx proof-pr@latest --version
 npx proof-pr@latest guide
 npx proof-pr@latest demo workflow --locale zh-CN
 npx proof-pr@latest init
-npx proof-pr@latest doctor
-npx proof-pr@latest template
 npx proof-pr@latest check
 ```
 
 `check` 会自动选择常见主分支作为 base，并纳入已提交分支 diff、staged、unstaged 和未跟踪新文件。
 
-如果第一行输出 `0.1.22`，说明你正在使用当前最新发布版。
+如果第一行输出 `0.1.23`，说明你正在使用当前最新发布版。
 
 也可以全局安装：
 
@@ -165,46 +163,19 @@ pnpm build
 node packages/cli/dist/index.js check
 ```
 
-## 常用命令
+## 辅助命令
 
-查看功能菜单：
-
-```bash
-proof-pr guide
-```
-
-体检接入状态：
+不确定是否装好：
 
 ```bash
 proof-pr doctor
 ```
 
-单独补 PR 模板：
+已接入仓库但缺少 PR 模板：
 
 ```bash
 proof-pr template
 ```
-
-运行内置案例：
-
-```bash
-proof-pr demo workflow --locale zh-CN
-proof-pr demo --list
-```
-
-初始化配置和 workflow：
-
-```bash
-proof-pr init
-```
-
-运行 benchmark，确认规则样本仍按预期命中：
-
-```bash
-proof-pr benchmark --cases benchmarks/cases
-```
-
-![ProofPR benchmark 输出](screenshots/proofpr-benchmark-output.png)
 
 生成独立 HTML 可视化报告：
 
@@ -215,6 +186,20 @@ proof-pr check --format html --output proofpr-report.html
 HTML 报告支持按风险严重程度筛选、搜索规则/文件/详情，并复制“补证清单”给贡献者。
 
 ![ProofPR HTML 可视化报告](screenshots/proofpr-visual-report.png)
+
+查看所有内置案例：
+
+```bash
+proof-pr demo --list
+```
+
+运行 benchmark，确认规则样本仍按预期命中：
+
+```bash
+proof-pr benchmark --cases benchmarks/cases
+```
+
+![ProofPR benchmark 输出](screenshots/proofpr-benchmark-output.png)
 
 如果你的仓库更关注安全、MCP 或依赖风险，可以换成：
 
@@ -231,30 +216,13 @@ pnpm build
 node packages/cli/dist/index.js init --preset security-strict
 ```
 
-扫描当前工作区 diff：
-
-```bash
-proof-pr scan
-```
-
-扫描指定 base/head：
-
-```bash
-proof-pr check
-```
-
-输出中文报告：
-```bash
-proof-pr check
-```
-
-输出 JSON：
+需要机器可读结果时再使用 JSON：
 
 ```bash
 proof-pr check --format json --output proofpr-report.json
 ```
 
-加入 PR 描述证据检查：
+需要精确指定 base、PR 标题或 PR 描述时，再使用底层 `scan` 命令：
 
 ```bash
 proof-pr scan --base origin/main --pr-title "Fix login redirect" --pr-body-file pr-body.md

@@ -1,8 +1,8 @@
 # proof-pr
 
-ProofPR 是给开源维护者和工程团队使用的 PR 证据门禁。它在投入深度 review 之前，先检查 PR 是否提供了足够证据：测试、复现、截图、changelog、权限理由，以及是否触碰敏感路径、依赖、workflow、MCP 或 secret 风险。
+ProofPR 是给开源维护者和工程团队使用的 PR 证据门禁。它只回答一个问题：这个 PR 有没有足够证据，值得维护者开始 review？
 
-它不依赖大模型，不上传代码，只基于 diff、PR 描述和配置做确定性判断。
+它不是 AI code reviewer，也不是漏洞库。它不依赖大模型，不上传代码，只基于 diff、PR 描述和配置做确定性判断。
 
 ## 快速使用
 
@@ -12,9 +12,9 @@ ProofPR 是给开源维护者和工程团队使用的 PR 证据门禁。它在�
 npx proof-pr@latest --version
 ```
 
-当前应输出 `0.1.22`。
+当前应输出 `0.1.23`。
 
-不知道用哪个功能时：
+不知道怎么开始时：
 
 ```bash
 npx proof-pr@latest
@@ -22,14 +22,15 @@ npx proof-pr@latest
 npx proof-pr@latest guide
 ```
 
-不接入仓库，先体验报告：
+默认只用三条命令。
+
+先看效果，不改仓库：
 
 ```bash
 npx proof-pr@latest demo workflow --locale zh-CN
-npx proof-pr@latest demo --list
 ```
 
-初始化配置和 GitHub Action：
+接入 GitHub PR 自动检查：
 
 ```bash
 npx proof-pr@latest init
@@ -38,21 +39,7 @@ npx proof-pr@latest init
 这个命令会生成 `.proofpr.yml`、`.github/workflows/proofpr.yml` 和 `.github/pull_request_template.md`，提交后打开 PR 即可看到报告。
 重复运行时已有文件会被保留；需要刷新模板时使用 `npx proof-pr@latest init --force`。
 
-已接入仓库单独补 PR 模板：
-
-```bash
-npx proof-pr@latest template
-```
-
-体检接入状态：
-
-```bash
-npx proof-pr@latest doctor
-```
-
-这个命令会检查配置文件、workflow、PR 模板、Action 版本、PR 权限和本地 diff 是否可读，并自动识别常见主分支作为 base。
-
-本地扫描当前分支：
+发 PR 前本地自查：
 
 ```bash
 npx proof-pr@latest check
@@ -60,10 +47,26 @@ npx proof-pr@latest check
 
 `check` 会自动选择常见主分支作为 base，并纳入已提交分支 diff、staged、unstaged 和未跟踪新文件。
 
-扫描内置案例：
+## 辅助命令
+
+不确定是否装好：
 
 ```bash
-npx proof-pr@latest demo workflow --locale zh-CN
+npx proof-pr@latest doctor
+```
+
+这个命令会检查配置文件、workflow、PR 模板、Action 版本、PR 权限和本地 diff 是否可读，并自动识别常见主分支作为 base。
+
+已接入仓库单独补 PR 模板：
+
+```bash
+npx proof-pr@latest template
+```
+
+查看所有内置案例：
+
+```bash
+npx proof-pr@latest demo --list
 ```
 
 生成独立 HTML 可视化报告：
@@ -83,7 +86,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.22
+- uses: linsk27/proof-pr@v0.1.23
   with:
     fail-on: high
     comment: "true"

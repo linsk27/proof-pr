@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.22`。
+当前最新公开版本是 `0.1.23`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.22
-git push origin v0.1.22
+git tag v0.1.23
+git push origin v0.1.23
 ```
 
 发布完成后需要检查：
@@ -66,9 +66,18 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.22
-npx proof-pr@latest --version -> 0.1.22
+npm view proof-pr version -> 0.1.23
+npx proof-pr@latest --version -> 0.1.23
 ```
+
+## `v0.1.23` 发布状态
+
+`v0.1.23` 是产品定位收敛版，重点包括：
+
+- README 第一屏收敛为“PR 证据门禁”：判断 PR 是否带够证据、值不值得 review。
+- CLI 默认向导从功能菜单改为三步路径：先看效果、接入仓库、本地自查。
+- `doctor`、HTML、SARIF、benchmark 等能力下沉为辅助命令，避免首次用户误以为 ProofPR 是杂项扫描工具箱。
+- npm 包 README 和中文文档入口同步精简定位。
 
 ## `v0.1.22` 发布状态
 
@@ -151,7 +160,7 @@ npx proof-pr@latest --version -> 0.1.22
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.22` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.23` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 

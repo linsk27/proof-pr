@@ -5,29 +5,36 @@
 [![npm](https://img.shields.io/npm/v/proof-pr)](https://www.npmjs.com/package/proof-pr)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-看证据，不看感觉。
+先要证据，再看代码。
 
-ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它会在 Pull Request 中检查改动范围、PR 描述、测试证据、敏感路径、依赖变化、GitHub Actions 权限、MCP 配置和疑似 secret，然后输出风险等级、证据评分、Review 门禁和维护者行动清单。
+ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。
 
-它不依赖大模型，不猜代码是不是 AI 写的。它只回答一个更适合 CI 的问题：**这个 PR 有没有足够证据值得维护者投入 review 时间？**
+它不是 AI code reviewer，也不是漏洞库。它只在 review 开始前回答一个问题：
+
+> 这个 PR 有没有足够证据，值得维护者开始 review？
+
+ProofPR 会读取 PR diff、PR 描述和仓库配置，判断贡献者是否补齐了测试、复现、截图、changelog、权限理由，以及这次改动是否碰到依赖、workflow、secret、MCP 或其他高风险区域。输出结果会收敛成三类信息：
+
+- **能不能开始 review**：继续 review、先补证据，还是高风险先别合并。
+- **缺什么证据**：测试、复现、截图、changelog、权限理由。
+- **先看哪里**：风险雷达把问题归到证据完整性、供应链、Workflow 权限、Secret 泄露和 Review 面。
 
 ## 现在能用吗
 
-- GitHub Release：[`v0.1.22`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.22)
-- npm：[`proof-pr@0.1.22`](https://www.npmjs.com/package/proof-pr)
-- GitHub Action：`linsk27/proof-pr@v0.1.22`
+- GitHub Release：[`v0.1.23`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.23)
+- npm：[`proof-pr@0.1.23`](https://www.npmjs.com/package/proof-pr)
+- GitHub Action：`linsk27/proof-pr@v0.1.23`
 - 当前源码 benchmark：`22/22 passed`
-- 接入体检：`npx proof-pr@latest doctor`
-- PR 模板：`npx proof-pr@latest template`
-- 可视化报告：`--format html` / `html-output`，支持筛选风险和复制补证清单
-- 默认接入体验：`init` 生成的 workflow 会自动上传 `proofpr-report.html` artifact
+- 默认接入：`npx proof-pr@latest init`
+- 本地自查：`npx proof-pr@latest check`
+- 可视化报告：`init` 生成的 workflow 会自动上传 `proofpr-report.html` artifact
 
 项目当前状态：
 
 - **已可正式试用**：CLI、GitHub Action、npm 包、GitHub Release、中文文档和截图都已经打通。
-- **核心差异点明确**：ProofPR 不做“玄学代码质量判断”，只做确定性 PR 证据门禁，帮助维护者先判断是否值得 review。
-- **发布链路已验证**：npm Trusted Publishing 已绑定 `linsk27/proof-pr` + `release.yml`，`v0.1.21` 和 `v0.1.22` 已通过 GitHub OIDC 自动发布到 npm。
-- **下一步增长点**：GitHub Marketplace 上架、更多真实项目案例、更多截图和更丰富 benchmark。
+- **核心边界明确**：ProofPR 不做通用代码审查，不判断代码好不好；它只做确定性 PR 证据门禁，帮助维护者先判断是否值得 review。
+- **发布链路已验证**：npm Trusted Publishing 已绑定 `linsk27/proof-pr` + `release.yml`，`v0.1.21`、`v0.1.22` 和 `v0.1.23` 已通过 GitHub OIDC 自动发布到 npm。
+- **下一步增长点**：继续减少首屏概念，补充真实 PR 案例和 Marketplace 上架材料。
 
 验证你拿到的是最新版本：
 
@@ -36,9 +43,9 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-这两个命令当前都应输出 `0.1.22`。
+这两个命令当前都应输出 `0.1.23`。
 
-不知道该用哪个功能时，直接打开中文功能菜单：
+不知道怎么开始时，直接运行中文向导：
 
 ```bash
 npx proof-pr@latest
@@ -48,18 +55,22 @@ npx proof-pr@latest guide
 
 ![ProofPR 中文功能菜单](docs/screenshots/proofpr-guide-output.png)
 
-常用操作可以按目标复制：
+默认只需要三条命令：
 
 | 目标 | 命令 |
 | --- | --- |
 | 不接入仓库，先体验报告 | `npx proof-pr@latest demo workflow --locale zh-CN` |
 | 接入 GitHub PR 自动检查 | `npx proof-pr@latest init` |
-| 体检当前仓库接入状态 | `npx proof-pr@latest doctor` |
-| 已接入仓库，单独补 PR 模板 | `npx proof-pr@latest template` |
 | 本地检查当前分支 | `npx proof-pr@latest check` |
+
+其他能力是辅助项，不是理解 ProofPR 的入口：
+
+| 场景 | 命令 |
+| --- | --- |
+| 不确定是否装好 | `npx proof-pr@latest doctor` |
 | 生成 HTML 可视化报告 | `npx proof-pr@latest check --format html --output proofpr-report.html` |
 | 生成 SARIF | `npx proof-pr@latest check --format sarif --output proofpr.sarif` |
-| 查看全部功能 | `npx proof-pr@latest guide` |
+| 查看内置案例 | `npx proof-pr@latest demo --list` |
 
 ## 它解决什么问题
 
@@ -204,7 +215,7 @@ Benchmark 输出，证明规则样本仍按预期命中：
 
 ## 本地 CLI
 
-先看功能菜单：
+先看中文向导：
 
 ```bash
 npx proof-pr@latest guide
@@ -244,7 +255,7 @@ npx proof-pr@latest check --format html --output proofpr-report.html
 
 HTML 报告不是静态截图：它可以按高/中/低风险筛选、搜索规则或文件，并把“需要贡献者补什么”一键复制到 PR 描述或评论里。
 
-运行 benchmark：
+维护规则或发版前再运行 benchmark：
 
 ```bash
 npx proof-pr@latest benchmark --cases benchmarks/cases
@@ -280,7 +291,7 @@ evidence:
 `init` 默认已经会在 GitHub Action 里保存 HTML 面板，对应 workflow 片段如下：
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.22
+- uses: linsk27/proof-pr@v0.1.23
   with:
     html-output: proofpr-report.html
 - uses: actions/upload-artifact@v4

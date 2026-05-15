@@ -4,6 +4,12 @@
 
 暂无。
 
+## 0.1.23 - 2026-05-15
+
+- 收敛项目定位：README、CLI 向导和中文文档统一强调 ProofPR 是“PR 证据门禁”，不是通用扫描器、AI code reviewer 或漏洞库。
+- 简化默认使用路径：首屏只保留“先看效果、接入仓库、本地自查”三条主命令，`doctor`、HTML、SARIF、benchmark 等能力下沉为辅助命令。
+- 更新 npm 包 README 和文档入口，减少功能堆叠，让首次访问者更容易理解项目作用。
+
 ## 0.1.22 - 2026-05-15
 
 - Markdown 和 HTML 报告新增“风险雷达”，把 findings 按证据完整性、供应链、Workflow 权限、Secret 泄露和 Review 面归并展示。

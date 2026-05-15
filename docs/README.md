@@ -1,6 +1,8 @@
 # ProofPR 文档
 
-这里是 ProofPR 的中文文档入口。第一次使用建议先看“快速开始”，它只保留最短安装路径。
+这里是 ProofPR 的中文文档入口。ProofPR 的核心定位是 PR 证据门禁：先判断一个 PR 是否带够证据、值不值得 review，再进入代码细节。
+
+第一次使用建议先看“快速开始”，它只保留最短安装路径。
 
 ## 推荐阅读顺序
 
@@ -15,9 +17,10 @@
 
 ## 当前发布
 
-- GitHub Release：[`v0.1.22`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.22)
-- npm：[`proof-pr@0.1.22`](https://www.npmjs.com/package/proof-pr)
-- 核心能力：Review Plan、`demo` 内置案例、`doctor` 接入体检、PR 模板生成、默认 HTML artifact、规则预设、Evidence Contract、GitHub annotations、SARIF、benchmark、真实案例库、依赖大版本升级检查、供应链来源/版本/lockfile/解析覆盖检查、包生命周期脚本检查、`pull_request_target` / PR head checkout 检查、可筛选并可复制补证清单的独立 HTML 可视化报告、npm Trusted Publishing 发布流程、Marketplace 准备材料。
+- GitHub Release：[`v0.1.23`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.23)
+- npm：[`proof-pr@0.1.23`](https://www.npmjs.com/package/proof-pr)
+- 核心能力：判断 PR 是否值得 review、指出缺失证据、标出高风险改动区域，并生成维护者行动清单。
+- 辅助能力：HTML 报告、GitHub annotations、SARIF、benchmark、真实案例库和 npm Trusted Publishing 发布流程。
 
 确认本机拿到的 latest：
 
@@ -26,9 +29,9 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-当前都应输出 `0.1.22`。
+当前都应输出 `0.1.23`。
 
-不知道用哪个功能时：
+不知道怎么开始时：
 
 ```bash
 npx proof-pr@latest
@@ -77,15 +80,10 @@ npx proof-pr@latest guide
 
 ProofPR 是一个给开源维护者使用的 PR 证据门禁。它关注的是“这个 PR 有没有足够证据值得 review”，不是猜测“代码是不是 AI 写的”。
 
-它的核心输出包括：
+它的核心输出只有三类：
 
-- 风险等级。
-- 0-100 证据评分。
-- Review 门禁建议。
-- Review 行动清单。
-- Evidence Contract。
-- Benchmark case。
-- CI benchmark report。
-- GitHub annotations。
-- SARIF / Code Scanning 输出。
-- 独立 HTML 可视化报告：`init` 默认上传为 `proofpr-report` artifact，支持风险筛选、搜索和一键复制补证清单。
+- **能不能开始 review**：风险等级、证据评分和 Review 门禁建议。
+- **缺什么证据**：测试、复现、截图、changelog、权限理由。
+- **先看哪里**：风险雷达、重点文件和维护者行动清单。
+
+HTML、SARIF、benchmark 和 annotations 都是交付形态，不是项目本身的定位。

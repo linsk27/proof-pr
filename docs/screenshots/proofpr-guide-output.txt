@@ -1,45 +1,34 @@
-﻿ProofPR 功能菜单
+﻿ProofPR = PR 证据门禁
 
-最推荐先做第 1 步。已经接入过的项目，按目标复制下面的命令即可。
+它只回答一个问题：
+这个 PR 有没有足够证据，值得维护者开始 review？
 
-1. 接入 GitHub PR 自动检查
-   npx proof-pr@latest init
-   然后提交 .proofpr.yml、.github/workflows/proofpr.yml 和 .github/pull_request_template.md；重复运行不会覆盖已有文件，需要刷新模板时加 --force。
+默认只用三条命令：
 
-2. 体检当前仓库接入状态
-   npx proof-pr@latest doctor
-   检查配置文件、workflow、PR 模板、Action 版本、PR 权限和本地 diff 是否正常，并自动识别常见 base 分支。
-
-3. 已接入仓库，单独补 PR 模板
-   npx proof-pr@latest template
-   引导贡献者填写验证、复现、截图、changelog 和权限理由。
-
-4. 本地检查当前分支
-   npx proof-pr@latest check
-   自动选择 origin/main / origin/master 等 base，适合在发 PR 前先看风险、证据评分和 Review 行动清单。
-
-5. 生成可分享 HTML 报告
-   npx proof-pr@latest check --format html --output proofpr-report.html
-   生成后用浏览器打开 proofpr-report.html。
-
-6. 生成 GitHub Code Scanning 的 SARIF
-   npx proof-pr@latest check --format sarif --output proofpr.sarif
-   适合在 CI 里配合 github/codeql-action/upload-sarif 使用。
-
-7. 不接入仓库，先试跑内置案例
+1. 先看效果，不改仓库
    npx proof-pr@latest demo workflow --locale zh-CN
-   不需要 clone 仓库或寻找 examples 文件，也能快速看到 ProofPR 会抓什么风险。
 
-8. 查看所有内置案例
-   npx proof-pr@latest demo --list
+2. 接入 GitHub PR 自动检查
+   npx proof-pr@latest init
+   生成 .proofpr.yml、.github/workflows/proofpr.yml 和 PR 模板；提交后打开 PR 即可看到报告。
 
-9. 验证规则样本是否仍然命中
-   npx proof-pr@latest benchmark --cases benchmarks/cases
-   适合维护 ProofPR 规则或发版前回归。
+3. 发 PR 前本地自查
+   npx proof-pr@latest check
+   自动识别常见 base 分支，并检查当前工作区相对 base 的最终改动。
 
-10. 调整审查强度
-   打开 .proofpr.yml，把 preset 改成 security-strict、dependency-careful 或 mcp-security。
+报告会给出：
+- 是否建议继续 review、先补证据，还是先处理高风险。
+- 缺什么证据：测试、复现、截图、changelog、权限理由。
+- 风险主要在哪：供应链、Workflow、Secret、证据完整性或 Review 面。
 
-结果在哪里看：
-- GitHub Action：PR Conversation 评论、Actions summary、Checks 状态、workflow annotations、proofpr-report artifact。
-- 本地 CLI：终端输出；如果用了 --output，就看写出的 HTML / JSON / SARIF / Markdown 文件。
+不确定装好没有：
+   npx proof-pr@latest doctor
+
+需要可分享页面：
+   npx proof-pr@latest check --format html --output proofpr-report.html
+
+高级命令按需使用：
+- npx proof-pr@latest template
+- npx proof-pr@latest demo --list
+- npx proof-pr@latest check --format sarif --output proofpr.sarif
+- npx proof-pr@latest benchmark --cases benchmarks/cases
