@@ -22,7 +22,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.20";
+const CLI_VERSION = "0.1.21";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -68,7 +68,7 @@ interface DoctorCommandOptions {
   config: string;
   workflowPath: string;
   prTemplatePath: string;
-  base: string;
+  base?: string;
   head: string;
 }
 
@@ -86,6 +86,11 @@ interface DoctorCheck {
 interface DoctorReport {
   checks: DoctorCheck[];
   nextSteps: string[];
+}
+
+interface InitFileResult {
+  path: string;
+  status: "created" | "updated" | "skipped";
 }
 
 interface DemoCase {
@@ -316,7 +321,7 @@ program
   .option("--config <path>", "Path to .proofpr.yml.", ".proofpr.yml")
   .option("--workflow-path <path>", "Path to the GitHub Actions workflow.", ".github/workflows/proofpr.yml")
   .option("--pr-template-path <path>", "Path to the pull request template.", ".github/pull_request_template.md")
-  .option("--base <ref>", "Base git ref used for local diff checks.", "origin/main")
+  .option("--base <ref>", "Base git ref used for local diff checks. Defaults to the same auto-detected base as check.")
   .option("--head <ref>", "Head git ref used for local diff checks.", "HEAD")
   .action(async (options: DoctorCommandOptions) => {
     const report = await runDoctor(options);
@@ -470,32 +475,29 @@ program
   .option("--fail-on <level>", "Workflow failure threshold: low, medium, high, or never.", parseFailLevel, "high")
   .option("--force", "Overwrite existing files.", false)
   .action(async (options: InitCommandOptions) => {
-    await writeIfMissing(options.configPath, renderConfigTemplate(options.preset), options.force);
-    await writeIfMissing(
-      options.workflowPath,
-      renderWorkflowTemplate(options.failOn, options.htmlReport, options.htmlOutput),
-      options.force
-    );
-    const created = [options.configPath, options.workflowPath];
-    const skipped: string[] = [];
+    const results: InitFileResult[] = [
+      {
+        path: options.configPath,
+        status: await writeProjectFile(options.configPath, renderConfigTemplate(options.preset), options.force)
+      },
+      {
+        path: options.workflowPath,
+        status: await writeProjectFile(
+          options.workflowPath,
+          renderWorkflowTemplate(options.failOn, options.htmlReport, options.htmlOutput),
+          options.force
+        )
+      }
+    ];
 
     if (options.prTemplate) {
-      const wroteTemplate = await writeIfMissingSoft(
-        options.prTemplatePath,
-        renderPullRequestTemplate(),
-        options.force
-      );
-
-      if (wroteTemplate) {
-        created.push(options.prTemplatePath);
-      } else {
-        skipped.push(`${options.prTemplatePath} already exists`);
-      }
+      results.push({
+        path: options.prTemplatePath,
+        status: await writeProjectFile(options.prTemplatePath, renderPullRequestTemplate(), options.force)
+      });
     }
 
-    process.stdout.write(
-      `ProofPR initialized.\n\nCreated:\n${created.map((item) => `- ${item}`).join("\n")}${skipped.length > 0 ? `\n\nSkipped:\n${skipped.map((item) => `- ${item}`).join("\n")}` : ""}\n\nNext:\n1. Commit these files.\n2. Open or update a pull request.\n3. Read the ProofPR comment, Actions summary, annotations${options.htmlReport ? `, and ${options.htmlOutput} artifact` : ""}.\n\nLocal check:\nnpx proof-pr@latest check\n\nNeed another task?\nnpx proof-pr@latest guide\n`
-    );
+    process.stdout.write(renderInitReport(results, options));
   });
 
 program
@@ -547,11 +549,11 @@ function renderGuide(): string {
 
 1. 接入 GitHub PR 自动检查
    npx proof-pr@latest init
-   然后提交 .proofpr.yml、.github/workflows/proofpr.yml 和 .github/pull_request_template.md，打开 PR 后看评论、Actions summary、annotations 和 HTML artifact。
+   然后提交 .proofpr.yml、.github/workflows/proofpr.yml 和 .github/pull_request_template.md；重复运行不会覆盖已有文件，需要刷新模板时加 --force。
 
 2. 体检当前仓库接入状态
    npx proof-pr@latest doctor
-   检查配置文件、workflow、PR 模板、Action 版本、PR 权限和本地 diff 是否正常。
+   检查配置文件、workflow、PR 模板、Action 版本、PR 权限和本地 diff 是否正常，并自动识别常见 base 分支。
 
 3. 已接入仓库，单独补 PR 模板
    npx proof-pr@latest template
@@ -796,20 +798,33 @@ async function inspectGitDiff(
     checks.push({ level: "info", title: "无法读取当前分支名" });
   }
 
+  const detectedBase = options.base ?? (await resolveDefaultBaseRef().catch(() => undefined));
+
   try {
-    const diff = await readGitDiff(options.base, options.head);
-    checks.push({
-      level: "pass",
-      title: `可以读取 ${options.base}...${options.head} diff`,
-      detail: diff.length === 0 ? "当前没有可扫描的 diff。" : `diff 大小约 ${diff.length} 字符。`
-    });
+    if (detectedBase) {
+      const diff = await readCheckDiff(detectedBase, options.head);
+      checks.push({
+        level: "pass",
+        title: `可以读取 ${detectedBase}...${options.head} diff`,
+        detail: diff.length === 0 ? "当前没有可扫描的 diff。" : `diff 大小约 ${diff.length} 字符。`
+      });
+    } else {
+      const diff = await readGitDiff(undefined, options.head);
+      checks.push({
+        level: "warn",
+        title: "未找到默认 base 分支，只检查当前工作区 diff",
+        detail: diff.length === 0 ? "当前工作区没有可扫描的 diff。" : `工作区 diff 大小约 ${diff.length} 字符。`
+      });
+      nextSteps.add("如果仓库有远程主分支，先运行 git fetch origin；主分支不是 main/master 时，使用 npx proof-pr@latest doctor --base origin/你的主分支。");
+    }
   } catch (error) {
+    const baseLabel = detectedBase ?? "工作区";
     checks.push({
       level: "warn",
-      title: `无法读取 ${options.base}...${options.head} diff`,
+      title: `无法读取 ${baseLabel}...${options.head} diff`,
       detail: error instanceof Error ? error.message : String(error)
     });
-    nextSteps.add(`运行 git fetch origin 后重试；如果主分支不是 main，请使用 --base origin/master 或你的实际主分支。`);
+    nextSteps.add("运行 git fetch origin 后重试；如果主分支不是 main/master，请使用 --base origin/你的实际主分支。");
   }
 }
 
@@ -835,6 +850,42 @@ ${checks}
 
 Next:
 ${nextSteps}
+`;
+}
+
+function renderInitReport(results: InitFileResult[], options: InitCommandOptions): string {
+  const statusText: Record<InitFileResult["status"], string> = {
+    created: "已创建",
+    updated: "已更新",
+    skipped: "已存在，未覆盖"
+  };
+  const files = results.map((result) => `[${statusText[result.status]}] ${result.path}`).join("\n");
+  const skipped = results.filter((result) => result.status === "skipped");
+  const gitAddPaths = results.map((result) => result.path).join(" ");
+  const forceHint =
+    skipped.length > 0
+      ? "\n已有文件已保留不变。如果想用当前版本模板覆盖它们，运行：\nnpx proof-pr@latest init --force\n"
+      : "";
+
+  return `ProofPR 初始化完成。
+
+文件:
+${files}
+${forceHint}
+下一步直接复制:
+git add ${gitAddPaths}
+git commit -m "chore: add ProofPR"
+
+打开或更新 Pull Request 后，报告会出现在:
+- PR 评论
+- GitHub Actions summary
+- Workflow annotations${options.htmlReport ? `\n- ${options.htmlOutput} artifact` : ""}
+
+本地先自查:
+npx proof-pr@latest check
+
+检查接入是否完整:
+npx proof-pr@latest doctor
 `;
 }
 
@@ -951,14 +1002,16 @@ async function writeIfMissing(path: string, contents: string, force: boolean): P
   await writeFile(path, contents, "utf8");
 }
 
-async function writeIfMissingSoft(path: string, contents: string, force: boolean): Promise<boolean> {
-  if (!force && (await pathExists(path))) {
-    return false;
+async function writeProjectFile(path: string, contents: string, force: boolean): Promise<InitFileResult["status"]> {
+  const exists = await pathExists(path);
+
+  if (exists && !force) {
+    return "skipped";
   }
 
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, contents, "utf8");
-  return true;
+  return exists ? "updated" : "created";
 }
 
 async function writeOutput(path: string, contents: string): Promise<void> {

@@ -10,7 +10,7 @@ Checks:
        comment.enabled=true
 [pass] .github/workflows/proofpr.yml 已存在
 [pass] workflow 会在 Pull Request 事件运行
-[pass] GitHub Action 版本为 v0.1.20
+[pass] GitHub Action 版本为 v0.1.21
 [pass] workflow 具备写 PR 评论权限
 [pass] workflow 具备读取仓库内容权限
 [pass] workflow 会生成 HTML 可视化报告
@@ -20,7 +20,7 @@ Checks:
 [pass] PR 模板覆盖复现、截图或权限理由提示
 [pass] 当前目录位于 Git 仓库中
 [info] 当前分支：main
-[pass] 可以读取 origin/main...HEAD diff
+[pass] 可以读取 main...HEAD diff
        当前没有可扫描的 diff。
 
 Next:

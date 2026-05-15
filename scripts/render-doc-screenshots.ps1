@@ -132,7 +132,7 @@ function Save-TerminalImage {
     }
 
     $brush = $brushMuted
-    if ($line -match "PASS|100%|0\.1\.15|\[pass\]|ProofPR initialized|状态：接入正常|完成|通过") {
+    if ($line -match "PASS|100%|0\.1\.\d+|\[pass\]|ProofPR initialized|ProofPR 初始化完成|状态：接入正常|完成|通过") {
       $brush = $brushAccent
     } elseif ($line -match "\[warn\]|高|风险|block-merge|pull_request_target|workflow-untrusted-checkout") {
       $brush = $brushWarn
@@ -154,6 +154,8 @@ if (Test-Path $initDir) {
   Remove-Item -LiteralPath $initDir -Recurse -Force
 }
 New-Item -ItemType Directory -Path $initDir | Out-Null
+& git -C $initDir init -q
+& git -C $initDir symbolic-ref HEAD refs/heads/main
 
 $initText = Invoke-CommandText `
   -File "node" `
@@ -165,6 +167,20 @@ Save-TerminalImage `
   -Command "npx proof-pr@latest init" `
   -Text $initText `
   -Path (Join-Path $OutDir "proofpr-init-output.png")
+
+& git -C $initDir -c core.autocrlf=false add .
+& git -C $initDir -c core.autocrlf=false -c user.name="ProofPR Docs" -c user.email="proofpr@example.com" commit -m "chore: add ProofPR" -q
+
+$doctorText = Invoke-CommandText `
+  -File "node" `
+  -CommandArgs @((Join-Path $Repo "packages\cli\dist\index.js"), "doctor", "--base", "main") `
+  -WorkDir $initDir
+Set-Content -LiteralPath (Join-Path $OutDir "proofpr-doctor-output.txt") -Value $doctorText -Encoding UTF8
+Save-TerminalImage `
+  -Title "ProofPR doctor output" `
+  -Command "npx proof-pr@latest doctor" `
+  -Text $doctorText `
+  -Path (Join-Path $OutDir "proofpr-doctor-output.png")
 Remove-Item -LiteralPath $initDir -Recurse -Force
 
 $guideText = Invoke-CommandText `
@@ -188,17 +204,6 @@ Save-TerminalImage `
   -Command "npx proof-pr@latest demo workflow --locale zh-CN" `
   -Text (Limit-Lines -Text $demoText -MaxLines 46) `
   -Path (Join-Path $OutDir "proofpr-demo-output.png")
-
-$doctorText = Invoke-CommandText `
-  -File "node" `
-  -CommandArgs @((Join-Path $Repo "packages\cli\dist\index.js"), "doctor") `
-  -WorkDir $Repo
-Set-Content -LiteralPath (Join-Path $OutDir "proofpr-doctor-output.txt") -Value $doctorText -Encoding UTF8
-Save-TerminalImage `
-  -Title "ProofPR doctor output" `
-  -Command "npx proof-pr@latest doctor" `
-  -Text $doctorText `
-  -Path (Join-Path $OutDir "proofpr-doctor-output.png")
 
 $workflowText = Invoke-CommandText `
   -File "node" `

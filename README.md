@@ -13,9 +13,9 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 
 ## 现在能用吗
 
-- GitHub Release：[`v0.1.20`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.20)
-- npm：[`proof-pr@0.1.20`](https://www.npmjs.com/package/proof-pr)
-- GitHub Action：`linsk27/proof-pr@v0.1.20`
+- GitHub Release：[`v0.1.21`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.21)
+- npm：[`proof-pr@0.1.21`](https://www.npmjs.com/package/proof-pr)
+- GitHub Action：`linsk27/proof-pr@v0.1.21`
 - 当前源码 benchmark：`22/22 passed`
 - 接入体检：`npx proof-pr@latest doctor`
 - PR 模板：`npx proof-pr@latest template`
@@ -36,7 +36,7 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-这两个命令当前都应输出 `0.1.20`。
+这两个命令当前都应输出 `0.1.21`。
 
 不知道该用哪个功能时，直接打开中文功能菜单：
 
@@ -105,6 +105,7 @@ npx proof-pr@latest init
 
 默认配置已经适合开源仓库试用；PR 模板会引导贡献者补充验证、复现、截图、changelog 和权限理由。
 生成的 workflow 还会默认保存 `proofpr-report.html` artifact，维护者可以在 Actions 页面直接下载可视化报告。
+如果仓库里已经有这些文件，`init` 默认会保留不覆盖，并告诉你哪些文件已存在；需要刷新到当前模板时再加 `--force`。
 
 ### 2. 体检接入状态
 
@@ -114,7 +115,7 @@ npx proof-pr@latest doctor
 
 ![ProofPR doctor 体检输出](docs/screenshots/proofpr-doctor-output.png)
 
-`doctor` 会检查 `.proofpr.yml`、`.github/workflows/proofpr.yml`、PR 模板、Action 版本、PR 事件、评论权限和本地 diff 是否可读。它的目标是告诉新用户“装好了吗，还差哪一步”。
+`doctor` 会检查 `.proofpr.yml`、`.github/workflows/proofpr.yml`、PR 模板、Action 版本、PR 事件、评论权限和本地 diff 是否可读。它会像 `check` 一样自动识别常见主分支，目标是告诉新用户“装好了吗，还差哪一步”。
 
 ### 3. 提交并打开 PR
 
@@ -278,7 +279,7 @@ evidence:
 `init` 默认已经会在 GitHub Action 里保存 HTML 面板，对应 workflow 片段如下：
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.20
+- uses: linsk27/proof-pr@v0.1.21
   with:
     html-output: proofpr-report.html
 - uses: actions/upload-artifact@v4

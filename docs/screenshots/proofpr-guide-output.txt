@@ -4,11 +4,11 @@
 
 1. 接入 GitHub PR 自动检查
    npx proof-pr@latest init
-   然后提交 .proofpr.yml、.github/workflows/proofpr.yml 和 .github/pull_request_template.md，打开 PR 后看评论、Actions summary、annotations 和 HTML artifact。
+   然后提交 .proofpr.yml、.github/workflows/proofpr.yml 和 .github/pull_request_template.md；重复运行不会覆盖已有文件，需要刷新模板时加 --force。
 
 2. 体检当前仓库接入状态
    npx proof-pr@latest doctor
-   检查配置文件、workflow、PR 模板、Action 版本、PR 权限和本地 diff 是否正常。
+   检查配置文件、workflow、PR 模板、Action 版本、PR 权限和本地 diff 是否正常，并自动识别常见 base 分支。
 
 3. 已接入仓库，单独补 PR 模板
    npx proof-pr@latest template

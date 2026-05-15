@@ -12,7 +12,7 @@ ProofPR 是给开源维护者和工程团队使用的 PR 证据门禁。它在�
 npx proof-pr@latest --version
 ```
 
-当前应输出 `0.1.20`。
+当前应输出 `0.1.21`。
 
 不知道用哪个功能时：
 
@@ -36,6 +36,7 @@ npx proof-pr@latest init
 ```
 
 这个命令会生成 `.proofpr.yml`、`.github/workflows/proofpr.yml` 和 `.github/pull_request_template.md`，提交后打开 PR 即可看到报告。
+重复运行时已有文件会被保留；需要刷新模板时使用 `npx proof-pr@latest init --force`。
 
 已接入仓库单独补 PR 模板：
 
@@ -49,7 +50,7 @@ npx proof-pr@latest template
 npx proof-pr@latest doctor
 ```
 
-这个命令会检查配置文件、workflow、PR 模板、Action 版本、PR 权限和本地 diff 是否可读。
+这个命令会检查配置文件、workflow、PR 模板、Action 版本、PR 权限和本地 diff 是否可读，并自动识别常见主分支作为 base。
 
 本地扫描当前分支：
 
@@ -82,7 +83,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.20
+- uses: linsk27/proof-pr@v0.1.21
   with:
     fail-on: high
     comment: "true"

@@ -42,6 +42,8 @@ npx proof-pr@latest init
 
 默认配置已经会输出中文报告、上传 HTML 可视化报告，并使用开源维护者预设。PR 模板会引导贡献者补充验证、复现、截图、changelog 和权限理由。
 
+这条命令可以重复运行。已有文件默认会保留不覆盖；如果以后想刷新到当前版本模板，再运行 `npx proof-pr@latest init --force`。
+
 如果你中途忘了某个功能怎么用，运行：
 
 ```bash
@@ -146,7 +148,7 @@ npx proof-pr@latest check
 
 `check` 会自动选择常见主分支作为 base，并纳入已提交分支 diff、staged、unstaged 和未跟踪新文件。
 
-第一行当前应输出 `0.1.20`，用于确认 npm latest 已经安装正确。
+第一行当前应输出 `0.1.21`，用于确认 npm latest 已经安装正确。
 
 扫描内置案例：
 
@@ -198,7 +200,7 @@ permissions:
 
 steps:
   - uses: actions/checkout@v4
-  - uses: linsk27/proof-pr@v0.1.20
+  - uses: linsk27/proof-pr@v0.1.21
     with:
       fail-on: high
       comment: "true"

@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.20`。
+当前最新公开版本是 `0.1.21`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.20
-git push origin v0.1.20
+git tag v0.1.21
+git push origin v0.1.21
 ```
 
 发布完成后需要检查：
@@ -66,9 +66,17 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.20
-npx proof-pr@latest --version -> 0.1.20
+npm view proof-pr version -> 0.1.21
+npx proof-pr@latest --version -> 0.1.21
 ```
+
+## `v0.1.21` 发布状态
+
+`v0.1.21` 是首轮接入体验增强版，重点包括：
+
+- `proof-pr init` 可以重复执行，已有配置默认保留不覆盖，避免新用户因为文件已存在直接卡住。
+- `proof-pr init` 输出更短，直接给出要提交的文件、本地自查命令和接入体检命令。
+- `proof-pr doctor` 默认自动识别 base 分支，和 `check` 的默认行为保持一致；找不到远程主分支时给出明确处理建议。
 
 ## `v0.1.20` 发布状态
 
@@ -135,7 +143,7 @@ npx proof-pr@latest --version -> 0.1.20
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.20` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.21` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 

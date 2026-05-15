@@ -73,6 +73,12 @@ npx proof-pr@latest init
 
 提交这些文件后，打开或更新 Pull Request，ProofPR 会自动运行。默认结果会出现在 PR 评论、Actions summary、workflow annotations 和 `proofpr-report` artifact。PR 模板会提醒贡献者补充验证、复现、截图、changelog 和权限理由。
 
+这个命令可以重复执行。已有文件默认保留不覆盖；如果想把配置、workflow 和 PR 模板刷新到当前版本模板，再使用：
+
+```bash
+npx proof-pr@latest init --force
+```
+
 如果你的仓库已经接入过 ProofPR，只想单独补 PR 模板：
 
 ```bash
@@ -101,12 +107,12 @@ npx proof-pr@latest doctor
 - `.github/workflows/proofpr.yml` 是否存在。
 - `.github/pull_request_template.md` 是否存在，以及是否提示验证、复现、截图或权限理由。
 - workflow 是否监听 `pull_request`。
-- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.20`。
+- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.21`。
 - 是否具备 `pull-requests: write` 和 `contents: read` 权限。
 - 是否启用了 `html-output` 和 `actions/upload-artifact`，方便下载 HTML 可视化报告。
-- 当前目录是否在 Git 仓库里，以及 `origin/main...HEAD` diff 是否可读。
+- 当前目录是否在 Git 仓库里，以及自动识别出的 base...HEAD diff 是否可读。
 
-如果你的主分支不是 `main`，可以这样指定：
+`doctor` 默认会像 `check` 一样自动选择 `origin/main`、`origin/master`、`upstream/main`、`upstream/master`、`main` 或 `master`。如果你的主分支不是这些名字，可以这样指定：
 
 ```bash
 npx proof-pr@latest doctor --base origin/master

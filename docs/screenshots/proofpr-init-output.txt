@@ -1,17 +1,22 @@
-﻿ProofPR initialized.
+﻿ProofPR 初始化完成。
 
-Created:
-- .proofpr.yml
-- .github/workflows/proofpr.yml
-- .github/pull_request_template.md
+文件:
+[已创建] .proofpr.yml
+[已创建] .github/workflows/proofpr.yml
+[已创建] .github/pull_request_template.md
 
-Next:
-1. Commit these files.
-2. Open or update a pull request.
-3. Read the ProofPR comment, Actions summary, annotations, and proofpr-report.html artifact.
+下一步直接复制:
+git add .proofpr.yml .github/workflows/proofpr.yml .github/pull_request_template.md
+git commit -m "chore: add ProofPR"
 
-Local check:
+打开或更新 Pull Request 后，报告会出现在:
+- PR 评论
+- GitHub Actions summary
+- Workflow annotations
+- proofpr-report.html artifact
+
+本地先自查:
 npx proof-pr@latest check
 
-Need another task?
-npx proof-pr@latest guide
+检查接入是否完整:
+npx proof-pr@latest doctor
