@@ -26,7 +26,7 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 
 - **已可正式试用**：CLI、GitHub Action、npm 包、GitHub Release、中文文档和截图都已经打通。
 - **核心差异点明确**：ProofPR 不做“玄学代码质量判断”，只做确定性 PR 证据门禁，帮助维护者先判断是否值得 review。
-- **发布链路已完善**：npm Trusted Publishing 已绑定 `linsk27/proof-pr` + `release.yml`，下一次 tag 用来验证 GitHub OIDC 自动发布链路。
+- **发布链路已验证**：npm Trusted Publishing 已绑定 `linsk27/proof-pr` + `release.yml`，`v0.1.21` 和 `v0.1.22` 已通过 GitHub OIDC 自动发布到 npm。
 - **下一步增长点**：GitHub Marketplace 上架、更多真实项目案例、更多截图和更丰富 benchmark。
 
 验证你拿到的是最新版本：
