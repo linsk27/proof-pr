@@ -52,11 +52,14 @@ pnpm benchmark:report
 ```txt
 ProofPR benchmark
 
-Summary: 13/13 passed (100%)
+Summary: 22/22 passed (100%)
 
 Categories:
 - dependency: 3/3 passed (100%)
 - evidence-contract: 4/4 passed (100%)
+- supply-chain: 8/8 passed (100%)
 ```
+
+当前 benchmark 包含 `supply-chain` 分类，覆盖非注册表来源、未固定版本、manifest/lockfile 不一致、lockfile-only 变更、解析覆盖、Python direct URL、Rust git/path 和 Go `go.sum` 同步检查。
 
 这个目录的意义是让项目的“准确性”有一个可持续讨论的基准：新增规则时必须补 case，规则误报或漏报时也应该先补 case，再调整实现。

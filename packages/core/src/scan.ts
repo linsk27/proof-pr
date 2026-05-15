@@ -86,6 +86,11 @@ function calculateEvidenceScore(summary: ScanSummary, findings: Finding[]): Evid
       "dependency-added",
       "dependency-major-upgrade",
       "dependency-lifecycle-script",
+      "dependency-non-registry-source",
+      "dependency-unpinned-version",
+      "dependency-lockfile-missing",
+      "dependency-lockfile-only-change",
+      "dependency-resolution-override",
       "workflow-permission-change",
       "workflow-dangerous-trigger",
       "workflow-untrusted-checkout",
@@ -143,6 +148,24 @@ function calculateEvidenceScore(summary: ScanSummary, findings: Finding[]): Evid
         "dependency-lifecycle-script",
         25,
         "Package lifecycle scripts can run during install or publish."
+      );
+    } else if (finding.ruleId === "dependency-non-registry-source") {
+      addDeduction(
+        "dependency-non-registry-source",
+        25,
+        "Dependencies resolved outside the normal registry need provenance review."
+      );
+    } else if (finding.ruleId === "dependency-unpinned-version") {
+      addDeduction("dependency-unpinned-version", 15, "Unpinned dependency versions reduce reproducibility.");
+    } else if (finding.ruleId === "dependency-lockfile-missing") {
+      addDeduction("dependency-lockfile-missing", 15, "Dependency manifest changes need matching lockfile evidence.");
+    } else if (finding.ruleId === "dependency-lockfile-only-change") {
+      addDeduction("dependency-lockfile-only-change", 15, "Lockfile-only changes need package graph review.");
+    } else if (finding.ruleId === "dependency-resolution-override") {
+      addDeduction(
+        "dependency-resolution-override",
+        25,
+        "Dependency resolution overrides can change transitive package selection."
       );
     } else if (finding.ruleId.startsWith("evidence-contract:")) {
       addDeduction(
@@ -240,6 +263,8 @@ function calculateReviewDecision(
       finding.ruleId === "workflow-dangerous-trigger" ||
       (finding.ruleId === "workflow-untrusted-checkout" && finding.severity === "high") ||
       finding.ruleId === "dependency-lifecycle-script" ||
+      finding.ruleId === "dependency-non-registry-source" ||
+      finding.ruleId === "dependency-resolution-override" ||
       finding.ruleId === "mcp-credential-risk"
   );
 
@@ -505,6 +530,66 @@ function reviewActionsForFinding(finding: Finding): ReviewAction[] {
         title: "Review major dependency upgrade impact.",
         detail: "Check changelogs, migration notes, peer dependencies, and whether tests cover the upgraded surface.",
         priority: "medium",
+        relatedRuleIds: [finding.ruleId]
+      }
+    ];
+  }
+
+  if (finding.ruleId === "dependency-non-registry-source") {
+    return [
+      {
+        actionId: "verify-non-registry-dependency-source",
+        title: "Verify non-registry dependency provenance.",
+        detail: "Require a clear reason for git, URL, file, link, or portal dependencies and confirm the source is immutable or policy-approved.",
+        priority: "high",
+        relatedRuleIds: [finding.ruleId]
+      }
+    ];
+  }
+
+  if (finding.ruleId === "dependency-unpinned-version") {
+    return [
+      {
+        actionId: "pin-dependency-version",
+        title: "Ask for a reproducible dependency version.",
+        detail: "Replace latest, wildcard, empty, or overly broad versions with a deliberate version range and matching lockfile evidence.",
+        priority: "medium",
+        relatedRuleIds: [finding.ruleId]
+      }
+    ];
+  }
+
+  if (finding.ruleId === "dependency-lockfile-missing") {
+    return [
+      {
+        actionId: "add-matching-lockfile-update",
+        title: "Ask for the matching lockfile update.",
+        detail: "Dependency manifest changes should include the package manager lockfile or a short explanation for why none is expected.",
+        priority: "medium",
+        relatedRuleIds: [finding.ruleId]
+      }
+    ];
+  }
+
+  if (finding.ruleId === "dependency-lockfile-only-change") {
+    return [
+      {
+        actionId: "explain-lockfile-only-change",
+        title: "Ask why only the lockfile changed.",
+        detail: "Confirm the lockfile was intentionally regenerated and inspect the resolved package graph for unexpected additions or downgrades.",
+        priority: "medium",
+        relatedRuleIds: [finding.ruleId]
+      }
+    ];
+  }
+
+  if (finding.ruleId === "dependency-resolution-override") {
+    return [
+      {
+        actionId: "review-dependency-resolution-override",
+        title: "Review dependency resolution overrides.",
+        detail: "Confirm why transitive dependency resolution is being overridden and whether consumers or CI now resolve a different package graph.",
+        priority: "high",
         relatedRuleIds: [finding.ruleId]
       }
     ];

@@ -22,7 +22,7 @@ npx proof-pr@latest demo --list
 | --- | --- | --- |
 | 高权限 workflow | `npx proof-pr@latest demo workflow --locale zh-CN` | `pull_request_target` + PR head checkout 高风险组合 |
 | 疑似 secret | `npx proof-pr@latest demo secret --locale zh-CN` | API key、数据库连接串、`.env` 敏感路径 |
-| 依赖大版本升级 | `npx proof-pr@latest demo dependency --locale zh-CN` | major upgrade，需要 changelog、迁移说明和验证证据 |
+| 依赖供应链风险 | `npx proof-pr@latest demo dependency --locale zh-CN` | major upgrade、非注册表来源、未固定版本和 lockfile 提示 |
 | MCP 配置风险 | `npx proof-pr@latest demo mcp --locale zh-CN` | `command`、`args`、`env` 和凭据面 |
 | UI 证据要求 | `npx proof-pr@latest demo ui-evidence --locale zh-CN` | Evidence Contract 要求截图和验证说明 |
 
@@ -45,6 +45,14 @@ node packages/cli/dist/index.js scan --diff-file examples/cases/workflow-untrust
 | `examples/cases/dependency-change.diff` | 新增依赖 |
 | `examples/cases/dependency-major-upgrade.diff` | 依赖大版本升级 |
 | `examples/cases/package-lifecycle-script.diff` | 包生命周期脚本 |
+| `examples/cases/supply-chain-npm-non-registry-source.diff` | npm GitHub / git URL 等非注册表依赖来源 |
+| `examples/cases/supply-chain-npm-unpinned-version.diff` | `latest`、`*` 等未固定版本 |
+| `examples/cases/supply-chain-lockfile-missing.diff` | manifest 变更但没有 lockfile |
+| `examples/cases/supply-chain-lockfile-only-change.diff` | lockfile-only 异常变化 |
+| `examples/cases/supply-chain-resolution-override.diff` | `overrides` / `resolutions` 等解析覆盖 |
+| `examples/cases/supply-chain-python-direct-url.diff` | Python direct URL 依赖 |
+| `examples/cases/supply-chain-rust-git-source.diff` | Cargo git/path 依赖 |
+| `examples/cases/supply-chain-go-lockfile-missing.diff` | Go `go.mod` 变更但没有 `go.sum` |
 | `examples/cases/ui-change.diff` | UI 改动，可配合 Evidence Contract |
 
 ## Benchmark
@@ -55,7 +63,7 @@ node packages/cli/dist/index.js scan --diff-file examples/cases/workflow-untrust
 pnpm benchmark
 ```
 
-当前 benchmark 覆盖依赖大版本升级、包生命周期脚本、`pull_request_target`、PR head checkout、MCP 配置、secret、缺少测试和 Evidence Contract。
+当前 benchmark 覆盖依赖大版本升级、供应链规则、包生命周期脚本、`pull_request_target`、PR head checkout、MCP 配置、secret、缺少测试和 Evidence Contract。
 
 ## 这些案例的意义
 

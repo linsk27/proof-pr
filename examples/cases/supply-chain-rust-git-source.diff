@@ -1,0 +1,9 @@
+diff --git a/Cargo.toml b/Cargo.toml
+index 0000000..1111111 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -6,4 +6,5 @@ edition = "2021"
+ 
+ [dependencies]
+ anyhow = "1.0"
++internal-kit = { git = "https://github.com/acme/internal-kit", branch = "main" }

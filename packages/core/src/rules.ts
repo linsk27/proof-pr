@@ -35,6 +35,20 @@ const PACKAGE_JSON_NON_DEPENDENCY_KEYS = new Set([
   "version"
 ]);
 
+const TOML_NON_DEPENDENCY_KEYS = new Set([
+  "authors",
+  "description",
+  "edition",
+  "license",
+  "name",
+  "readme",
+  "repository",
+  "requires-python",
+  "version"
+]);
+
+type DependencyEcosystem = "go" | "npm" | "python" | "rust";
+
 interface ParsedDependencyLine {
   name: string;
   version: string;
@@ -315,6 +329,10 @@ function analyzeDependencyChanges(files: DiffFile[], config: ProofPRConfig): Fin
             "Verify package names, licenses, provenance, and whether the lockfile matches the intended dependency change."
         });
       }
+
+      findings.push(...analyzeNonRegistrySources(file));
+      findings.push(...analyzeUnpinnedDependencyDeclarations(file));
+      findings.push(...analyzeDependencyResolutionOverrides(file));
     }
 
     if (config.dependencies.flagMajorUpgrades) {
@@ -326,11 +344,373 @@ function analyzeDependencyChanges(files: DiffFile[], config: ProofPRConfig): Fin
     }
   }
 
+  if (config.dependencies.flagNewPackages) {
+    findings.push(...analyzeDependencyLockfileConsistency(files));
+  }
+
   return findings;
 }
 
 function isDependencyLikeAddition(path: string, line: string): boolean {
   return parseDependencyLine(path, { value: line }) !== undefined;
+}
+
+function hasDependencyManifestChange(file: DiffFile): boolean {
+  return [...file.addedLines, ...file.removedLines].some((line) => {
+    const value = line.value.trim();
+
+    return (
+      parseDependencyLine(file.path, line) !== undefined ||
+      isNonRegistryDependencyLine(file.path, value) ||
+      isUnpinnedDependencyLine(file.path, value) ||
+      isResolutionOverrideLine(value)
+    );
+  });
+}
+
+function dependencyChangeEvidence(file: DiffFile): string[] {
+  const lines = file.addedLines.filter((line) => {
+    const value = line.value.trim();
+
+    return (
+      parseDependencyLine(file.path, line) !== undefined ||
+      isNonRegistryDependencyLine(file.path, value) ||
+      isUnpinnedDependencyLine(file.path, value) ||
+      isResolutionOverrideLine(value)
+    );
+  });
+
+  return lines.length > 0 ? lines.slice(0, 5).map(formatEvidenceLine) : [`+${file.added} -${file.removed}`];
+}
+
+function isNonRegistryDependencyLine(path: string, line: string): boolean {
+  if (isIgnorableDependencyLine(line)) {
+    return false;
+  }
+
+  if (path.endsWith("package.json")) {
+    const entry = parsePackageJsonStringEntry(line);
+    return Boolean(entry && !PACKAGE_JSON_NON_DEPENDENCY_KEYS.has(entry.key) && isNonRegistryVersion(entry.version));
+  }
+
+  if (path.endsWith("requirements.txt")) {
+    return isPythonDirectUrl(line);
+  }
+
+  if (path.endsWith("pyproject.toml")) {
+    const spec = parseQuotedPythonDependencySpec(line);
+    const assignment = parseTomlStringAssignment(line);
+
+    return (
+      Boolean(spec && isPythonDirectUrl(spec)) ||
+      Boolean(assignment && !TOML_NON_DEPENDENCY_KEYS.has(assignment.key) && isNonRegistryVersion(assignment.value))
+    );
+  }
+
+  if (path.endsWith("Cargo.toml")) {
+    return /\b(?:git|path)\s*=/.test(line);
+  }
+
+  return false;
+}
+
+function isUnpinnedDependencyLine(path: string, line: string): boolean {
+  if (isIgnorableDependencyLine(line) || isNonRegistryDependencyLine(path, line)) {
+    return false;
+  }
+
+  if (path.endsWith("package.json")) {
+    const entry = parsePackageJsonStringEntry(line);
+    return Boolean(entry && !PACKAGE_JSON_NON_DEPENDENCY_KEYS.has(entry.key) && isUnpinnedVersion(entry.version));
+  }
+
+  if (path.endsWith("requirements.txt")) {
+    return isUnpinnedPythonRequirement(line);
+  }
+
+  if (path.endsWith("pyproject.toml")) {
+    const spec = parseQuotedPythonDependencySpec(line);
+    const assignment = parseTomlStringAssignment(line);
+
+    return (
+      Boolean(spec && isUnpinnedPythonRequirement(spec)) ||
+      Boolean(assignment && !TOML_NON_DEPENDENCY_KEYS.has(assignment.key) && isUnpinnedVersion(assignment.value))
+    );
+  }
+
+  if (path.endsWith("Cargo.toml")) {
+    const assignment = parseTomlStringAssignment(line);
+    const key = assignment?.key ?? parseTomlDependencyKey(line);
+    const inlineVersion = /\bversion\s*=\s*"(?<version>[^"]*)"/.exec(line);
+    const version = inlineVersion?.groups?.version ?? assignment?.value;
+
+    return Boolean(key && !TOML_NON_DEPENDENCY_KEYS.has(key) && version && isUnpinnedVersion(version));
+  }
+
+  return false;
+}
+
+function isResolutionOverrideLine(line: string): boolean {
+  return /^"(?:overrides|resolutions)"\s*:/.test(line) || /^"pnpm"\s*:\s*\{.*"overrides"\s*:/.test(line);
+}
+
+function isNonRegistryVersion(version: string): boolean {
+  return /^(?:git\+|github:|https?:|file:|link:|portal:)/i.test(version.trim());
+}
+
+function isUnpinnedVersion(version: string): boolean {
+  const normalized = version.trim().toLowerCase();
+
+  return (
+    normalized === "" ||
+    normalized === "*" ||
+    normalized === "latest" ||
+    normalized === "x" ||
+    normalized === ">=0" ||
+    normalized === ">=0.0.0" ||
+    normalized === ">0" ||
+    normalized === ">0.0.0"
+  );
+}
+
+function isUnpinnedPythonRequirement(line: string): boolean {
+  const value = stripInlineComment(line).trim();
+
+  if (!value || isPythonDirectUrl(value) || /^(?:-r|--requirement|-c|--constraint)\b/.test(value)) {
+    return false;
+  }
+
+  const nameOnly = /^[A-Za-z0-9_.-]+(?:\[.*\])?$/.test(value);
+
+  if (nameOnly) {
+    return true;
+  }
+
+  const match =
+    /^[A-Za-z0-9_.-]+(?:\[.*\])?\s*(?<operator>==|>=|<=|~=|>|<|!=)\s*(?<version>[^#\s]+)/.exec(value);
+
+  return Boolean(match?.groups?.version && isUnpinnedVersion(match.groups.version));
+}
+
+function isPythonDirectUrl(line: string): boolean {
+  const value = stripInlineComment(line).trim();
+
+  return (
+    /^(?:git\+|https?:\/\/|file:)/i.test(value) ||
+    /^[A-Za-z0-9_.-]+(?:\[.*\])?\s*@\s*(?:git\+|https?:\/\/|file:)/i.test(value)
+  );
+}
+
+function parsePackageJsonStringEntry(line: string): { key: string; version: string } | undefined {
+  const match = /^"(?<key>[@A-Za-z0-9_./-]+)"\s*:\s*"(?<version>[^"]*)"/.exec(line);
+
+  return match?.groups?.key !== undefined && match.groups.version !== undefined
+    ? { key: match.groups.key, version: match.groups.version }
+    : undefined;
+}
+
+function parseTomlStringAssignment(line: string): { key: string; value: string } | undefined {
+  const match = /^(?<key>[A-Za-z0-9_.-]+)\s*=\s*"(?<value>[^"]*)"/.exec(line);
+
+  return match?.groups?.key !== undefined && match.groups.value !== undefined
+    ? { key: match.groups.key, value: match.groups.value }
+    : undefined;
+}
+
+function parseTomlDependencyKey(line: string): string | undefined {
+  const match = /^(?<key>[A-Za-z0-9_.-]+)\s*=/.exec(line);
+
+  return match?.groups?.key;
+}
+
+function parseQuotedPythonDependencySpec(line: string): string | undefined {
+  const match = /^"(?<spec>[^"]+)"\s*,?$/.exec(line);
+
+  return match?.groups?.spec;
+}
+
+function stripInlineComment(line: string): string {
+  return line.replace(/\s+#.*$/, "");
+}
+
+function isIgnorableDependencyLine(line: string): boolean {
+  const value = line.trim();
+
+  return value === "" || value.startsWith("#") || value.startsWith("//");
+}
+
+function ecosystemForLockfileCheckedManifest(path: string): DependencyEcosystem | undefined {
+  if (path.endsWith("package.json")) {
+    return "npm";
+  }
+
+  if (path.endsWith("Cargo.toml")) {
+    return "rust";
+  }
+
+  if (path.endsWith("go.mod")) {
+    return "go";
+  }
+
+  return undefined;
+}
+
+function ecosystemForDependencyLockfile(path: string): DependencyEcosystem | undefined {
+  if (
+    path.endsWith("package-lock.json") ||
+    path.endsWith("pnpm-lock.yaml") ||
+    path.endsWith("yarn.lock") ||
+    path.endsWith("bun.lockb")
+  ) {
+    return "npm";
+  }
+
+  if (path.endsWith("Cargo.lock")) {
+    return "rust";
+  }
+
+  if (path.endsWith("go.sum")) {
+    return "go";
+  }
+
+  return undefined;
+}
+
+function analyzeNonRegistrySources(file: DiffFile): Finding[] {
+  const sourceLines = file.addedLines.filter((line) =>
+    isNonRegistryDependencyLine(file.path, line.value.trim())
+  );
+
+  if (sourceLines.length === 0) {
+    return [];
+  }
+
+  return [
+    {
+      ruleId: "dependency-non-registry-source",
+      title: "Dependency uses a non-registry source",
+      message: `${file.path} adds dependency entries that resolve outside the normal package registry.`,
+      severity: "high",
+      path: file.path,
+      evidence: sourceLines.slice(0, 5).map(formatEvidenceLine),
+      recommendation:
+        "Require an explicit provenance explanation and verify that the source is pinned to an immutable commit, tag, or internal policy-approved path."
+    }
+  ];
+}
+
+function analyzeUnpinnedDependencyDeclarations(file: DiffFile): Finding[] {
+  const unpinnedLines = file.addedLines.filter((line) =>
+    isUnpinnedDependencyLine(file.path, line.value.trim())
+  );
+
+  if (unpinnedLines.length === 0) {
+    return [];
+  }
+
+  return [
+    {
+      ruleId: "dependency-unpinned-version",
+      title: "Dependency version is not reproducibly pinned",
+      message: `${file.path} adds dependency entries with latest, wildcard, empty, or overly broad versions.`,
+      severity: "medium",
+      path: file.path,
+      evidence: unpinnedLines.slice(0, 5).map(formatEvidenceLine),
+      recommendation:
+        "Pin the dependency to a deliberate version range and include the matching lockfile update, or explain why a broad range is required."
+    }
+  ];
+}
+
+function analyzeDependencyResolutionOverrides(file: DiffFile): Finding[] {
+  if (!file.path.endsWith("package.json")) {
+    return [];
+  }
+
+  const overrideLines = file.addedLines.filter((line) => isResolutionOverrideLine(line.value.trim()));
+
+  if (overrideLines.length === 0) {
+    return [];
+  }
+
+  return [
+    {
+      ruleId: "dependency-resolution-override",
+      title: "Dependency resolution override changed",
+      message: `${file.path} adds npm overrides, Yarn resolutions, or pnpm override configuration.`,
+      severity: "high",
+      path: file.path,
+      evidence: overrideLines.slice(0, 5).map(formatEvidenceLine),
+      recommendation:
+        "Review why transitive dependency resolution is being overridden and confirm the lockfile reflects the intended package graph."
+    }
+  ];
+}
+
+function analyzeDependencyLockfileConsistency(files: DiffFile[]): Finding[] {
+  const findings: Finding[] = [];
+  const changedLockfileEcosystems = new Set<DependencyEcosystem>();
+  const changedManifestEcosystems = new Set<DependencyEcosystem>();
+  const manifestDependencyFiles = files.filter(
+    (file) => ecosystemForLockfileCheckedManifest(file.path) && hasDependencyManifestChange(file)
+  );
+  const lockfileFiles = files.filter((file) => ecosystemForDependencyLockfile(file.path));
+
+  for (const file of lockfileFiles) {
+    const ecosystem = ecosystemForDependencyLockfile(file.path);
+
+    if (ecosystem) {
+      changedLockfileEcosystems.add(ecosystem);
+    }
+  }
+
+  for (const file of manifestDependencyFiles) {
+    const ecosystem = ecosystemForLockfileCheckedManifest(file.path);
+
+    if (ecosystem) {
+      changedManifestEcosystems.add(ecosystem);
+    }
+  }
+
+  for (const file of manifestDependencyFiles) {
+    const ecosystem = ecosystemForLockfileCheckedManifest(file.path);
+
+    if (!ecosystem || changedLockfileEcosystems.has(ecosystem)) {
+      continue;
+    }
+
+    findings.push({
+      ruleId: "dependency-lockfile-missing",
+      title: "Dependency manifest changed without lockfile",
+      message: `${file.path} changes dependency declarations, but no ${ecosystem} lockfile changed in the diff.`,
+      severity: "medium",
+      path: file.path,
+      evidence: dependencyChangeEvidence(file),
+      recommendation:
+        "Commit the matching lockfile update, or explain why this ecosystem intentionally does not track a lockfile."
+    });
+  }
+
+  for (const file of lockfileFiles) {
+    const ecosystem = ecosystemForDependencyLockfile(file.path);
+
+    if (!ecosystem || changedManifestEcosystems.has(ecosystem)) {
+      continue;
+    }
+
+    findings.push({
+      ruleId: "dependency-lockfile-only-change",
+      title: "Lockfile changed without manifest change",
+      message: `${file.path} changed, but no corresponding ${ecosystem} dependency manifest changed in the diff.`,
+      severity: "medium",
+      path: file.path,
+      evidence: [`+${file.added} -${file.removed}`],
+      recommendation:
+        "Ask why the lockfile was regenerated or modified and verify that no unintended package graph change was introduced."
+    });
+  }
+
+  return findings;
 }
 
 function analyzeMajorDependencyUpgrades(file: DiffFile): Finding[] {
@@ -407,27 +787,21 @@ function parseDependencyLine(path: string, line: ChangeLine): ParsedDependencyLi
   const value = line.value.trim();
 
   if (path.endsWith("package.json")) {
-    const match = /^"(?<key>[@A-Za-z0-9_.-]+)"\s*:\s*"(?<version>[^"]*)"/.exec(value);
+    const entry = parsePackageJsonStringEntry(value);
 
-    if (!match?.groups) {
-      return undefined;
-    }
-
-    const { key, version } = match.groups;
-
-    if (!key || !version || PACKAGE_JSON_NON_DEPENDENCY_KEYS.has(key)) {
+    if (!entry || !entry.version || PACKAGE_JSON_NON_DEPENDENCY_KEYS.has(entry.key)) {
       return undefined;
     }
 
     if (
       !/^(?:\^|~|>=?|<=?|\d|workspace:|npm:|file:|link:|portal:|git\+|https?:|github:)/.test(
-        version
+        entry.version
       )
     ) {
       return undefined;
     }
 
-    return { name: key, version, line };
+    return { name: entry.key, version: entry.version, line };
   }
 
   if (path.endsWith("requirements.txt")) {
@@ -441,6 +815,12 @@ function parseDependencyLine(path: string, line: ChangeLine): ParsedDependencyLi
   }
 
   if (path.endsWith("pyproject.toml") || path.endsWith("Cargo.toml")) {
+    const assignment = parseTomlStringAssignment(value);
+
+    if (assignment && TOML_NON_DEPENDENCY_KEYS.has(assignment.key)) {
+      return undefined;
+    }
+
     const match =
       /^(?<name>[A-Za-z0-9_.-]+)\s*=\s*"(?<version>(?:\^|~|>=?|<=?|\d|workspace:|path\s*=|git\s*=)[^"]*)"/.exec(
         value

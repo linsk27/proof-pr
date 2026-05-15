@@ -158,7 +158,7 @@ SARIF 主要给 GitHub Code Scanning 或其他安全平台读取。完整接入�
 npx proof-pr@latest demo workflow --locale zh-CN
 ```
 
-这个命令不需要修改你的项目，也不需要 examples 文件，适合快速理解 ProofPR 会如何判断 workflow、依赖、secret、测试证据这些风险。
+这个命令不需要修改你的项目，也不需要 examples 文件，适合快速理解 ProofPR 会如何判断 workflow、供应链依赖、secret、测试证据这些风险。依赖案例会展示大版本升级、非注册表来源、未固定版本和 lockfile 提示。
 
 ## 8. 跑 benchmark
 
@@ -188,6 +188,6 @@ comment:
 | --- | --- |
 | `open-source-maintainer` | 开源仓库默认推荐 |
 | `security-strict` | 安全敏感项目 |
-| `dependency-careful` | 特别关注依赖和 lockfile |
+| `dependency-careful` | 特别关注依赖、lockfile 和供应链来源 |
 | `mcp-security` | 特别关注 MCP / agent 配置 |
 | `ai-generated-pr` | AI 生成 PR 较多的仓库 |

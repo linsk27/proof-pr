@@ -1,0 +1,11 @@
+{
+  "id": "supply-chain-rust-git-source",
+  "title": "Rust git/path dependencies should be treated as non-registry sources",
+  "category": "supply-chain",
+  "diffFile": "../../examples/cases/supply-chain-rust-git-source.diff",
+  "expect": {
+    "risk": "high",
+    "reviewDecision": "block-merge",
+    "findings": ["dependency-non-registry-source"]
+  }
+}

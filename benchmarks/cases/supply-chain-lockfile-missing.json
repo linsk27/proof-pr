@@ -1,0 +1,11 @@
+{
+  "id": "supply-chain-lockfile-missing",
+  "title": "Dependency manifests should move with lockfiles",
+  "category": "supply-chain",
+  "diffFile": "../../examples/cases/supply-chain-lockfile-missing.diff",
+  "expect": {
+    "risk": "high",
+    "reviewDecision": "block-merge",
+    "findings": ["dependency-lockfile-missing"]
+  }
+}

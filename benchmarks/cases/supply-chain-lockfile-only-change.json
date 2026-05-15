@@ -1,0 +1,11 @@
+{
+  "id": "supply-chain-lockfile-only-change",
+  "title": "Lockfile-only changes should be reviewed as package graph changes",
+  "category": "supply-chain",
+  "diffFile": "../../examples/cases/supply-chain-lockfile-only-change.diff",
+  "expect": {
+    "risk": "high",
+    "reviewDecision": "block-merge",
+    "findings": ["dependency-lockfile-only-change"]
+  }
+}

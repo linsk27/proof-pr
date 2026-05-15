@@ -383,6 +383,129 @@ index 0000000..1111111 100644
     ).toBe(true);
   });
 
+  it("flags non-registry dependency sources", () => {
+    const result = scanDiff(`diff --git a/package.json b/package.json
+index 0000000..1111111 100644
+--- a/package.json
++++ b/package.json
+@@ -1,4 +1,5 @@
+ {
+   "dependencies": {
++    "internal-kit": "github:acme/internal-kit"
+   }
+ }
+`);
+
+    expect(result.risk).toBe("high");
+    expect(result.reviewDecision).toBe("block-merge");
+    expect(result.findings.some((finding) => finding.ruleId === "dependency-non-registry-source")).toBe(true);
+    expect(
+      result.reviewPlan.actionItems.some(
+        (action) => action.actionId === "verify-non-registry-dependency-source"
+      )
+    ).toBe(true);
+  });
+
+  it("flags unpinned dependency versions", () => {
+    const result = scanDiff(`diff --git a/package.json b/package.json
+index 0000000..1111111 100644
+--- a/package.json
++++ b/package.json
+@@ -1,4 +1,6 @@
+ {
+   "dependencies": {
++    "left-pad": "latest",
++    "right-pad": "*"
+   }
+ }
+`);
+
+    expect(result.findings.some((finding) => finding.ruleId === "dependency-unpinned-version")).toBe(true);
+  });
+
+  it("flags manifest dependency changes without a matching lockfile", () => {
+    const result = scanDiff(`diff --git a/package.json b/package.json
+index 0000000..1111111 100644
+--- a/package.json
++++ b/package.json
+@@ -1,4 +1,5 @@
+ {
+   "dependencies": {
++    "left-pad": "^1.3.0"
+   }
+ }
+`);
+
+    expect(result.findings.some((finding) => finding.ruleId === "dependency-lockfile-missing")).toBe(true);
+  });
+
+  it("flags lockfile-only dependency graph changes", () => {
+    const result = scanDiff(`diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
+index 0000000..1111111 100644
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -1,2 +1,5 @@
+ lockfileVersion: '9.0'
++packages:
++  left-pad@1.3.0:
++    resolution: {integrity: sha512-demo}
+`);
+
+    expect(result.findings.some((finding) => finding.ruleId === "dependency-lockfile-only-change")).toBe(true);
+    expect(
+      result.reviewPlan.actionItems.some((action) => action.actionId === "explain-lockfile-only-change")
+    ).toBe(true);
+  });
+
+  it("flags dependency resolution overrides", () => {
+    const result = scanDiff(`diff --git a/package.json b/package.json
+index 0000000..1111111 100644
+--- a/package.json
++++ b/package.json
+@@ -1,4 +1,7 @@
+ {
++  "overrides": {
++    "ansi-regex": "6.0.1"
++  },
+   "dependencies": {
+   }
+ }
+`);
+
+    expect(result.findings.some((finding) => finding.ruleId === "dependency-resolution-override")).toBe(true);
+    expect(
+      result.reviewPlan.actionItems.some(
+        (action) => action.actionId === "review-dependency-resolution-override"
+      )
+    ).toBe(true);
+  });
+
+  it("does not flag missing lockfile when manifest and lockfile move together", () => {
+    const result = scanDiff(`diff --git a/package.json b/package.json
+index 0000000..1111111 100644
+--- a/package.json
++++ b/package.json
+@@ -1,4 +1,5 @@
+ {
+   "dependencies": {
++    "left-pad": "^1.3.0"
+   }
+ }
+diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
+index 0000000..1111111 100644
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -1,2 +1,5 @@
+ lockfileVersion: '9.0'
++packages:
++  left-pad@1.3.0:
++    resolution: {integrity: sha512-demo}
+`);
+
+    expect(result.findings.some((finding) => finding.ruleId === "dependency-lockfile-missing")).toBe(false);
+    expect(result.findings.some((finding) => finding.ruleId === "dependency-lockfile-only-change")).toBe(false);
+  });
+
   it("flags pull_request_target workflow triggers", () => {
     const result = scanDiff(`diff --git a/.github/workflows/pr.yml b/.github/workflows/pr.yml
 index 0000000..1111111 100644
@@ -514,5 +637,24 @@ index 0000000..1111111
     };
 
     expect(sarif.runs[0]?.results[0]?.locations?.[0]?.physicalLocation.artifactLocation.uri).toBe(".env");
+  });
+
+  it("renders new supply-chain rule ids in SARIF", () => {
+    const result = scanDiff(`diff --git a/package.json b/package.json
+index 0000000..1111111 100644
+--- a/package.json
++++ b/package.json
+@@ -1,4 +1,5 @@
+ {
+   "dependencies": {
++    "internal-kit": "github:acme/internal-kit"
+   }
+ }
+`);
+    const sarif = JSON.parse(renderSarifReport(result)) as {
+      runs: Array<{ results: Array<{ ruleId: string }> }>;
+    };
+
+    expect(sarif.runs[0]?.results.some((item) => item.ruleId === "dependency-non-registry-source")).toBe(true);
   });
 });

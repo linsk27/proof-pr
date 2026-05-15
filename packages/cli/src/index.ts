@@ -203,17 +203,19 @@ index 0000000..1111111
   },
   {
     id: "dependency",
-    title: "依赖大版本升级",
-    description: "演示依赖 major upgrade 需要 changelog、迁移说明和验证证据。",
+    title: "依赖供应链风险",
+    description: "演示依赖大版本升级、非注册表来源、未固定版本和缺少 lockfile 的组合风险。",
     diffText: `diff --git a/package.json b/package.json
 index 1111111..2222222 100644
 --- a/package.json
 +++ b/package.json
-@@ -1,8 +1,8 @@
+@@ -1,8 +1,10 @@
  {
    "dependencies": {
 -    "react": "^18.2.0",
 +    "react": "^19.0.0",
++    "internal-kit": "github:acme/internal-kit",
++    "left-pad": "latest",
      "zod": "^3.25.1"
    },
    "devDependencies": {

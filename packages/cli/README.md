@@ -101,7 +101,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 - `security-strict`：安全敏感项目。
 - `ai-generated-pr`：AI 生成 PR 较多的仓库。
 - `mcp-security`：关注 MCP / agent 配置。
-- `dependency-careful`：关注依赖和锁文件变化。
+- `dependency-careful`：关注依赖、锁文件和供应链变化。
 
 完整中文文档、截图和从 0 到 1 教程见仓库 README：
 

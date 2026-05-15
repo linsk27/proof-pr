@@ -1,0 +1,11 @@
+{
+  "id": "supply-chain-npm-non-registry-source",
+  "title": "Non-registry npm dependency sources should block until provenance is explained",
+  "category": "supply-chain",
+  "diffFile": "../../examples/cases/supply-chain-npm-non-registry-source.diff",
+  "expect": {
+    "risk": "high",
+    "reviewDecision": "block-merge",
+    "findings": ["dependency-non-registry-source"]
+  }
+}

@@ -21,20 +21,20 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 - Demo：无需 clone 仓库即可运行内置案例，适合首次体验和文档传播。
 - PR 模板：`init` 默认生成模板，`template` 可单独补模板，帮助贡献者提前提供证据。
 - 可交互 HTML 报告：支持风险筛选、搜索 finding、折叠详情和复制补证清单。
-- npm 发布自动化：Release workflow 已改为 npm Trusted Publishing / GitHub OIDC 优先，`NPM_TOKEN` 只作为兜底。
+- npm 发布自动化：npm Trusted Publishing 已绑定 `linsk27/proof-pr` + `release.yml`，Release workflow 使用 GitHub OIDC 发布。
 - Marketplace 准备：补充 action branding、安装说明和上架文案。
-- 内置规则：改动规模、敏感路径、缺少测试、PR 描述、复现上下文、secret、依赖、大版本升级、包生命周期脚本、workflow 权限、`pull_request_target`、PR head checkout、MCP 配置。
+- 内置规则：改动规模、敏感路径、缺少测试、PR 描述、复现上下文、secret、依赖、大版本升级、非注册表依赖来源、未固定版本、lockfile 一致性、解析覆盖、包生命周期脚本、workflow 权限、`pull_request_target`、PR head checkout、MCP 配置。
 
 ## 短期方向
 
 1. GitHub Marketplace 上架
    代码侧材料已准备好，下一步需要仓库所有者在 GitHub 网页上确认发布。
 
-2. npm Trusted Publishing 网页配置
-   在 npm 包设置中添加 GitHub Actions trusted publisher：仓库 `linsk27/proof-pr`，workflow file `release.yml`。配置后用下一个 tag 验证 npm 自动发布。
+2. npm Trusted Publishing 自动发布验证
+   Trusted Publisher 已配置完成。下一次正常发 tag 时验证 GitHub Release workflow 是否能通过 OIDC 自动发布 npm，不再走本地 token 发布。
 
 3. 真实截图刷新
-   用 `v0.1.17` 的 annotations / SARIF 能力重新跑一个 demo PR，补充新版效果图。
+   用供应链增强规则重新跑一个 demo PR，补充新版依赖风险、HTML 报告和 benchmark 效果图。
 
 4. 真实项目样例扩展
    继续补充 React、Python、Go、Rust 等不同生态的真实 diff 示例，让用户能更快理解规则价值。
@@ -42,7 +42,7 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 ## 中期方向
 
 1. Benchmark 扩充
-   继续补充真实/模拟 PR 样本，标注预期 finding、误报和漏报原因。
+   当前已覆盖 22 个样本和 `supply-chain` 分类。后续继续补充真实/模拟 PR 样本，标注预期 finding、误报和漏报原因。
 
 2. Issue 质量检查
    扫描 issue 是否包含复现步骤、环境信息、预期/实际结果。
@@ -62,4 +62,4 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 
 ## 下一版优先级
 
-下一步优先用真实 demo PR 更新截图和 Marketplace 页面。代码能力已经比 MVP 更完整，后续重点应该转向传播、案例和低门槛安装体验。
+下一步优先验证 `0.1.18` 的自动 npm 发布链路，并用供应链增强规则更新真实 demo PR 截图和 Marketplace 页面。

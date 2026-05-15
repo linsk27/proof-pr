@@ -1,0 +1,11 @@
+{
+  "id": "supply-chain-npm-unpinned-version",
+  "title": "Unpinned npm dependency versions should be visible",
+  "category": "supply-chain",
+  "diffFile": "../../examples/cases/supply-chain-npm-unpinned-version.diff",
+  "expect": {
+    "risk": "high",
+    "reviewDecision": "block-merge",
+    "findings": ["dependency-unpinned-version"]
+  }
+}

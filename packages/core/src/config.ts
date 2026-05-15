@@ -40,16 +40,27 @@ const DEFAULT_SENSITIVE_PATHS = [
   "Dockerfile",
   "**/Dockerfile",
   "package.json",
+  "**/package.json",
   "pnpm-lock.yaml",
+  "**/pnpm-lock.yaml",
   "package-lock.json",
+  "**/package-lock.json",
   "yarn.lock",
+  "**/yarn.lock",
   "bun.lockb",
+  "**/bun.lockb",
   "requirements.txt",
+  "**/requirements.txt",
   "pyproject.toml",
+  "**/pyproject.toml",
   "Cargo.toml",
+  "**/Cargo.toml",
   "Cargo.lock",
+  "**/Cargo.lock",
   "go.mod",
-  "go.sum"
+  "**/go.mod",
+  "go.sum",
+  "**/go.sum"
 ];
 
 const DEFAULT_TEST_PATHS = ["src/**", "packages/**/src/**", "app/**", "lib/**"];
@@ -152,13 +163,23 @@ const PRESET_DEFAULTS: Record<ConfigPreset, ConfigPresetDefaults> = {
     sensitivePaths: [
       ...DEFAULT_SENSITIVE_PATHS,
       "poetry.lock",
+      "**/poetry.lock",
+      "uv.lock",
+      "**/uv.lock",
       "Pipfile",
+      "**/Pipfile",
       "Pipfile.lock",
+      "**/Pipfile.lock",
       "pom.xml",
+      "**/pom.xml",
       "build.gradle",
+      "**/build.gradle",
       "build.gradle.kts",
+      "**/build.gradle.kts",
       "Gemfile",
-      "Gemfile.lock"
+      "**/Gemfile",
+      "Gemfile.lock",
+      "**/Gemfile.lock"
     ],
     requireTests: {
       enabled: true,

@@ -58,6 +58,36 @@ evidence:
 
 标记 `package.json` 中新增或修改 `preinstall`、`install`、`postinstall`、`prepare`、`prepublish`、`prepublishOnly` 等包生命周期脚本。它们可能在安装或发布阶段自动执行代码，是供应链风险里很值得维护者提前看的信号。
 
+## `dependency-non-registry-source`
+
+标记不通过普通包注册表解析的依赖来源，例如 npm 的 `git+`、`github:`、`http(s):`、`file:`、`link:`、`portal:`，Python direct URL，以及 Cargo `git` / `path` 依赖。
+
+这类依赖不是一定有问题，但维护者应该确认来源、权限边界和是否固定到不可变 commit 或版本。
+
+## `dependency-unpinned-version`
+
+标记 `latest`、`*`、空版本、`>=0` 等不可复现或过宽的版本声明。它不会把正常的 `^1.2.3` 或 `~1.2.3` 直接当成问题，目标是先抓明显会让依赖解析不稳定的写法。
+
+## `dependency-lockfile-missing`
+
+当依赖 manifest 发生变化，但同生态 lockfile 没有同步出现在 diff 中时触发。
+
+当前会检查：
+
+- npm：`package.json` 对应 `package-lock.json`、`pnpm-lock.yaml`、`yarn.lock`、`bun.lockb`。
+- Rust：`Cargo.toml` 对应 `Cargo.lock`。
+- Go：`go.mod` 对应 `go.sum`。
+
+Python 的 `requirements.txt` 和 `pyproject.toml` 仍会参与依赖来源、版本和敏感路径检查，但本轮不强制要求某一种 Python lockfile。
+
+## `dependency-lockfile-only-change`
+
+当 lockfile 变化但没有对应 manifest 依赖变化时触发。常见原因可能是重新安装、包管理器版本变化或传递依赖解析变化。ProofPR 不直接判断对错，只提醒维护者核查 package graph 是否符合预期。
+
+## `dependency-resolution-override`
+
+标记 npm `overrides`、Yarn `resolutions` 和 pnpm overrides 相关改动。解析覆盖会改变传递依赖选择，容易影响运行时行为和供应链边界，应该要求贡献者说明原因并确认 lockfile。
+
 ## `workflow-permission-change`
 
 标记 GitHub Actions 写权限或 OIDC 权限变化，例如 `permissions: write-all`、`contents: write`、`packages: write`、`id-token: write` 或 `pull-requests: write`。只读权限如 `contents: read` 不会被当成权限升级。

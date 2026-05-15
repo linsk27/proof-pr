@@ -118,6 +118,11 @@ preset: open-source-maintainer
 - `dependency-added`：检查依赖清单中的新增依赖或依赖变化。
 - `dependency-major-upgrade`：检查依赖是否跨越大版本边界。
 - `dependency-lifecycle-script`：检查 `package.json` 中安装或发布阶段会自动执行的包生命周期脚本。
+- `dependency-non-registry-source`：检查 git、GitHub、URL、file/link/portal、Python direct URL、Cargo git/path 等非普通注册表来源。
+- `dependency-unpinned-version`：检查 `latest`、`*`、空版本、`>=0` 等不可复现依赖声明。
+- `dependency-lockfile-missing`：检查 npm / Rust / Go manifest 变更是否缺少对应 lockfile。
+- `dependency-lockfile-only-change`：检查 lockfile 变化是否没有对应 manifest 依赖变化。
+- `dependency-resolution-override`：检查 npm `overrides`、Yarn `resolutions`、pnpm overrides。
 - `workflow-permission-change`：检查 GitHub Actions 是否新增写权限或 OIDC 权限。
 - `workflow-dangerous-trigger`：检查是否新增 `pull_request_target` 这类高权限 PR 触发器。
 - `workflow-untrusted-checkout`：检查 workflow 是否 checkout PR head 代码，尤其是和 `pull_request_target` 同时出现时。
@@ -128,7 +133,7 @@ preset: open-source-maintainer
 - 变更文件数大于等于 10，或变更行数大于等于 250：触发 `medium`。
 - 变更文件数大于等于 20，或变更行数大于等于 800：触发 `high`。
 
-敏感路径、依赖、workflow 权限、PR head checkout、MCP 和 secret 规则会基于路径、added line、正则和 glob 做确定性匹配。它们不调用大模型，也不会猜测作者是谁。
+敏感路径、依赖、workflow 权限、PR head checkout、MCP 和 secret 规则会基于路径、added line、正则和 glob 做确定性匹配。它们不调用大模型，也不会查询在线漏洞库；依赖漏洞信息应继续交给 GitHub dependency-review、OSV、Snyk 等专门工具。
 
 ## Evidence Contract
 
@@ -184,6 +189,10 @@ ProofPR 会从 100 分开始，根据缺失的证据和触发的规则扣分：
 - 依赖清单变更：扣 10 分。
 - 依赖大版本升级：扣 15 分。
 - 包生命周期脚本风险：扣 25 分。
+- 非注册表依赖来源：扣 25 分。
+- 未固定依赖版本：扣 15 分。
+- manifest/lockfile 不一致：扣 15 分。
+- 依赖解析覆盖：扣 25 分。
 - workflow 权限或 MCP 配置风险：扣 25 分。
 - `pull_request_target` 高权限触发器：扣 30 分。
 - Evidence Contract 未满足：扣 15-25 分。

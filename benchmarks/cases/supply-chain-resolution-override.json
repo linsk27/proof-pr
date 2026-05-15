@@ -1,0 +1,11 @@
+{
+  "id": "supply-chain-resolution-override",
+  "title": "Dependency resolution overrides should get focused review",
+  "category": "supply-chain",
+  "diffFile": "../../examples/cases/supply-chain-resolution-override.diff",
+  "expect": {
+    "risk": "high",
+    "reviewDecision": "block-merge",
+    "findings": ["dependency-resolution-override"]
+  }
+}

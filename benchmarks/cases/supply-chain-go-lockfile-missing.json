@@ -1,0 +1,11 @@
+{
+  "id": "supply-chain-go-lockfile-missing",
+  "title": "Go module changes should move with go.sum",
+  "category": "supply-chain",
+  "diffFile": "../../examples/cases/supply-chain-go-lockfile-missing.diff",
+  "expect": {
+    "risk": "high",
+    "reviewDecision": "block-merge",
+    "findings": ["dependency-lockfile-missing"]
+  }
+}

@@ -16,7 +16,7 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 - GitHub Release：[`v0.1.17`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.17)
 - npm：[`proof-pr@0.1.17`](https://www.npmjs.com/package/proof-pr)
 - GitHub Action：`linsk27/proof-pr@v0.1.17`
-- 当前 benchmark：`14/14 passed`
+- 当前源码 benchmark：`22/22 passed`
 - 接入体检：`npx proof-pr@latest doctor`
 - PR 模板：`npx proof-pr@latest template`
 - 可视化报告：`--format html` / `html-output`，支持筛选风险和复制补证清单
@@ -26,8 +26,7 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 
 - **已可正式试用**：CLI、GitHub Action、npm 包、GitHub Release、中文文档和截图都已经打通。
 - **核心差异点明确**：ProofPR 不做“玄学代码质量判断”，只做确定性 PR 证据门禁，帮助维护者先判断是否值得 review。
-- **发布链路已完善**：Release workflow 已改为 npm Trusted Publishing / GitHub OIDC 优先，`NPM_TOKEN` 只作为兜底。
-- **还差一次网页配置**：npm 包需要在 npm 网站配置 trusted publisher，之后推 tag 才能自动发 npm，不再需要本地粘贴 token。
+- **发布链路已完善**：npm Trusted Publishing 已绑定 `linsk27/proof-pr` + `release.yml`，下一次 tag 用来验证 GitHub OIDC 自动发布链路。
 - **下一步增长点**：GitHub Marketplace 上架、更多真实项目案例、更多截图和更丰富 benchmark。
 
 验证你拿到的是最新版本：
@@ -69,7 +68,7 @@ npx proof-pr@latest guide
 | PR 描述很薄，只写了 fixed bug。 | 判断描述质量，要求补充动机、复现、验证和影响。 |
 | 改了代码但没有测试，也没有手动验证说明。 | 输出 `needs-evidence`，让维护者先要证据再深度 review。 |
 | 改了 `.github/workflows/**`、依赖、`.env`、MCP 配置。 | 把敏感文件列出来，给出重点 review 清单。 |
-| 新增依赖、大版本升级、`postinstall` 脚本。 | 提醒核查供应链风险、changelog、迁移说明和 lockfile。 |
+| 新增依赖、大版本升级、非注册表来源、未固定版本、`postinstall` 脚本。 | 提醒核查供应链来源、changelog、迁移说明、解析覆盖和 lockfile 是否同步。 |
 | 使用 `pull_request_target` 并 checkout PR head。 | 标记为高风险组合，避免高权限上下文运行不可信 PR 代码。 |
 | 团队想要求 UI 改动必须有截图。 | 用 Evidence Contract 声明路径级证据要求。 |
 | 想把扫描结果做成可分享页面。 | 输出可搜索、可筛选、可复制补证清单的独立 HTML 风险面板。 |
@@ -196,7 +195,7 @@ Benchmark 输出，证明规则样本仍按预期命中：
 | Evidence Contract | 命中仓库自定义路径，但缺少要求的截图、验证、changelog 或权限理由。 |
 | 敏感路径 | `.github/workflows/**`、`.env*`、依赖文件、Dockerfile、MCP 配置等。 |
 | secrets | 常见 API key、token、数据库连接串。 |
-| 依赖变化 | 新增依赖、依赖大版本升级、lockfile 风险。 |
+| 依赖变化 | 新增依赖、大版本升级、非注册表来源、未固定版本、manifest/lockfile 不一致、lockfile-only 变更、解析覆盖。 |
 | 包生命周期脚本 | `preinstall`、`install`、`postinstall`、`prepare` 等。 |
 | GitHub Actions 风险 | 写权限、OIDC、`pull_request_target`、PR head checkout 高风险组合。 |
 | MCP 风险 | `command`、`args`、`env`、token、secret、password 等配置。 |
@@ -291,7 +290,7 @@ evidence:
 | `security-strict` | 安全敏感项目。 |
 | `ai-generated-pr` | AI 生成 PR 较多的仓库。 |
 | `mcp-security` | 关注 MCP、Cursor、VS Code、本地 agent 配置。 |
-| `dependency-careful` | 关注依赖和锁文件变化。 |
+| `dependency-careful` | 关注依赖清单、锁文件、多语言包管理配置和供应链风险。 |
 
 ## 准确性边界
 

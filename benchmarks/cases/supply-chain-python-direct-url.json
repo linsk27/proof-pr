@@ -1,0 +1,11 @@
+{
+  "id": "supply-chain-python-direct-url",
+  "title": "Python direct URL dependencies should be treated as provenance risks",
+  "category": "supply-chain",
+  "diffFile": "../../examples/cases/supply-chain-python-direct-url.diff",
+  "expect": {
+    "risk": "high",
+    "reviewDecision": "block-merge",
+    "findings": ["dependency-non-registry-source"]
+  }
+}

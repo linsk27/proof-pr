@@ -50468,16 +50468,27 @@ const DEFAULT_SENSITIVE_PATHS = [
     "Dockerfile",
     "**/Dockerfile",
     "package.json",
+    "**/package.json",
     "pnpm-lock.yaml",
+    "**/pnpm-lock.yaml",
     "package-lock.json",
+    "**/package-lock.json",
     "yarn.lock",
+    "**/yarn.lock",
     "bun.lockb",
+    "**/bun.lockb",
     "requirements.txt",
+    "**/requirements.txt",
     "pyproject.toml",
+    "**/pyproject.toml",
     "Cargo.toml",
+    "**/Cargo.toml",
     "Cargo.lock",
+    "**/Cargo.lock",
     "go.mod",
-    "go.sum"
+    "**/go.mod",
+    "go.sum",
+    "**/go.sum"
 ];
 const DEFAULT_TEST_PATHS = ["src/**", "packages/**/src/**", "app/**", "lib/**"];
 const WORKFLOW_EVIDENCE_CONTRACTS = [
@@ -50572,13 +50583,23 @@ const PRESET_DEFAULTS = {
         sensitivePaths: [
             ...DEFAULT_SENSITIVE_PATHS,
             "poetry.lock",
+            "**/poetry.lock",
+            "uv.lock",
+            "**/uv.lock",
             "Pipfile",
+            "**/Pipfile",
             "Pipfile.lock",
+            "**/Pipfile.lock",
             "pom.xml",
+            "**/pom.xml",
             "build.gradle",
+            "**/build.gradle",
             "build.gradle.kts",
+            "**/build.gradle.kts",
             "Gemfile",
-            "Gemfile.lock"
+            "**/Gemfile",
+            "Gemfile.lock",
+            "**/Gemfile.lock"
         ],
         requireTests: {
             enabled: true,
@@ -52440,6 +52461,17 @@ const PACKAGE_JSON_NON_DEPENDENCY_KEYS = new Set([
     "types",
     "version"
 ]);
+const TOML_NON_DEPENDENCY_KEYS = new Set([
+    "authors",
+    "description",
+    "edition",
+    "license",
+    "name",
+    "readme",
+    "repository",
+    "requires-python",
+    "version"
+]);
 function analyzeDiffFiles(files, config, pullRequest) {
     const activeFiles = files.filter((file) => !matchesAny(file.path, config.ignorePaths));
     const findings = [];
@@ -52644,6 +52676,9 @@ function analyzeDependencyChanges(files, config) {
                     recommendation: "Verify package names, licenses, provenance, and whether the lockfile matches the intended dependency change."
                 });
             }
+            findings.push(...analyzeNonRegistrySources(file));
+            findings.push(...analyzeUnpinnedDependencyDeclarations(file));
+            findings.push(...analyzeDependencyResolutionOverrides(file));
         }
         if (config.dependencies.flagMajorUpgrades) {
             findings.push(...analyzeMajorDependencyUpgrades(file));
@@ -52652,10 +52687,272 @@ function analyzeDependencyChanges(files, config) {
             findings.push(...analyzeLifecycleScripts(file));
         }
     }
+    if (config.dependencies.flagNewPackages) {
+        findings.push(...analyzeDependencyLockfileConsistency(files));
+    }
     return findings;
 }
 function isDependencyLikeAddition(path, line) {
     return parseDependencyLine(path, { value: line }) !== undefined;
+}
+function hasDependencyManifestChange(file) {
+    return [...file.addedLines, ...file.removedLines].some((line) => {
+        const value = line.value.trim();
+        return (parseDependencyLine(file.path, line) !== undefined ||
+            isNonRegistryDependencyLine(file.path, value) ||
+            isUnpinnedDependencyLine(file.path, value) ||
+            isResolutionOverrideLine(value));
+    });
+}
+function dependencyChangeEvidence(file) {
+    const lines = file.addedLines.filter((line) => {
+        const value = line.value.trim();
+        return (parseDependencyLine(file.path, line) !== undefined ||
+            isNonRegistryDependencyLine(file.path, value) ||
+            isUnpinnedDependencyLine(file.path, value) ||
+            isResolutionOverrideLine(value));
+    });
+    return lines.length > 0 ? lines.slice(0, 5).map(formatEvidenceLine) : [`+${file.added} -${file.removed}`];
+}
+function isNonRegistryDependencyLine(path, line) {
+    if (isIgnorableDependencyLine(line)) {
+        return false;
+    }
+    if (path.endsWith("package.json")) {
+        const entry = parsePackageJsonStringEntry(line);
+        return Boolean(entry && !PACKAGE_JSON_NON_DEPENDENCY_KEYS.has(entry.key) && isNonRegistryVersion(entry.version));
+    }
+    if (path.endsWith("requirements.txt")) {
+        return isPythonDirectUrl(line);
+    }
+    if (path.endsWith("pyproject.toml")) {
+        const spec = parseQuotedPythonDependencySpec(line);
+        const assignment = parseTomlStringAssignment(line);
+        return (Boolean(spec && isPythonDirectUrl(spec)) ||
+            Boolean(assignment && !TOML_NON_DEPENDENCY_KEYS.has(assignment.key) && isNonRegistryVersion(assignment.value)));
+    }
+    if (path.endsWith("Cargo.toml")) {
+        return /\b(?:git|path)\s*=/.test(line);
+    }
+    return false;
+}
+function isUnpinnedDependencyLine(path, line) {
+    if (isIgnorableDependencyLine(line) || isNonRegistryDependencyLine(path, line)) {
+        return false;
+    }
+    if (path.endsWith("package.json")) {
+        const entry = parsePackageJsonStringEntry(line);
+        return Boolean(entry && !PACKAGE_JSON_NON_DEPENDENCY_KEYS.has(entry.key) && isUnpinnedVersion(entry.version));
+    }
+    if (path.endsWith("requirements.txt")) {
+        return isUnpinnedPythonRequirement(line);
+    }
+    if (path.endsWith("pyproject.toml")) {
+        const spec = parseQuotedPythonDependencySpec(line);
+        const assignment = parseTomlStringAssignment(line);
+        return (Boolean(spec && isUnpinnedPythonRequirement(spec)) ||
+            Boolean(assignment && !TOML_NON_DEPENDENCY_KEYS.has(assignment.key) && isUnpinnedVersion(assignment.value)));
+    }
+    if (path.endsWith("Cargo.toml")) {
+        const assignment = parseTomlStringAssignment(line);
+        const key = assignment?.key ?? parseTomlDependencyKey(line);
+        const inlineVersion = /\bversion\s*=\s*"(?<version>[^"]*)"/.exec(line);
+        const version = inlineVersion?.groups?.version ?? assignment?.value;
+        return Boolean(key && !TOML_NON_DEPENDENCY_KEYS.has(key) && version && isUnpinnedVersion(version));
+    }
+    return false;
+}
+function isResolutionOverrideLine(line) {
+    return /^"(?:overrides|resolutions)"\s*:/.test(line) || /^"pnpm"\s*:\s*\{.*"overrides"\s*:/.test(line);
+}
+function isNonRegistryVersion(version) {
+    return /^(?:git\+|github:|https?:|file:|link:|portal:)/i.test(version.trim());
+}
+function isUnpinnedVersion(version) {
+    const normalized = version.trim().toLowerCase();
+    return (normalized === "" ||
+        normalized === "*" ||
+        normalized === "latest" ||
+        normalized === "x" ||
+        normalized === ">=0" ||
+        normalized === ">=0.0.0" ||
+        normalized === ">0" ||
+        normalized === ">0.0.0");
+}
+function isUnpinnedPythonRequirement(line) {
+    const value = stripInlineComment(line).trim();
+    if (!value || isPythonDirectUrl(value) || /^(?:-r|--requirement|-c|--constraint)\b/.test(value)) {
+        return false;
+    }
+    const nameOnly = /^[A-Za-z0-9_.-]+(?:\[.*\])?$/.test(value);
+    if (nameOnly) {
+        return true;
+    }
+    const match = /^[A-Za-z0-9_.-]+(?:\[.*\])?\s*(?<operator>==|>=|<=|~=|>|<|!=)\s*(?<version>[^#\s]+)/.exec(value);
+    return Boolean(match?.groups?.version && isUnpinnedVersion(match.groups.version));
+}
+function isPythonDirectUrl(line) {
+    const value = stripInlineComment(line).trim();
+    return (/^(?:git\+|https?:\/\/|file:)/i.test(value) ||
+        /^[A-Za-z0-9_.-]+(?:\[.*\])?\s*@\s*(?:git\+|https?:\/\/|file:)/i.test(value));
+}
+function parsePackageJsonStringEntry(line) {
+    const match = /^"(?<key>[@A-Za-z0-9_./-]+)"\s*:\s*"(?<version>[^"]*)"/.exec(line);
+    return match?.groups?.key !== undefined && match.groups.version !== undefined
+        ? { key: match.groups.key, version: match.groups.version }
+        : undefined;
+}
+function parseTomlStringAssignment(line) {
+    const match = /^(?<key>[A-Za-z0-9_.-]+)\s*=\s*"(?<value>[^"]*)"/.exec(line);
+    return match?.groups?.key !== undefined && match.groups.value !== undefined
+        ? { key: match.groups.key, value: match.groups.value }
+        : undefined;
+}
+function parseTomlDependencyKey(line) {
+    const match = /^(?<key>[A-Za-z0-9_.-]+)\s*=/.exec(line);
+    return match?.groups?.key;
+}
+function parseQuotedPythonDependencySpec(line) {
+    const match = /^"(?<spec>[^"]+)"\s*,?$/.exec(line);
+    return match?.groups?.spec;
+}
+function stripInlineComment(line) {
+    return line.replace(/\s+#.*$/, "");
+}
+function isIgnorableDependencyLine(line) {
+    const value = line.trim();
+    return value === "" || value.startsWith("#") || value.startsWith("//");
+}
+function ecosystemForLockfileCheckedManifest(path) {
+    if (path.endsWith("package.json")) {
+        return "npm";
+    }
+    if (path.endsWith("Cargo.toml")) {
+        return "rust";
+    }
+    if (path.endsWith("go.mod")) {
+        return "go";
+    }
+    return undefined;
+}
+function ecosystemForDependencyLockfile(path) {
+    if (path.endsWith("package-lock.json") ||
+        path.endsWith("pnpm-lock.yaml") ||
+        path.endsWith("yarn.lock") ||
+        path.endsWith("bun.lockb")) {
+        return "npm";
+    }
+    if (path.endsWith("Cargo.lock")) {
+        return "rust";
+    }
+    if (path.endsWith("go.sum")) {
+        return "go";
+    }
+    return undefined;
+}
+function analyzeNonRegistrySources(file) {
+    const sourceLines = file.addedLines.filter((line) => isNonRegistryDependencyLine(file.path, line.value.trim()));
+    if (sourceLines.length === 0) {
+        return [];
+    }
+    return [
+        {
+            ruleId: "dependency-non-registry-source",
+            title: "Dependency uses a non-registry source",
+            message: `${file.path} adds dependency entries that resolve outside the normal package registry.`,
+            severity: "high",
+            path: file.path,
+            evidence: sourceLines.slice(0, 5).map(formatEvidenceLine),
+            recommendation: "Require an explicit provenance explanation and verify that the source is pinned to an immutable commit, tag, or internal policy-approved path."
+        }
+    ];
+}
+function analyzeUnpinnedDependencyDeclarations(file) {
+    const unpinnedLines = file.addedLines.filter((line) => isUnpinnedDependencyLine(file.path, line.value.trim()));
+    if (unpinnedLines.length === 0) {
+        return [];
+    }
+    return [
+        {
+            ruleId: "dependency-unpinned-version",
+            title: "Dependency version is not reproducibly pinned",
+            message: `${file.path} adds dependency entries with latest, wildcard, empty, or overly broad versions.`,
+            severity: "medium",
+            path: file.path,
+            evidence: unpinnedLines.slice(0, 5).map(formatEvidenceLine),
+            recommendation: "Pin the dependency to a deliberate version range and include the matching lockfile update, or explain why a broad range is required."
+        }
+    ];
+}
+function analyzeDependencyResolutionOverrides(file) {
+    if (!file.path.endsWith("package.json")) {
+        return [];
+    }
+    const overrideLines = file.addedLines.filter((line) => isResolutionOverrideLine(line.value.trim()));
+    if (overrideLines.length === 0) {
+        return [];
+    }
+    return [
+        {
+            ruleId: "dependency-resolution-override",
+            title: "Dependency resolution override changed",
+            message: `${file.path} adds npm overrides, Yarn resolutions, or pnpm override configuration.`,
+            severity: "high",
+            path: file.path,
+            evidence: overrideLines.slice(0, 5).map(formatEvidenceLine),
+            recommendation: "Review why transitive dependency resolution is being overridden and confirm the lockfile reflects the intended package graph."
+        }
+    ];
+}
+function analyzeDependencyLockfileConsistency(files) {
+    const findings = [];
+    const changedLockfileEcosystems = new Set();
+    const changedManifestEcosystems = new Set();
+    const manifestDependencyFiles = files.filter((file) => ecosystemForLockfileCheckedManifest(file.path) && hasDependencyManifestChange(file));
+    const lockfileFiles = files.filter((file) => ecosystemForDependencyLockfile(file.path));
+    for (const file of lockfileFiles) {
+        const ecosystem = ecosystemForDependencyLockfile(file.path);
+        if (ecosystem) {
+            changedLockfileEcosystems.add(ecosystem);
+        }
+    }
+    for (const file of manifestDependencyFiles) {
+        const ecosystem = ecosystemForLockfileCheckedManifest(file.path);
+        if (ecosystem) {
+            changedManifestEcosystems.add(ecosystem);
+        }
+    }
+    for (const file of manifestDependencyFiles) {
+        const ecosystem = ecosystemForLockfileCheckedManifest(file.path);
+        if (!ecosystem || changedLockfileEcosystems.has(ecosystem)) {
+            continue;
+        }
+        findings.push({
+            ruleId: "dependency-lockfile-missing",
+            title: "Dependency manifest changed without lockfile",
+            message: `${file.path} changes dependency declarations, but no ${ecosystem} lockfile changed in the diff.`,
+            severity: "medium",
+            path: file.path,
+            evidence: dependencyChangeEvidence(file),
+            recommendation: "Commit the matching lockfile update, or explain why this ecosystem intentionally does not track a lockfile."
+        });
+    }
+    for (const file of lockfileFiles) {
+        const ecosystem = ecosystemForDependencyLockfile(file.path);
+        if (!ecosystem || changedManifestEcosystems.has(ecosystem)) {
+            continue;
+        }
+        findings.push({
+            ruleId: "dependency-lockfile-only-change",
+            title: "Lockfile changed without manifest change",
+            message: `${file.path} changed, but no corresponding ${ecosystem} dependency manifest changed in the diff.`,
+            severity: "medium",
+            path: file.path,
+            evidence: [`+${file.added} -${file.removed}`],
+            recommendation: "Ask why the lockfile was regenerated or modified and verify that no unintended package graph change was introduced."
+        });
+    }
+    return findings;
 }
 function analyzeMajorDependencyUpgrades(file) {
     const removedDependencies = new Map();
@@ -52708,18 +53005,14 @@ function analyzeLifecycleScripts(file) {
 function parseDependencyLine(path, line) {
     const value = line.value.trim();
     if (path.endsWith("package.json")) {
-        const match = /^"(?<key>[@A-Za-z0-9_.-]+)"\s*:\s*"(?<version>[^"]*)"/.exec(value);
-        if (!match?.groups) {
+        const entry = parsePackageJsonStringEntry(value);
+        if (!entry || !entry.version || PACKAGE_JSON_NON_DEPENDENCY_KEYS.has(entry.key)) {
             return undefined;
         }
-        const { key, version } = match.groups;
-        if (!key || !version || PACKAGE_JSON_NON_DEPENDENCY_KEYS.has(key)) {
+        if (!/^(?:\^|~|>=?|<=?|\d|workspace:|npm:|file:|link:|portal:|git\+|https?:|github:)/.test(entry.version)) {
             return undefined;
         }
-        if (!/^(?:\^|~|>=?|<=?|\d|workspace:|npm:|file:|link:|portal:|git\+|https?:|github:)/.test(version)) {
-            return undefined;
-        }
-        return { name: key, version, line };
+        return { name: entry.key, version: entry.version, line };
     }
     if (path.endsWith("requirements.txt")) {
         const match = /^(?<name>[A-Za-z0-9_.-]+)(?:\[.*\])?\s*(?:==|>=|<=|~=|>|<)\s*(?<version>[^#\s]+)/.exec(value);
@@ -52728,6 +53021,10 @@ function parseDependencyLine(path, line) {
             : undefined;
     }
     if (path.endsWith("pyproject.toml") || path.endsWith("Cargo.toml")) {
+        const assignment = parseTomlStringAssignment(value);
+        if (assignment && TOML_NON_DEPENDENCY_KEYS.has(assignment.key)) {
+            return undefined;
+        }
         const match = /^(?<name>[A-Za-z0-9_.-]+)\s*=\s*"(?<version>(?:\^|~|>=?|<=?|\d|workspace:|path\s*=|git\s*=)[^"]*)"/.exec(value);
         return match?.groups?.name && match.groups.version
             ? { name: match.groups.name, version: match.groups.version, line }
@@ -52926,6 +53223,11 @@ function calculateEvidenceScore(summary, findings) {
         "dependency-added",
         "dependency-major-upgrade",
         "dependency-lifecycle-script",
+        "dependency-non-registry-source",
+        "dependency-unpinned-version",
+        "dependency-lockfile-missing",
+        "dependency-lockfile-only-change",
+        "dependency-resolution-override",
         "workflow-permission-change",
         "workflow-dangerous-trigger",
         "workflow-untrusted-checkout",
@@ -52969,6 +53271,21 @@ function calculateEvidenceScore(summary, findings) {
         }
         else if (finding.ruleId === "dependency-lifecycle-script") {
             addDeduction("dependency-lifecycle-script", 25, "Package lifecycle scripts can run during install or publish.");
+        }
+        else if (finding.ruleId === "dependency-non-registry-source") {
+            addDeduction("dependency-non-registry-source", 25, "Dependencies resolved outside the normal registry need provenance review.");
+        }
+        else if (finding.ruleId === "dependency-unpinned-version") {
+            addDeduction("dependency-unpinned-version", 15, "Unpinned dependency versions reduce reproducibility.");
+        }
+        else if (finding.ruleId === "dependency-lockfile-missing") {
+            addDeduction("dependency-lockfile-missing", 15, "Dependency manifest changes need matching lockfile evidence.");
+        }
+        else if (finding.ruleId === "dependency-lockfile-only-change") {
+            addDeduction("dependency-lockfile-only-change", 15, "Lockfile-only changes need package graph review.");
+        }
+        else if (finding.ruleId === "dependency-resolution-override") {
+            addDeduction("dependency-resolution-override", 25, "Dependency resolution overrides can change transitive package selection.");
         }
         else if (finding.ruleId.startsWith("evidence-contract:")) {
             addDeduction("evidence-contract-missing", finding.severity === "high" ? 25 : 15, "Configured evidence contract was not satisfied.");
@@ -53036,6 +53353,8 @@ function calculateReviewDecision(risk, evidenceScore, findings) {
         finding.ruleId === "workflow-dangerous-trigger" ||
         (finding.ruleId === "workflow-untrusted-checkout" && finding.severity === "high") ||
         finding.ruleId === "dependency-lifecycle-script" ||
+        finding.ruleId === "dependency-non-registry-source" ||
+        finding.ruleId === "dependency-resolution-override" ||
         finding.ruleId === "mcp-credential-risk");
     if (hasBlockingSecurityFinding || evidenceScore.value < 50 || risk === "high") {
         return "block-merge";
@@ -53262,6 +53581,61 @@ function reviewActionsForFinding(finding) {
                 title: "Review major dependency upgrade impact.",
                 detail: "Check changelogs, migration notes, peer dependencies, and whether tests cover the upgraded surface.",
                 priority: "medium",
+                relatedRuleIds: [finding.ruleId]
+            }
+        ];
+    }
+    if (finding.ruleId === "dependency-non-registry-source") {
+        return [
+            {
+                actionId: "verify-non-registry-dependency-source",
+                title: "Verify non-registry dependency provenance.",
+                detail: "Require a clear reason for git, URL, file, link, or portal dependencies and confirm the source is immutable or policy-approved.",
+                priority: "high",
+                relatedRuleIds: [finding.ruleId]
+            }
+        ];
+    }
+    if (finding.ruleId === "dependency-unpinned-version") {
+        return [
+            {
+                actionId: "pin-dependency-version",
+                title: "Ask for a reproducible dependency version.",
+                detail: "Replace latest, wildcard, empty, or overly broad versions with a deliberate version range and matching lockfile evidence.",
+                priority: "medium",
+                relatedRuleIds: [finding.ruleId]
+            }
+        ];
+    }
+    if (finding.ruleId === "dependency-lockfile-missing") {
+        return [
+            {
+                actionId: "add-matching-lockfile-update",
+                title: "Ask for the matching lockfile update.",
+                detail: "Dependency manifest changes should include the package manager lockfile or a short explanation for why none is expected.",
+                priority: "medium",
+                relatedRuleIds: [finding.ruleId]
+            }
+        ];
+    }
+    if (finding.ruleId === "dependency-lockfile-only-change") {
+        return [
+            {
+                actionId: "explain-lockfile-only-change",
+                title: "Ask why only the lockfile changed.",
+                detail: "Confirm the lockfile was intentionally regenerated and inspect the resolved package graph for unexpected additions or downgrades.",
+                priority: "medium",
+                relatedRuleIds: [finding.ruleId]
+            }
+        ];
+    }
+    if (finding.ruleId === "dependency-resolution-override") {
+        return [
+            {
+                actionId: "review-dependency-resolution-override",
+                title: "Review dependency resolution overrides.",
+                detail: "Confirm why transitive dependency resolution is being overridden and whether consumers or CI now resolve a different package graph.",
+                priority: "high",
                 relatedRuleIds: [finding.ruleId]
             }
         ];

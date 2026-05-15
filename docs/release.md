@@ -27,11 +27,11 @@ pnpm release:check
 
 GitHub Release 会先创建；随后 workflow 会检查该版本是否已经存在于 npm。只有 npm 还没有该版本时，才会执行发布步骤。
 
-workflow 使用 Node 24 和 npm 11，并通过 GitHub OIDC 使用 npm Trusted Publishing。如果 npm 包没有配置 trusted publisher，发布步骤会失败，需要先在 npm 包设置页补齐 publisher。
+workflow 使用 Node 24 和 npm 11，并通过 GitHub OIDC 使用 npm Trusted Publishing。`linsk27/proof-pr` 的 trusted publisher 已配置完成；如果 fork 或新包没有配置，发布步骤会失败，需要先在 npm 包设置页补齐 publisher。
 
 ## npm Trusted Publishing 设置
 
-在 npm 网站给 `proof-pr` 配置 trusted publisher：
+`proof-pr` 当前已在 npm 网站配置 trusted publisher：
 
 - Provider：GitHub Actions
 - Repository：`linsk27/proof-pr`
@@ -45,15 +45,15 @@ npm install -g npm@^11.10.0
 npm trust github proof-pr --repo linsk27/proof-pr --file release.yml
 ```
 
-npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm trust` 命令需要 npm 11.10+。配置完成后，后续推 tag 应该能自动发布 npm，不再需要本地粘贴 token。
+npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm trust` 命令需要 npm 11.10+。后续推 tag 应该能自动发布 npm，不再需要本地粘贴 token。
 
 ## 正式发布命令
 
-确认 trusted publisher 已配置后：
+确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.17
-git push origin v0.1.17
+git tag v0.1.18
+git push origin v0.1.18
 ```
 
 发布完成后需要检查：

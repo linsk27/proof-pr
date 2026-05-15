@@ -16,7 +16,9 @@ sensitivePaths:
   - "**/.env*"
   - "**/mcp*.json"
   - "package.json"
+  - "**/package.json"
   - "pnpm-lock.yaml"
+  - "**/pnpm-lock.yaml"
 
 requireTests:
   enabled: true
@@ -83,7 +85,7 @@ proof-pr scan --base origin/main --head HEAD --format sarif --output proofpr.sar
 | `mcp-security` | 关注 MCP、Cursor、VS Code、本地 agent 配置和凭证风险。 |
 | `dependency-careful` | 关注依赖清单、锁文件和多语言包管理配置变化。 |
 
-`security-strict` 会内置 workflow 权限理由证据契约。`dependency-careful` 会内置依赖变更证据契约。
+`security-strict` 会内置 workflow 权限理由证据契约。`dependency-careful` 会内置依赖变更证据契约，并额外把 Poetry / Pipenv / Maven / Gradle / Ruby Bundler 文件作为敏感路径。Java 和 Ruby 本轮先做敏感路径提醒，不做深度依赖解析。
 
 示例：
 
@@ -119,6 +121,14 @@ preset: security-strict
 - `flagNewPackages`：标记新增依赖或依赖条目变化。
 - `flagMajorUpgrades`：标记跨大版本升级，例如 `18.x` 到 `19.x`。
 - `flagLifecycleScripts`：标记 `preinstall`、`postinstall`、`prepare` 等安装/发布阶段脚本。
+
+供应链增强规则默认随依赖检查启用，不新增配置项，避免用户为了开启基础保护还要理解一堆开关。当前会额外标记：
+
+- `dependency-non-registry-source`：git、GitHub、URL、file/link/portal、Python direct URL、Cargo git/path 等非普通注册表来源。
+- `dependency-unpinned-version`：`latest`、`*`、空版本、`>=0` 等不可复现依赖声明。
+- `dependency-lockfile-missing`：npm / Rust / Go manifest 改了，但对应 lockfile 没有同步变化。
+- `dependency-lockfile-only-change`：lockfile 改了，但没有对应 manifest 依赖变化。
+- `dependency-resolution-override`：npm `overrides`、Yarn `resolutions`、pnpm overrides。
 
 ## `evidence.contracts`
 
