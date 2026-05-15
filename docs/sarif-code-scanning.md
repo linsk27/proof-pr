@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.16
+      - uses: linsk27/proof-pr@v0.1.17
         with:
           fail-on: high
           comment: "true"

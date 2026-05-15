@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.16`。
+当前最新公开版本是 `0.1.17`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 trusted publisher 已配置后：
 
 ```bash
-git tag v0.1.16
-git push origin v0.1.16
+git tag v0.1.17
+git push origin v0.1.17
 ```
 
 发布完成后需要检查：
@@ -66,9 +66,19 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.16
-npx proof-pr@latest --version -> 0.1.16
+npm view proof-pr version -> 0.1.17
+npx proof-pr@latest --version -> 0.1.17
 ```
+
+## `v0.1.17` 发布状态
+
+`v0.1.17` 是小版本功能增强，重点包括：
+
+- `proof-pr init` 生成的 GitHub workflow 默认写出 `proofpr-report.html` 并上传为 `proofpr-report` artifact。
+- `proof-pr init` 新增 `--no-html-report` 和 `--html-output <path>`，需要精简 workflow 时可以关闭或改路径。
+- `proof-pr doctor` 新增 HTML artifact 检查，能提示 workflow 是否启用了 `html-output` 和 `actions/upload-artifact`。
+- 项目自身 `.github/workflows/proofpr.yml` 已同步到 `linsk27/proof-pr@v0.1.17`，并启用 annotations 和 HTML artifact。
+- README、快速开始、从 0 到 1 文档、命令速查和示意图同步说明 artifact 查看路径。
 
 ## `v0.1.16` 发布状态
 
@@ -100,7 +110,7 @@ npx proof-pr@latest --version -> 0.1.16
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.16` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.17` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 

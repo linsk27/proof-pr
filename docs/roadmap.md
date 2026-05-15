@@ -34,7 +34,7 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
    在 npm 包设置中添加 GitHub Actions trusted publisher：仓库 `linsk27/proof-pr`，workflow file `release.yml`。配置后用下一个 tag 验证 npm 自动发布。
 
 3. 真实截图刷新
-   用 `v0.1.16` 的 annotations / SARIF 能力重新跑一个 demo PR，补充新版效果图。
+   用 `v0.1.17` 的 annotations / SARIF 能力重新跑一个 demo PR，补充新版效果图。
 
 4. 真实项目样例扩展
    继续补充 React、Python、Go、Rust 等不同生态的真实 diff 示例，让用户能更快理解规则价值。

@@ -101,7 +101,7 @@ npx proof-pr@latest doctor
 - `.github/workflows/proofpr.yml` 是否存在。
 - `.github/pull_request_template.md` 是否存在，以及是否提示验证、复现、截图或权限理由。
 - workflow 是否监听 `pull_request`。
-- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.16`。
+- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.17`。
 - 是否具备 `pull-requests: write` 和 `contents: read` 权限。
 - 是否启用了 `html-output` 和 `actions/upload-artifact`，方便下载 HTML 可视化报告。
 - 当前目录是否在 Git 仓库里，以及 `origin/main...HEAD` diff 是否可读。
