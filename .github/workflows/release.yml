@@ -45,27 +45,7 @@ jobs:
           else
             echo "published=false" >> "$GITHUB_OUTPUT"
           fi
-      - name: Select npm publish auth mode
-        id: npm-auth
-        if: startsWith(github.ref, 'refs/tags/v') && steps.npm-version.outputs.published != 'true'
-        shell: bash
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          if [ -n "$NODE_AUTH_TOKEN" ]; then
-            echo "mode=token-fallback" >> "$GITHUB_OUTPUT"
-            echo "::notice::NPM_TOKEN is configured. npm 11 will still prefer trusted publishing when npm has a matching publisher; otherwise it can fall back to the token."
-          else
-            echo "mode=trusted-publishing" >> "$GITHUB_OUTPUT"
-            echo "::notice::NPM_TOKEN is not configured. Publishing will use npm trusted publishing via GitHub OIDC."
-          fi
       - name: Publish CLI to npm with trusted publishing
-        if: startsWith(github.ref, 'refs/tags/v') && steps.npm-version.outputs.published != 'true' && steps.npm-auth.outputs.mode == 'trusted-publishing'
+        if: startsWith(github.ref, 'refs/tags/v') && steps.npm-version.outputs.published != 'true'
         working-directory: packages/cli
-        run: npm publish --access public --registry https://registry.npmjs.org
-      - name: Publish CLI to npm with token fallback
-        if: startsWith(github.ref, 'refs/tags/v') && steps.npm-version.outputs.published != 'true' && steps.npm-auth.outputs.mode == 'token-fallback'
-        working-directory: packages/cli
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public --registry https://registry.npmjs.org

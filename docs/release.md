@@ -23,11 +23,11 @@ pnpm release:check
 - npm 包：`proof-pr`。
 - 发布命令：`npm publish --access public`。
 - 推荐认证方式：npm Trusted Publishing，通过 GitHub OIDC 发布，不需要长期 npm token。
-- 兼容认证方式：仓库 secret `NPM_TOKEN`，仅作为 trusted publishing 未配置时的兜底。
+- 不再依赖仓库 secret `NPM_TOKEN`。如果仓库里仍残留旧 token，release workflow 也会忽略它，避免旧 token 把发布带到 token fallback。
 
 GitHub Release 会先创建；随后 workflow 会检查该版本是否已经存在于 npm。只有 npm 还没有该版本时，才会执行发布步骤。
 
-workflow 使用 Node 24 和 npm 11。npm 11 会在 GitHub OIDC 环境里优先使用 Trusted Publishing；如果 npm 包没有配置 trusted publisher，才会退回 `NPM_TOKEN`。
+workflow 使用 Node 24 和 npm 11，并通过 GitHub OIDC 使用 npm Trusted Publishing。如果 npm 包没有配置 trusted publisher，发布步骤会失败，需要先在 npm 包设置页补齐 publisher。
 
 ## npm Trusted Publishing 设置
 
@@ -101,7 +101,7 @@ npx proof-pr@latest --version -> 0.1.17
 - 新增 `proof-pr doctor`，可检查配置、workflow、Action 版本、PR 权限和本地 diff 可读性。
 - 新增 `proof-pr demo`，无需 clone 仓库即可运行内置风险案例。
 - 新增 `proof-pr template`，并让 `proof-pr init` 默认生成 PR 模板，帮助贡献者提前补充证据。
-- Release workflow 已改为 OIDC trusted publishing 优先，`NPM_TOKEN` 只作为兼容兜底。
+- Release workflow 已改为 OIDC trusted publishing 发布，不再依赖 `NPM_TOKEN`。
 - CLI 支持 `--format html`，可生成独立 HTML 可视化报告。
 - CLI `scan` 支持 `--output`，可直接把 HTML、SARIF、JSON 或 Markdown 报告写入文件。
 - GitHub Action 支持 `html-output`，可把可视化报告上传为 artifact。
