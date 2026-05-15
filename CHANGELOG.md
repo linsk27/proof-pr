@@ -4,6 +4,11 @@
 
 暂无。
 
+## 0.1.20 - 2026-05-15
+
+- `check` 默认扫描当前工作区相对 base 的最终状态，包含已提交分支 diff、staged、unstaged 和未跟踪新文件。
+- 中文报告补齐供应链规则、行动项、扣分项和重点文件原因的翻译。
+
 ## 0.1.19 - 2026-05-15
 
 - 新增 `check` 命令：`npx proof-pr@latest check` 会自动选择 `origin/main`、`origin/master`、`main` 或 `master` 作为 base，减少本地自查命令长度。

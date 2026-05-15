@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.19
+      - uses: linsk27/proof-pr@v0.1.20
         with:
           fail-on: high
           comment: "true"
@@ -141,7 +141,9 @@ npx proof-pr@latest template
 npx proof-pr@latest check
 ```
 
-如果第一行输出 `0.1.19`，说明你正在使用当前最新发布版。
+`check` 会自动选择常见主分支作为 base，并纳入已提交分支 diff、staged、unstaged 和未跟踪新文件。
+
+如果第一行输出 `0.1.20`，说明你正在使用当前最新发布版。
 
 也可以全局安装：
 

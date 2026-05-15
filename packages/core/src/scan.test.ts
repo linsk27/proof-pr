@@ -588,6 +588,27 @@ index 0000000..1111111 100644
     expect(report).toContain("风险发现");
   });
 
+  it("renders Simplified Chinese supply-chain finding text", () => {
+    const result = scanDiff(`diff --git a/package.json b/package.json
+index 0000000..1111111 100644
+--- a/package.json
++++ b/package.json
+@@ -1,4 +1,6 @@
+ {
+   "dependencies": {
++    "internal-kit": "github:acme/internal-kit",
++    "left-pad": "latest"
+   }
+ }
+`);
+    const report = renderMarkdownReport(result, "zh-CN");
+
+    expect(report).toContain("依赖使用非注册表来源");
+    expect(report).toContain("依赖版本不可复现");
+    expect(report).toContain("依赖清单变更但缺少 lockfile");
+    expect(report).not.toContain("Dependency uses a non-registry source");
+  });
+
   it("renders a standalone HTML visual report", () => {
     const result = scanDiff(`diff --git a/src/auth.ts b/src/auth.ts
 index 0000000..1111111 100644

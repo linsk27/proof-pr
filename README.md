@@ -13,9 +13,9 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 
 ## 现在能用吗
 
-- GitHub Release：[`v0.1.19`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.19)
-- npm：[`proof-pr@0.1.19`](https://www.npmjs.com/package/proof-pr)
-- GitHub Action：`linsk27/proof-pr@v0.1.19`
+- GitHub Release：[`v0.1.20`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.20)
+- npm：[`proof-pr@0.1.20`](https://www.npmjs.com/package/proof-pr)
+- GitHub Action：`linsk27/proof-pr@v0.1.20`
 - 当前源码 benchmark：`22/22 passed`
 - 接入体检：`npx proof-pr@latest doctor`
 - PR 模板：`npx proof-pr@latest template`
@@ -36,7 +36,7 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-这两个命令当前都应输出 `0.1.19`。
+这两个命令当前都应输出 `0.1.20`。
 
 不知道该用哪个功能时，直接打开中文功能菜单：
 
@@ -220,7 +220,7 @@ npx proof-pr@latest doctor
 npx proof-pr@latest check
 ```
 
-`check` 会自动选择 `origin/main`、`origin/master`、`main` 或 `master` 作为对比基准。主分支不是这些名字时再显式指定：
+`check` 会自动选择 `origin/main`、`origin/master`、`main` 或 `master` 作为对比基准，并扫描当前工作区相对 base 的最终状态：已提交分支 diff、staged、unstaged 和未跟踪新文件都会纳入。主分支不是这些名字时再显式指定：
 
 ```bash
 npx proof-pr@latest check --base origin/dev
@@ -278,7 +278,7 @@ evidence:
 `init` 默认已经会在 GitHub Action 里保存 HTML 面板，对应 workflow 片段如下：
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.19
+- uses: linsk27/proof-pr@v0.1.20
   with:
     html-output: proofpr-report.html
 - uses: actions/upload-artifact@v4

@@ -22,7 +22,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.19";
+const CLI_VERSION = "0.1.20";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -385,7 +385,7 @@ program
   .option("--fail-on <level>", "Exit with code 1 on risk level: low, medium, high, or never.", parseFailLevel, "never")
   .action(async (options: CheckCommandOptions) => {
     const base = options.base ?? (await resolveDefaultBaseRef());
-    const diffText = await readGitDiff(base, options.head);
+    const diffText = await readCheckDiff(base, options.head);
     const config = await loadConfig(options.config);
     const result = scanDiff(diffText, { config });
     const locale = parseLocale(options.locale, config.locale);
@@ -849,6 +849,18 @@ async function readGitDiff(base: string | undefined, head: string): Promise<stri
   return stdout;
 }
 
+async function readCheckDiff(base: string, head: string): Promise<string> {
+  if (head !== "HEAD") {
+    return readGitDiff(base, head);
+  }
+
+  const mergeBase = (await readGitOutput(["merge-base", base, "HEAD"])) ?? base;
+  const trackedDiff = await readGitStdout(["diff", "--no-ext-diff", "--unified=0", mergeBase, "--"], [0]);
+  const untrackedDiffs = await readUntrackedFileDiffs();
+
+  return [trackedDiff, ...untrackedDiffs].filter((part) => part.trim().length > 0).join("\n");
+}
+
 async function resolveDefaultBaseRef(): Promise<string> {
   const originHead = await readGitOutput(["symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD"]);
 
@@ -878,6 +890,31 @@ async function gitCommitRefExists(ref: string): Promise<boolean> {
   }
 }
 
+async function readUntrackedFileDiffs(): Promise<string[]> {
+  const output = await readGitOutput(["ls-files", "--others", "--exclude-standard"]);
+  const files = output?.split(/\r?\n/).filter(Boolean) ?? [];
+  const diffs: string[] = [];
+
+  for (const file of files) {
+    diffs.push(await readGitStdout(["diff", "--no-index", "--no-ext-diff", "--unified=0", "--", "/dev/null", file], [0, 1]));
+  }
+
+  return diffs;
+}
+
+async function readGitStdout(args: string[], allowedExitCodes: number[]): Promise<string> {
+  try {
+    const { stdout } = await execFileAsync("git", args, { maxBuffer: 20 * 1024 * 1024 });
+    return stdout;
+  } catch (error) {
+    if (isExecError(error) && allowedExitCodes.includes(error.code)) {
+      return typeof error.stdout === "string" ? error.stdout : "";
+    }
+
+    throw error;
+  }
+}
+
 async function readGitOutput(args: string[]): Promise<string | undefined> {
   try {
     const { stdout } = await execFileAsync("git", args);
@@ -886,6 +923,15 @@ async function readGitOutput(args: string[]): Promise<string | undefined> {
   } catch {
     return undefined;
   }
+}
+
+function isExecError(error: unknown): error is Error & { code: number; stdout?: string } {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    typeof (error as { code?: unknown }).code === "number"
+  );
 }
 
 async function readPullRequestBody(options: ScanCommandOptions): Promise<string | undefined> {

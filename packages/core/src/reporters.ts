@@ -1081,6 +1081,36 @@ function maintainerFocus(findings: Finding[], locale: ReportLocale): string[] {
           ? "合并前审查包生命周期脚本是否会在安装或发布时执行非预期代码。"
           : "Review package lifecycle scripts for unexpected install or publish-time execution."
       );
+    } else if (finding.ruleId === "dependency-non-registry-source") {
+      focus.add(
+        locale === "zh-CN"
+          ? "确认非注册表依赖来源可信，并要求固定到不可变 commit、tag 或内部批准路径。"
+          : "Verify non-registry dependency provenance and require an immutable commit, tag, or approved internal path."
+      );
+    } else if (finding.ruleId === "dependency-unpinned-version") {
+      focus.add(
+        locale === "zh-CN"
+          ? "要求把 latest、通配符或空版本改成可复现的版本范围。"
+          : "Ask for latest, wildcard, or empty dependency versions to be replaced with reproducible ranges."
+      );
+    } else if (finding.ruleId === "dependency-lockfile-missing") {
+      focus.add(
+        locale === "zh-CN"
+          ? "要求补充匹配的 lockfile，或说明该生态为什么不提交 lockfile。"
+          : "Ask for the matching lockfile update, or an explanation for why no lockfile is expected."
+      );
+    } else if (finding.ruleId === "dependency-lockfile-only-change") {
+      focus.add(
+        locale === "zh-CN"
+          ? "核查 lockfile-only 变化是否引入了非预期依赖图变更。"
+          : "Review lockfile-only changes for unintended package graph changes."
+      );
+    } else if (finding.ruleId === "dependency-resolution-override") {
+      focus.add(
+        locale === "zh-CN"
+          ? "重点审查 overrides / resolutions 是否改变了传递依赖解析。"
+          : "Review whether overrides or resolutions change transitive dependency resolution."
+      );
     } else if (finding.ruleId === "workflow-dangerous-trigger") {
       focus.add(
         locale === "zh-CN"
@@ -1189,6 +1219,46 @@ function translateFinding(finding: Finding): Pick<Finding, "title" | "message" |
       title: "包生命周期脚本发生变更",
       message: finding.path ? `${finding.path} 新增或修改了安装/发布阶段可能自动执行的脚本。` : finding.message,
       recommendation: "请确认该脚本是否必要，是否下载或执行远程代码，以及是否会影响安装该包的用户。"
+    };
+  }
+
+  if (finding.ruleId === "dependency-non-registry-source") {
+    return {
+      title: "依赖使用非注册表来源",
+      message: finding.path ? `${finding.path} 新增了不通过普通包注册表解析的依赖。` : finding.message,
+      recommendation: "请要求说明依赖来源，并确认它固定到不可变 commit、tag 或内部策略允许的路径。"
+    };
+  }
+
+  if (finding.ruleId === "dependency-unpinned-version") {
+    return {
+      title: "依赖版本不可复现",
+      message: finding.path ? `${finding.path} 新增了 latest、通配符、空版本或过宽版本范围。` : finding.message,
+      recommendation: "请把依赖改成明确版本范围并同步 lockfile；如果必须使用宽范围，需要在 PR 中说明原因。"
+    };
+  }
+
+  if (finding.ruleId === "dependency-lockfile-missing") {
+    return {
+      title: "依赖清单变更但缺少 lockfile",
+      message: finding.path ? `${finding.path} 修改了依赖声明，但 diff 中没有对应生态的 lockfile 变化。` : finding.message,
+      recommendation: "请提交匹配的 lockfile 更新；如果该生态故意不提交 lockfile，需要在 PR 中说明原因。"
+    };
+  }
+
+  if (finding.ruleId === "dependency-lockfile-only-change") {
+    return {
+      title: "只有 lockfile 发生变化",
+      message: finding.path ? `${finding.path} 发生变化，但 diff 中没有对应的依赖清单变化。` : finding.message,
+      recommendation: "请确认 lockfile 是否只是重新生成，并检查解析出的依赖图是否出现非预期新增、降级或替换。"
+    };
+  }
+
+  if (finding.ruleId === "dependency-resolution-override") {
+    return {
+      title: "依赖解析覆盖发生变化",
+      message: finding.path ? `${finding.path} 新增了 overrides、resolutions 或 pnpm overrides。` : finding.message,
+      recommendation: "请确认为什么要覆盖传递依赖解析，并检查 lockfile 是否反映了预期的依赖图。"
     };
   }
 
@@ -1322,6 +1392,11 @@ function translateReviewActionTitle(actionId: string, fallback: string): string 
     "request-review-map-or-split": "要求拆分 PR 或提供逐文件 review map",
     "verify-dependency-change": "核查依赖来源和 lockfile 影响",
     "review-major-dependency-upgrade": "核查依赖大版本升级影响",
+    "verify-non-registry-dependency-source": "核查非注册表依赖来源",
+    "pin-dependency-version": "要求使用可复现依赖版本",
+    "add-matching-lockfile-update": "要求补充匹配的 lockfile",
+    "explain-lockfile-only-change": "要求说明 lockfile-only 变化",
+    "review-dependency-resolution-override": "审查依赖解析覆盖",
     "assign-sensitive-file-review": "安排敏感文件重点 review"
   }[actionId] ?? fallback;
 }
@@ -1345,6 +1420,11 @@ function translateReviewActionDetail(actionId: string, fallback: string): string
     "request-review-map-or-split": "要求贡献者拆分无关改动，或标出最需要重点 review 的文件。",
     "verify-dependency-change": "检查包名、维护者、许可证、安装脚本，以及 lockfile 是否符合预期依赖变化。",
     "review-major-dependency-upgrade": "检查 changelog、迁移说明、peer dependencies，以及测试是否覆盖升级后的关键路径。",
+    "verify-non-registry-dependency-source": "要求说明 git、URL、file、link 或 portal 依赖的必要性，并确认来源固定且符合项目策略。",
+    "pin-dependency-version": "把 latest、通配符、空版本或过宽版本范围替换为明确版本范围，并同步 lockfile。",
+    "add-matching-lockfile-update": "依赖清单变更应包含包管理器 lockfile，或在 PR 中说明为什么没有 lockfile。",
+    "explain-lockfile-only-change": "确认 lockfile 是否只是重新生成，并检查依赖图是否出现非预期新增、降级或替换。",
+    "review-dependency-resolution-override": "确认为什么要覆盖传递依赖解析，以及消费者或 CI 是否会解析到不同依赖图。",
     "assign-sensitive-file-review": "合并前由维护者有意识地检查敏感文件改动。"
   }[actionId] ?? fallback;
 }
@@ -1360,6 +1440,11 @@ function translateFocusReason(reasonId: string, fallback: string): string {
     "dependency-added": "依赖清单发生变更",
     "dependency-major-upgrade": "依赖发生大版本升级",
     "dependency-lifecycle-script": "包生命周期脚本发生变更",
+    "dependency-non-registry-source": "依赖使用非注册表来源",
+    "dependency-unpinned-version": "依赖版本不可复现",
+    "dependency-lockfile-missing": "依赖清单变更但缺少 lockfile",
+    "dependency-lockfile-only-change": "只有 lockfile 发生变化",
+    "dependency-resolution-override": "依赖解析覆盖发生变化",
     "workflow-permission-change": "workflow 权限发生变更",
     "workflow-dangerous-trigger": "workflow 使用了高风险触发器",
     "workflow-untrusted-checkout": "workflow checkout 了不可信 PR head",
@@ -1398,6 +1483,11 @@ function translateDeduction(reasonId: string, fallback: string): string {
     "dependency-change": "依赖清单发生变更。",
     "dependency-major-upgrade": "依赖发生大版本升级。",
     "dependency-lifecycle-script": "包生命周期脚本可能在安装或发布阶段执行代码。",
+    "dependency-non-registry-source": "依赖通过非注册表来源解析，需要核查来源和固定方式。",
+    "dependency-unpinned-version": "依赖版本不可复现，可能导致每次安装解析到不同内容。",
+    "dependency-lockfile-missing": "依赖清单发生变化，但缺少匹配的 lockfile 证据。",
+    "dependency-lockfile-only-change": "只有 lockfile 变化，需要核查依赖图是否符合预期。",
+    "dependency-resolution-override": "依赖解析覆盖可能改变传递依赖选择。",
     "workflow-dangerous-trigger": "pull_request_target workflow 需要重点审查高权限触发路径。",
     "workflow-untrusted-checkout": "Workflow checkout PR head 代码，需要审查权限边界。",
     "evidence-contract-missing": "仓库自定义证据契约未满足。",
