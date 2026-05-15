@@ -4,6 +4,13 @@
 
 暂无。
 
+## 0.1.24 - 2026-05-15
+
+- 新增 `proof-pr doctor --fix`，可自动创建缺失的 `.proofpr.yml`、`.github/workflows/proofpr.yml` 和 PR 模板。
+- `doctor --fix` 会把过旧或缺少关键配置的 ProofPR workflow 刷新为当前推荐模板，包括 PR 触发、权限、Action 版本和 HTML artifact。
+- 已有 PR 模板缺少验证、复现、截图或权限理由提示时，`doctor --fix` 只追加 ProofPR 证据补充块，不修改业务代码。
+- README、npm 包 README、快速开始和命令速查同步说明自动修复路径。
+
 ## 0.1.23 - 2026-05-15
 
 - 收敛项目定位：README、CLI 向导和中文文档统一强调 ProofPR 是“PR 证据门禁”，不是通用扫描器、AI code reviewer 或漏洞库。

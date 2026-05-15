@@ -24,6 +24,9 @@
 不确定装好没有：
    npx proof-pr@latest doctor
 
+想自动修复常见接入问题：
+   npx proof-pr@latest doctor --fix
+
 需要可分享页面：
    npx proof-pr@latest check --format html --output proofpr-report.html
 

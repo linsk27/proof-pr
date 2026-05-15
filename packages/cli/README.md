@@ -12,7 +12,7 @@ ProofPR 是给开源维护者和工程团队使用的 PR 证据门禁。它只�
 npx proof-pr@latest --version
 ```
 
-当前应输出 `0.1.23`。
+当前应输出 `0.1.24`。
 
 不知道怎么开始时：
 
@@ -57,6 +57,14 @@ npx proof-pr@latest doctor
 
 这个命令会检查配置文件、workflow、PR 模板、Action 版本、PR 权限和本地 diff 是否可读，并自动识别常见主分支作为 base。
 
+想自动修复常见接入问题：
+
+```bash
+npx proof-pr@latest doctor --fix
+```
+
+它只会创建或刷新 ProofPR 自己的接入文件，不会改业务代码。
+
 已接入仓库单独补 PR 模板：
 
 ```bash
@@ -86,7 +94,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.23
+- uses: linsk27/proof-pr@v0.1.24
   with:
     fail-on: high
     comment: "true"

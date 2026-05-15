@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.23
+      - uses: linsk27/proof-pr@v0.1.24
         with:
           fail-on: high
           comment: "true"
@@ -144,7 +144,7 @@ npx proof-pr@latest check
 
 `check` 会自动选择常见主分支作为 base，并纳入已提交分支 diff、staged、unstaged 和未跟踪新文件。
 
-如果第一行输出 `0.1.23`，说明你正在使用当前最新发布版。
+如果第一行输出 `0.1.24`，说明你正在使用当前最新发布版。
 
 也可以全局安装：
 
@@ -170,6 +170,14 @@ node packages/cli/dist/index.js check
 ```bash
 proof-pr doctor
 ```
+
+想自动修复常见接入问题：
+
+```bash
+proof-pr doctor --fix
+```
+
+它只会创建或刷新 ProofPR 自己的接入文件：`.proofpr.yml`、`.github/workflows/proofpr.yml` 和 PR 模板，不会修改业务代码。
 
 已接入仓库但缺少 PR 模板：
 

@@ -3,6 +3,7 @@
 状态：接入正常
 统计：0 fail, 0 warn, 15 checks
 
+
 Checks:
 [pass] .proofpr.yml 可读取
        locale=zh-CN, preset=open-source-maintainer, riskThreshold=high
@@ -10,7 +11,7 @@ Checks:
        comment.enabled=true
 [pass] .github/workflows/proofpr.yml 已存在
 [pass] workflow 会在 Pull Request 事件运行
-[pass] GitHub Action 版本为 v0.1.23
+[pass] GitHub Action 版本为 v0.1.24
 [pass] workflow 具备写 PR 评论权限
 [pass] workflow 具备读取仓库内容权限
 [pass] workflow 会生成 HTML 可视化报告

@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.23`。
+当前最新公开版本是 `0.1.24`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.23
-git push origin v0.1.23
+git tag v0.1.24
+git push origin v0.1.24
 ```
 
 发布完成后需要检查：
@@ -66,9 +66,18 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.23
-npx proof-pr@latest --version -> 0.1.23
+npm view proof-pr version -> 0.1.24
+npx proof-pr@latest --version -> 0.1.24
 ```
+
+## `v0.1.24` 发布状态
+
+`v0.1.24` 是自检体验增强版，重点包括：
+
+- `proof-pr doctor --fix`：自动创建缺失的 `.proofpr.yml`、`.github/workflows/proofpr.yml` 和 PR 模板。
+- 当 ProofPR workflow 版本过旧、缺少 PR 触发、权限或 HTML artifact 时，`doctor --fix` 会刷新为当前推荐模板。
+- 当已有 PR 模板缺少验证、复现、截图或权限理由提示时，`doctor --fix` 只追加 ProofPR 证据补充块，不修改业务代码。
+- README、npm 包 README、快速开始和命令速查同步说明自动修复路径。
 
 ## `v0.1.23` 发布状态
 
@@ -160,7 +169,7 @@ npx proof-pr@latest --version -> 0.1.23
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.23` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.24` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 

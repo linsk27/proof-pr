@@ -22,7 +22,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.23";
+const CLI_VERSION = "0.1.24";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -70,6 +70,7 @@ interface DoctorCommandOptions {
   prTemplatePath: string;
   base?: string;
   head: string;
+  fix: boolean;
 }
 
 interface TemplateCommandOptions {
@@ -86,6 +87,7 @@ interface DoctorCheck {
 interface DoctorReport {
   checks: DoctorCheck[];
   nextSteps: string[];
+  fixes: string[];
 }
 
 interface InitFileResult {
@@ -323,6 +325,7 @@ program
   .option("--pr-template-path <path>", "Path to the pull request template.", ".github/pull_request_template.md")
   .option("--base <ref>", "Base git ref used for local diff checks. Defaults to the same auto-detected base as check.")
   .option("--head <ref>", "Head git ref used for local diff checks.", "HEAD")
+  .option("--fix", "Create or refresh ProofPR setup files when the fix is safe.", false)
   .action(async (options: DoctorCommandOptions) => {
     const report = await runDoctor(options);
     process.stdout.write(renderDoctorReport(report));
@@ -569,6 +572,9 @@ function renderGuide(): string {
 不确定装好没有：
    npx proof-pr@latest doctor
 
+想自动修复常见接入问题：
+   npx proof-pr@latest doctor --fix
+
 需要可分享页面：
    npx proof-pr@latest check --format html --output proofpr-report.html
 
@@ -626,6 +632,7 @@ ${renderMarkdownReport(result, locale)}`;
 }
 
 async function runDoctor(options: DoctorCommandOptions): Promise<DoctorReport> {
+  const fixes = options.fix ? await applyDoctorFixes(options) : [];
   const checks: DoctorCheck[] = [];
   const nextSteps = new Set<string>();
 
@@ -673,7 +680,51 @@ async function runDoctor(options: DoctorCommandOptions): Promise<DoctorReport> {
     nextSteps.add("当前接入状态正常；可以打开 PR，或运行 npx proof-pr@latest check 做本地自查。");
   }
 
-  return { checks, nextSteps: [...nextSteps] };
+  return { checks, nextSteps: [...nextSteps], fixes };
+}
+
+async function applyDoctorFixes(options: DoctorCommandOptions): Promise<string[]> {
+  const fixes: string[] = [];
+
+  if (!(await pathExists(options.config))) {
+    await writeOutput(options.config, renderConfigTemplate("open-source-maintainer"));
+    fixes.push(`已创建 ${options.config}`);
+  }
+
+  if (await shouldRefreshDoctorWorkflow(options.workflowPath)) {
+    await writeOutput(options.workflowPath, renderWorkflowTemplate("high", true, "proofpr-report.html"));
+    fixes.push(`已刷新 ${options.workflowPath}`);
+  }
+
+  if (!(await pathExists(options.prTemplatePath))) {
+    await writeOutput(options.prTemplatePath, renderPullRequestTemplate());
+    fixes.push(`已创建 ${options.prTemplatePath}`);
+  } else {
+    const template = await readFile(options.prTemplatePath, "utf8");
+    if (!hasProofPrTemplateEvidence(template)) {
+      const nextTemplate = `${template.trimEnd()}\n\n${renderPullRequestTemplateAddon()}`;
+      await writeOutput(options.prTemplatePath, nextTemplate);
+      fixes.push(`已向 ${options.prTemplatePath} 追加 ProofPR 证据提示`);
+    }
+  }
+
+  return fixes;
+}
+
+async function shouldRefreshDoctorWorkflow(path: string): Promise<boolean> {
+  if (!(await pathExists(path))) {
+    return true;
+  }
+
+  const workflow = await readFile(path, "utf8");
+  return (
+    !/pull_request\s*:/.test(workflow) ||
+    !new RegExp(`linsk27/proof-pr@v${escapeRegExp(CLI_VERSION)}`).test(workflow) ||
+    !/pull-requests\s*:\s*write/.test(workflow) ||
+    !/contents\s*:\s*read/.test(workflow) ||
+    !/html-output\s*:/.test(workflow) ||
+    !/actions\/upload-artifact@v\d+/.test(workflow)
+  );
 }
 
 function inspectWorkflow(workflow: string, checks: DoctorCheck[], nextSteps: Set<string>): void {
@@ -821,6 +872,10 @@ function renderDoctorReport(report: DoctorReport): string {
   const failCount = report.checks.filter((check) => check.level === "fail").length;
   const warnCount = report.checks.filter((check) => check.level === "warn").length;
   const status = failCount > 0 ? "需要先修复" : warnCount > 0 ? "基本可用，但建议优化" : "接入正常";
+  const fixes =
+    report.fixes.length > 0
+      ? `\nAuto-fix:\n${report.fixes.map((fix) => `- ${fix}`).join("\n")}\n`
+      : "";
   const checks = report.checks
     .map((check) => {
       const detail = check.detail ? `\n       ${check.detail}` : "";
@@ -833,6 +888,7 @@ function renderDoctorReport(report: DoctorReport): string {
 
 状态：${status}
 统计：${failCount} fail, ${warnCount} warn, ${report.checks.length} checks
+${fixes}
 
 Checks:
 ${checks}
@@ -974,6 +1030,10 @@ function isExecError(error: unknown): error is Error & { code: number; stdout?: 
   );
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 async function readPullRequestBody(options: ScanCommandOptions): Promise<string | undefined> {
   if (options.prBodyFile) {
     return readFile(options.prBodyFile, "utf8");
@@ -1089,6 +1149,25 @@ function renderPullRequestTemplate(): string {
 - [ ] 无破坏性变更
 - [ ] 需要迁移说明 / changelog
 - [ ] 需要灰度或回滚方案
+`;
+}
+
+function hasProofPrTemplateEvidence(template: string): boolean {
+  return (
+    /验证|verification|test/i.test(template) &&
+    /复现|reproduction|before|after|截图|screenshot|权限|permission/i.test(template)
+  );
+}
+
+function renderPullRequestTemplateAddon(): string {
+  return `## ProofPR 证据补充
+
+如果本次 PR 涉及代码、UI、依赖、GitHub Actions、MCP、环境变量或权限变更，请补充：
+
+- 验证方式：测试命令、手动验证步骤或不需要测试的原因。
+- 复现上下文：bug fix 请说明修改前如何复现、预期结果和实际结果。
+- 截图 / 录屏：UI 改动请提供 before/after。
+- 依赖 / 权限理由：说明新增依赖、lockfile、workflow、MCP 或权限变更的必要性和安全影响。
 `;
 }
 

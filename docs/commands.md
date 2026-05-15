@@ -29,6 +29,7 @@ npx proof-pr@latest guide
 | 场景 | 命令 | 结果在哪里看 |
 | --- | --- | --- |
 | 不确定是否装好 | `npx proof-pr@latest doctor` | 当前终端 |
+| 自动修复常见接入问题 | `npx proof-pr@latest doctor --fix` | 当前终端和接入文件 |
 | 已接入仓库但缺少 PR 模板 | `npx proof-pr@latest template` | `.github/pull_request_template.md` |
 | 想把报告保存成页面 | `npx proof-pr@latest check --format html --output proofpr-report.html` | `proofpr-report.html` |
 | 想接入 GitHub Code Scanning | `npx proof-pr@latest check --format sarif --output proofpr.sarif` | `proofpr.sarif` / Code Scanning |
@@ -114,7 +115,7 @@ npx proof-pr@latest doctor
 - `.github/workflows/proofpr.yml` 是否存在。
 - `.github/pull_request_template.md` 是否存在，以及是否提示验证、复现、截图或权限理由。
 - workflow 是否监听 `pull_request`。
-- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.23`。
+- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.24`。
 - 是否具备 `pull-requests: write` 和 `contents: read` 权限。
 - 是否启用了 `html-output` 和 `actions/upload-artifact`，方便下载 HTML 可视化报告。
 - 当前目录是否在 Git 仓库里，以及自动识别出的 base...HEAD diff 是否可读。
