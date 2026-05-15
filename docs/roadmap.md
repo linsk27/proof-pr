@@ -62,4 +62,4 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 
 ## 下一版优先级
 
-下一步优先用 `0.1.21` 的简化接入流程更新真实 demo PR 截图和 Marketplace 页面，并继续准备 GitHub Marketplace 上架材料。
+下一步优先用 `0.1.22` 的风险雷达和简化接入流程更新真实 demo PR 截图和 Marketplace 页面，并继续准备 GitHub Marketplace 上架材料。

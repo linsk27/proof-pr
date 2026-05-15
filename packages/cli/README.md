@@ -12,7 +12,7 @@ ProofPR 是给开源维护者和工程团队使用的 PR 证据门禁。它在�
 npx proof-pr@latest --version
 ```
 
-当前应输出 `0.1.21`。
+当前应输出 `0.1.22`。
 
 不知道用哪个功能时：
 
@@ -83,7 +83,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.21
+- uses: linsk27/proof-pr@v0.1.22
   with:
     fail-on: high
     comment: "true"
@@ -95,6 +95,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 - 风险等级：`low`、`medium`、`high`。
 - 证据评分：0-100 分。
 - Review 门禁：正常 review、重点 review、先补证据、风险处理前不要合并。
+- 风险雷达：把 findings 归并成证据、供应链、Workflow、Secret 和 Review 面。
 - Review 行动清单：维护者可直接执行的 checklist。
 - 可选输出：GitHub annotations、SARIF、benchmark report、可筛选并可复制补证清单的独立 HTML 可视化报告；CLI 可用 `--output` 直接写文件。
 

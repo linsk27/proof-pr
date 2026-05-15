@@ -38,6 +38,18 @@
 - 扣分项：-30，pull_request_target workflow 需要重点审查高权限触发路径。
 - 扣分项：-30，Workflow checkout PR head 代码，需要审查权限边界。
 
+## 风险雷达
+
+这部分把 rule id 归并成维护者更容易理解的风险来源。
+
+| 风险来源 | Findings | 最高级别 | 说明 |
+| --- | ---: | --- | --- |
+| 证据完整性 | 0 | 信息 | PR 描述、验证、复现、截图、changelog 和证据契约是否足够。 |
+| 供应链 | 0 | 信息 | 依赖来源、版本固定、lockfile、解析覆盖和安装脚本是否可信。 |
+| Workflow 权限 | 2 | 高 | GitHub Actions 权限、OIDC、pull_request_target 和 PR head checkout 是否安全。 |
+| Secret 泄露 | 0 | 信息 | diff 中是否出现疑似 token、API key 或数据库连接串。 |
+| Review 面 | 1 | 高 | 改动规模、敏感路径、MCP 或本地 agent 配置是否需要重点 review。 |
+
 ## 可复制补证清单
 
 贡献者可以直接复制下面内容补到 PR 描述里，维护者也可以把它作为 review 回复。

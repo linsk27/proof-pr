@@ -13,9 +13,9 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 
 ## 现在能用吗
 
-- GitHub Release：[`v0.1.21`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.21)
-- npm：[`proof-pr@0.1.21`](https://www.npmjs.com/package/proof-pr)
-- GitHub Action：`linsk27/proof-pr@v0.1.21`
+- GitHub Release：[`v0.1.22`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.22)
+- npm：[`proof-pr@0.1.22`](https://www.npmjs.com/package/proof-pr)
+- GitHub Action：`linsk27/proof-pr@v0.1.22`
 - 当前源码 benchmark：`22/22 passed`
 - 接入体检：`npx proof-pr@latest doctor`
 - PR 模板：`npx proof-pr@latest template`
@@ -36,7 +36,7 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-这两个命令当前都应输出 `0.1.21`。
+这两个命令当前都应输出 `0.1.22`。
 
 不知道该用哪个功能时，直接打开中文功能菜单：
 
@@ -173,6 +173,7 @@ Benchmark 输出，证明规则样本仍按预期命中：
 | `Risk` / `风险等级` | `low`、`medium`、`high`，表示整体 review 风险。 |
 | `Evidence score` / `证据评分` | 0-100 分，越高代表 PR 证据越充分。 |
 | `Review gate` / `Review 门禁` | 建议正常 review、重点 review、先补证据，或风险处理前不要合并。 |
+| `Risk Radar` / `风险雷达` | 把 rule id 归并成证据完整性、供应链、Workflow 权限、Secret 泄露和 Review 面，先告诉维护者该从哪里看。 |
 | `Review Plan` / `Review 行动清单` | 可直接执行的维护者 checklist 和重点文件。 |
 | `一键补证建议` | 可复制给贡献者的 PR 描述补充模板，减少来回追问。 |
 
@@ -279,7 +280,7 @@ evidence:
 `init` 默认已经会在 GitHub Action 里保存 HTML 面板，对应 workflow 片段如下：
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.21
+- uses: linsk27/proof-pr@v0.1.22
   with:
     html-output: proofpr-report.html
 - uses: actions/upload-artifact@v4

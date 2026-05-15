@@ -50722,6 +50722,7 @@ function renderHtmlReport(result, locale = "en") {
     const scoreGrade = formatEvidenceGrade(result.evidenceScore.grade, locale);
     const findingsBySeverity = countFindingsBySeverity(result.findings);
     const ruleCounts = countFindingsByRule(result.findings);
+    const riskLenses = buildRiskLenses(result.findings, locale);
     const fixPrompt = renderContributorFixPrompt(result, locale);
     const evidenceSignals = [
         [labels.prDescription, locale === "zh-CN" ? translateDescriptionState(result.summary.pullRequestDescription) : result.summary.pullRequestDescription, result.summary.pullRequestDescription === "present"],
@@ -51001,6 +51002,56 @@ function renderHtmlReport(result, locale = "en") {
       font-size: 22px;
     }
 
+    .radar-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .radar-row {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 11px 12px;
+      background: #fbfcfd;
+    }
+
+    .radar-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+
+    .radar-label {
+      font-weight: 680;
+    }
+
+    .radar-count {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .radar-track {
+      height: 10px;
+      border-radius: 999px;
+      background: #eef1f5;
+      border: 1px solid var(--line);
+      overflow: hidden;
+      margin-bottom: 7px;
+    }
+
+    .radar-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: var(--blue);
+    }
+
+    .radar-fill.high { background: var(--red); }
+    .radar-fill.medium { background: var(--amber); }
+    .radar-fill.low { background: var(--green); }
+    .radar-fill.info { background: var(--blue); }
+
     .muted {
       color: var(--muted);
       font-size: 13px;
@@ -51135,6 +51186,14 @@ function renderHtmlReport(result, locale = "en") {
         <h2>${labels.evidenceSignals}</h2>
         <div class="signal-list">
           ${evidenceSignals.map(([name, state, ok]) => signalItem(name, state, ok)).join("\n")}
+        </div>
+      </article>
+
+      <article class="card full">
+        <h2>${labels.riskRadar}</h2>
+        <p class="muted" style="margin-bottom: 12px;">${labels.riskRadarHint}</p>
+        <div class="radar-list">
+          ${riskLenses.map((lens) => htmlRiskLens(lens, locale)).join("\n          ")}
         </div>
       </article>
 
@@ -51355,6 +51414,7 @@ function renderEnglishMarkdownReport(result) {
         ""
     ];
     appendEvidenceScoreSection(lines, result, "en");
+    appendRiskRadarSection(lines, result, "en");
     appendQuickFixSection(lines, result, "en");
     appendReviewPlanSection(lines, result, "en");
     if (result.findings.length === 0) {
@@ -51398,6 +51458,7 @@ function renderChineseMarkdownReport(result) {
         ""
     ];
     appendEvidenceScoreSection(lines, result, "zh-CN");
+    appendRiskRadarSection(lines, result, "zh-CN");
     appendQuickFixSection(lines, result, "zh-CN");
     appendReviewPlanSection(lines, result, "zh-CN");
     if (result.findings.length === 0) {
@@ -51432,6 +51493,19 @@ function appendEvidenceScoreSection(lines, result, locale) {
     }
     else {
         lines.push(locale === "zh-CN" ? "- 扣分项：无。" : "- Deduction: none.");
+    }
+    lines.push("");
+}
+function appendRiskRadarSection(lines, result, locale) {
+    const lenses = buildRiskLenses(result.findings, locale);
+    lines.push(locale === "zh-CN" ? "## 风险雷达" : "## Risk Radar", "");
+    lines.push(locale === "zh-CN"
+        ? "这部分把 rule id 归并成维护者更容易理解的风险来源。"
+        : "This groups rule ids into maintainer-facing risk sources.");
+    lines.push("", locale === "zh-CN" ? "| 风险来源 | Findings | 最高级别 | 说明 |" : "| Source | Findings | Highest | Why it matters |");
+    lines.push("| --- | ---: | --- | --- |");
+    for (const lens of lenses) {
+        lines.push(`| ${lens.label} | ${lens.count} | ${formatSeverity(lens.highest, locale)} | ${lens.hint} |`);
     }
     lines.push("");
 }
@@ -52040,6 +52114,8 @@ function htmlLabels(locale) {
             quickFixHint: "复制这段内容到 PR 描述或评论里，贡献者按空白项补齐即可。",
             copyFix: "复制补证清单",
             copiedFix: "已复制",
+            riskRadar: "风险雷达",
+            riskRadarHint: "按维护者视角归并风险来源，帮助先判断这轮 review 应该看哪里。",
             findingDistribution: "Finding 分布",
             findingFilters: "筛选风险发现",
             allFindings: "全部",
@@ -52096,6 +52172,8 @@ function htmlLabels(locale) {
         quickFixHint: "Copy this into the PR description or a review reply, then fill the blanks.",
         copyFix: "Copy checklist",
         copiedFix: "Copied",
+        riskRadar: "Risk radar",
+        riskRadarHint: "Groups rule hits by maintainer-facing risk source so the first review pass has a clear map.",
         findingDistribution: "Finding distribution",
         findingFilters: "Filter findings",
         allFindings: "All",
@@ -52129,6 +52207,20 @@ function signalItem(name, state, ok) {
 }
 function severityItem(severity, value, label) {
     return `<div class="severity ${severity === "high" ? "tone-high" : severity === "medium" ? "tone-medium" : severity === "low" ? "tone-low" : ""}"><strong>${value}</strong><span>${escapeHtml(label)}</span></div>`;
+}
+function htmlRiskLens(lens, locale) {
+    const severity = formatSeverity(lens.highest, locale);
+    const fillClass = lens.highest === "info" ? "info" : lens.highest;
+    return `<div class="radar-row">
+    <div class="radar-head">
+      <span class="radar-label">${escapeHtml(lens.label)}</span>
+      <span class="radar-count">${lens.count} ${locale === "zh-CN" ? "项" : "findings"} · ${escapeHtml(severity)}</span>
+    </div>
+    <div class="radar-track" aria-label="${escapeHtml(lens.label)}">
+      <div class="radar-fill ${fillClass}" style="width: ${lens.score}%"></div>
+    </div>
+    <div class="muted">${escapeHtml(lens.hint)}</div>
+  </div>`;
 }
 function findingFilterButton(label, severity, count, active = false) {
     return `<button class="filter-button${active ? " active" : ""}" type="button" data-filter-severity="${escapeHtml(severity)}">${escapeHtml(label)} <span class="muted">${count}</span></button>`;
@@ -52179,6 +52271,72 @@ function countFindingsBySeverity(findings) {
         counts[finding.severity] += 1;
         return counts;
     }, { info: 0, low: 0, medium: 0, high: 0 });
+}
+function buildRiskLenses(findings, locale) {
+    const lenses = riskLensDefinitions(locale).map((lens) => ({
+        ...lens,
+        count: 0,
+        highest: "info",
+        score: 0
+    }));
+    const byId = new Map(lenses.map((lens) => [lens.id, lens]));
+    for (const finding of findings) {
+        const lens = byId.get(riskLensIdForRule(finding.ruleId));
+        if (!lens) {
+            continue;
+        }
+        lens.count += 1;
+        if (severityWeight(finding.severity) > severityWeight(lens.highest)) {
+            lens.highest = finding.severity;
+        }
+    }
+    for (const lens of lenses) {
+        lens.score = lens.count === 0 ? 0 : Math.min(100, severityWeight(lens.highest) * 24 + lens.count * 12);
+    }
+    return lenses;
+}
+function riskLensDefinitions(locale) {
+    if (locale === "zh-CN") {
+        return [
+            { id: "evidence", label: "证据完整性", hint: "PR 描述、验证、复现、截图、changelog 和证据契约是否足够。" },
+            { id: "supply-chain", label: "供应链", hint: "依赖来源、版本固定、lockfile、解析覆盖和安装脚本是否可信。" },
+            { id: "workflow", label: "Workflow 权限", hint: "GitHub Actions 权限、OIDC、pull_request_target 和 PR head checkout 是否安全。" },
+            { id: "secrets", label: "Secret 泄露", hint: "diff 中是否出现疑似 token、API key 或数据库连接串。" },
+            { id: "review-surface", label: "Review 面", hint: "改动规模、敏感路径、MCP 或本地 agent 配置是否需要重点 review。" }
+        ];
+    }
+    return [
+        { id: "evidence", label: "Evidence completeness", hint: "PR description, verification, reproduction, screenshots, changelog, and evidence contracts." },
+        { id: "supply-chain", label: "Supply chain", hint: "Dependency provenance, pinning, lockfiles, resolution overrides, and lifecycle scripts." },
+        { id: "workflow", label: "Workflow privilege", hint: "GitHub Actions permissions, OIDC, pull_request_target, and pull request head checkout." },
+        { id: "secrets", label: "Secret exposure", hint: "Possible tokens, API keys, or database URLs committed in the diff." },
+        { id: "review-surface", label: "Review surface", hint: "Change size, sensitive paths, MCP, or local agent configuration needing focused review." }
+    ];
+}
+function riskLensIdForRule(ruleId) {
+    if (ruleId.startsWith("dependency-")) {
+        return "supply-chain";
+    }
+    if (ruleId.startsWith("workflow-")) {
+        return "workflow";
+    }
+    if (ruleId.startsWith("secret-detected")) {
+        return "secrets";
+    }
+    if (ruleId === "missing-tests" ||
+        ruleId === "thin-pr-description" ||
+        ruleId === "missing-pr-description" ||
+        ruleId === "missing-reproduction-context" ||
+        ruleId.startsWith("evidence-contract:")) {
+        return "evidence";
+    }
+    return "review-surface";
+}
+function severityWeight(severity) {
+    return { info: 0, low: 1, medium: 2, high: 3 }[severity];
+}
+function formatSeverity(severity, locale) {
+    return locale === "zh-CN" ? translateSeverity(severity) : severity;
 }
 function countFindingsByRule(findings) {
     const counts = new Map();

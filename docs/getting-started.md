@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.21
+      - uses: linsk27/proof-pr@v0.1.22
         with:
           fail-on: high
           comment: "true"
@@ -114,6 +114,7 @@ on:
 - PR 页面 `Conversation`：这里会出现 `ProofPR 审查报告` 评论。
 - 仓库 `Actions` 页面：这里可以看到 `ProofPR` workflow 的运行日志和 job summary。
 - PR 顶部的 checks 状态：如果风险达到 `fail-on` 阈值，检查项会失败，提醒维护者先处理风险。
+- 报告里的 `风险雷达`：把风险归并成证据、供应链、Workflow、Secret 和 Review 面，帮助你先决定看哪里。
 - GitHub annotations：`v0.1.5` 起会把 finding 输出为 workflow annotations，方便在 PR 文件视图里定位。
 - Actions artifact：默认会上传 `proofpr-report`，里面是可搜索、可筛选、可复制补证清单的 `proofpr-report.html`。
 
@@ -145,7 +146,7 @@ npx proof-pr@latest check
 
 `check` 会自动选择常见主分支作为 base，并纳入已提交分支 diff、staged、unstaged 和未跟踪新文件。
 
-如果第一行输出 `0.1.21`，说明你正在使用当前最新发布版。
+如果第一行输出 `0.1.22`，说明你正在使用当前最新发布版。
 
 也可以全局安装：
 

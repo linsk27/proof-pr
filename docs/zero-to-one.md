@@ -20,6 +20,7 @@ npx proof-pr@latest demo workflow --locale zh-CN
 - 一份 GitHub Actions job summary。
 - 一组 GitHub annotations，用来定位具体 finding。
 - 一个 `proofpr-report` artifact，里面是可搜索、可筛选的 HTML 可视化报告。
+- 一块 `风险雷达`，先告诉维护者风险集中在证据、供应链、Workflow、Secret 还是 Review 面。
 - 可选的 SARIF 文件，上传到 GitHub Code Scanning。
 
 ![ProofPR 输出位置示意图](assets/proofpr-output-locations.svg)
@@ -148,7 +149,7 @@ npx proof-pr@latest check
 
 `check` 会自动选择常见主分支作为 base，并纳入已提交分支 diff、staged、unstaged 和未跟踪新文件。
 
-第一行当前应输出 `0.1.21`，用于确认 npm latest 已经安装正确。
+第一行当前应输出 `0.1.22`，用于确认 npm latest 已经安装正确。
 
 扫描内置案例：
 
@@ -200,7 +201,7 @@ permissions:
 
 steps:
   - uses: actions/checkout@v4
-  - uses: linsk27/proof-pr@v0.1.21
+  - uses: linsk27/proof-pr@v0.1.22
     with:
       fail-on: high
       comment: "true"

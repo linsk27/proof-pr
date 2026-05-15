@@ -268,6 +268,56 @@
       font-size: 22px;
     }
 
+    .radar-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .radar-row {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 11px 12px;
+      background: #fbfcfd;
+    }
+
+    .radar-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+
+    .radar-label {
+      font-weight: 680;
+    }
+
+    .radar-count {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .radar-track {
+      height: 10px;
+      border-radius: 999px;
+      background: #eef1f5;
+      border: 1px solid var(--line);
+      overflow: hidden;
+      margin-bottom: 7px;
+    }
+
+    .radar-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: var(--blue);
+    }
+
+    .radar-fill.high { background: var(--red); }
+    .radar-fill.medium { background: var(--amber); }
+    .radar-fill.low { background: var(--green); }
+    .radar-fill.info { background: var(--blue); }
+
     .muted {
       color: var(--muted);
       font-size: 13px;
@@ -407,6 +457,63 @@
 <div class="signal"><span class="signal-name">截图证据</span><span class="signal-state tone-medium">无</span></div>
 <div class="signal"><span class="signal-name">Changelog</span><span class="signal-state tone-medium">无</span></div>
 <div class="signal"><span class="signal-name">权限理由</span><span class="signal-state tone-medium">无</span></div>
+        </div>
+      </article>
+
+      <article class="card full">
+        <h2>风险雷达</h2>
+        <p class="muted" style="margin-bottom: 12px;">按维护者视角归并风险来源，帮助先判断这轮 review 应该看哪里。</p>
+        <div class="radar-list">
+          <div class="radar-row">
+    <div class="radar-head">
+      <span class="radar-label">证据完整性</span>
+      <span class="radar-count">0 项 · 信息</span>
+    </div>
+    <div class="radar-track" aria-label="证据完整性">
+      <div class="radar-fill info" style="width: 0%"></div>
+    </div>
+    <div class="muted">PR 描述、验证、复现、截图、changelog 和证据契约是否足够。</div>
+  </div>
+          <div class="radar-row">
+    <div class="radar-head">
+      <span class="radar-label">供应链</span>
+      <span class="radar-count">0 项 · 信息</span>
+    </div>
+    <div class="radar-track" aria-label="供应链">
+      <div class="radar-fill info" style="width: 0%"></div>
+    </div>
+    <div class="muted">依赖来源、版本固定、lockfile、解析覆盖和安装脚本是否可信。</div>
+  </div>
+          <div class="radar-row">
+    <div class="radar-head">
+      <span class="radar-label">Workflow 权限</span>
+      <span class="radar-count">2 项 · 高</span>
+    </div>
+    <div class="radar-track" aria-label="Workflow 权限">
+      <div class="radar-fill high" style="width: 96%"></div>
+    </div>
+    <div class="muted">GitHub Actions 权限、OIDC、pull_request_target 和 PR head checkout 是否安全。</div>
+  </div>
+          <div class="radar-row">
+    <div class="radar-head">
+      <span class="radar-label">Secret 泄露</span>
+      <span class="radar-count">0 项 · 信息</span>
+    </div>
+    <div class="radar-track" aria-label="Secret 泄露">
+      <div class="radar-fill info" style="width: 0%"></div>
+    </div>
+    <div class="muted">diff 中是否出现疑似 token、API key 或数据库连接串。</div>
+  </div>
+          <div class="radar-row">
+    <div class="radar-head">
+      <span class="radar-label">Review 面</span>
+      <span class="radar-count">1 项 · 高</span>
+    </div>
+    <div class="radar-track" aria-label="Review 面">
+      <div class="radar-fill high" style="width: 84%"></div>
+    </div>
+    <div class="muted">改动规模、敏感路径、MCP 或本地 agent 配置是否需要重点 review。</div>
+  </div>
         </div>
       </article>
 
