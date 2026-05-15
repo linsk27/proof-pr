@@ -707,6 +707,10 @@ export function renderHtmlReport(result: ScanResult, locale: ReportLocale = "en"
 `;
 }
 
+export function renderContributorRequest(result: ScanResult, locale: ReportLocale = "en"): string {
+  return renderContributorFixPrompt(result, locale);
+}
+
 export function getReportMarker(): string {
   return REPORT_MARKER;
 }

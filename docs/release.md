@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.24`。
+当前最新公开版本是 `0.1.25`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.24
-git push origin v0.1.24
+git tag v0.1.25
+git push origin v0.1.25
 ```
 
 发布完成后需要检查：
@@ -66,9 +66,18 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.24
-npx proof-pr@latest --version -> 0.1.24
+npm view proof-pr version -> 0.1.25
+npx proof-pr@latest --version -> 0.1.25
 ```
+
+## `v0.1.25` 发布状态
+
+`v0.1.25` 是补证请求增强版，重点包括：
+
+- 新增 `proof-pr request`，只输出可以直接贴给贡献者的补证请求，不展示完整扫描报告。
+- 新增 `proof-pr request --output proofpr-request.md`，方便维护者把补证请求保存为文件或复制到 PR 评论。
+- Core 新增 `renderContributorRequest`，让后续 GitHub Action 或外部集成可以复用同一段补证请求逻辑。
+- README、npm 包 README、命令速查和快速开始同步说明 request 路径。
 
 ## `v0.1.24` 发布状态
 
@@ -169,7 +178,7 @@ npx proof-pr@latest --version -> 0.1.24
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.24` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.25` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 

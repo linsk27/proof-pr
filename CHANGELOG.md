@@ -4,6 +4,13 @@
 
 暂无。
 
+## 0.1.25 - 2026-05-15
+
+- 新增 `proof-pr request`，使用和 `check` 相同的默认 diff 逻辑，但只输出可以直接发给贡献者的补证请求。
+- 新增 `proof-pr request --output proofpr-request.md`，方便维护者把补证请求保存为文件或复制到 PR 评论。
+- Core 新增 `renderContributorRequest`，复用 HTML / Markdown 报告中的补证请求生成逻辑。
+- README、npm 包 README、快速开始和命令速查同步说明 request 路径。
+
 ## 0.1.24 - 2026-05-15
 
 - 新增 `proof-pr doctor --fix`，可自动创建缺失的 `.proofpr.yml`、`.github/workflows/proofpr.yml` 和 PR 模板。

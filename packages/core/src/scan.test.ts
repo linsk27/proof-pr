@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseConfig } from "./config.js";
-import { renderHtmlReport, renderMarkdownReport, renderSarifReport } from "./reporters.js";
+import { renderContributorRequest, renderHtmlReport, renderMarkdownReport, renderSarifReport } from "./reporters.js";
 import { scanDiff } from "./scan.js";
 
 describe("scanDiff", () => {
@@ -609,6 +609,23 @@ index 0000000..1111111 100644
     expect(report).toContain("依赖清单变更但缺少 lockfile");
     expect(report).toContain("| 供应链 |");
     expect(report).not.toContain("Dependency uses a non-registry source");
+  });
+
+  it("renders a contributor-ready evidence request", () => {
+    const result = scanDiff(`diff --git a/src/auth.ts b/src/auth.ts
+index 0000000..1111111 100644
+--- a/src/auth.ts
++++ b/src/auth.ts
+@@ -1 +1,2 @@
+ export function auth() {}
++export function logout() {}
+`);
+    const request = renderContributorRequest(result, "zh-CN");
+
+    expect(request).toContain("请在这个 PR 描述中补充以下内容");
+    expect(request).toContain("## 验证方式");
+    expect(request).toContain("## ProofPR 需要处理的点");
+    expect(request).toContain("补充测试或手动验证证据");
   });
 
   it("renders a standalone HTML visual report", () => {

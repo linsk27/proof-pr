@@ -44,7 +44,7 @@ npx proof-pr@latest doctor
 
 ![ProofPR doctor 体检输出](screenshots/proofpr-doctor-output.png)
 
-如果你不确定下一步该做什么，可以直接看中文向导。它会把默认路径收敛成“先看效果、接入仓库、本地自查”三步：
+如果你不确定下一步该做什么，可以直接看中文向导。它会把默认路径收敛成“先看效果、接入仓库、本地自查、生成补证请求”四个动作：
 
 ```bash
 npx proof-pr@latest
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.24
+      - uses: linsk27/proof-pr@v0.1.25
         with:
           fail-on: high
           comment: "true"
@@ -140,11 +140,12 @@ npx proof-pr@latest guide
 npx proof-pr@latest demo workflow --locale zh-CN
 npx proof-pr@latest init
 npx proof-pr@latest check
+npx proof-pr@latest request
 ```
 
 `check` 会自动选择常见主分支作为 base，并纳入已提交分支 diff、staged、unstaged 和未跟踪新文件。
 
-如果第一行输出 `0.1.24`，说明你正在使用当前最新发布版。
+如果第一行输出 `0.1.25`，说明你正在使用当前最新发布版。
 
 也可以全局安装：
 
@@ -183,6 +184,13 @@ proof-pr doctor --fix
 
 ```bash
 proof-pr template
+```
+
+只生成可以发给贡献者的补证请求：
+
+```bash
+proof-pr request
+proof-pr request --output proofpr-request.md
 ```
 
 生成独立 HTML 可视化报告：

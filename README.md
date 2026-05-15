@@ -21,19 +21,20 @@ ProofPR 会读取 PR diff、PR 描述和仓库配置，判断贡献者是否补�
 
 ## 现在能用吗
 
-- GitHub Release：[`v0.1.24`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.24)
-- npm：[`proof-pr@0.1.24`](https://www.npmjs.com/package/proof-pr)
-- GitHub Action：`linsk27/proof-pr@v0.1.24`
+- GitHub Release：[`v0.1.25`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.25)
+- npm：[`proof-pr@0.1.25`](https://www.npmjs.com/package/proof-pr)
+- GitHub Action：`linsk27/proof-pr@v0.1.25`
 - 当前源码 benchmark：`22/22 passed`
 - 默认接入：`npx proof-pr@latest init`
 - 本地自查：`npx proof-pr@latest check`
+- 补证请求：`npx proof-pr@latest request`
 - 可视化报告：`init` 生成的 workflow 会自动上传 `proofpr-report.html` artifact
 
 项目当前状态：
 
 - **已可正式试用**：CLI、GitHub Action、npm 包、GitHub Release、中文文档和截图都已经打通。
 - **核心边界明确**：ProofPR 不做通用代码审查，不判断代码好不好；它只做确定性 PR 证据门禁，帮助维护者先判断是否值得 review。
-- **发布链路已验证**：npm Trusted Publishing 已绑定 `linsk27/proof-pr` + `release.yml`，`v0.1.21` 到 `v0.1.24` 已通过 GitHub OIDC 自动发布到 npm。
+- **发布链路已验证**：npm Trusted Publishing 已绑定 `linsk27/proof-pr` + `release.yml`，`v0.1.21` 到 `v0.1.25` 已通过 GitHub OIDC 自动发布到 npm。
 - **下一步增长点**：继续减少首屏概念，补充真实 PR 案例和 Marketplace 上架材料。
 
 验证你拿到的是最新版本：
@@ -43,7 +44,7 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-这两个命令当前都应输出 `0.1.24`。
+这两个命令当前都应输出 `0.1.25`。
 
 不知道怎么开始时，直接运行中文向导：
 
@@ -55,13 +56,14 @@ npx proof-pr@latest guide
 
 ![ProofPR 中文功能菜单](docs/screenshots/proofpr-guide-output.png)
 
-默认只需要三条命令：
+默认只需要四条命令：
 
 | 目标 | 命令 |
 | --- | --- |
 | 不接入仓库，先体验报告 | `npx proof-pr@latest demo workflow --locale zh-CN` |
 | 接入 GitHub PR 自动检查 | `npx proof-pr@latest init` |
 | 本地检查当前分支 | `npx proof-pr@latest check` |
+| 生成贡献者补证请求 | `npx proof-pr@latest request` |
 
 其他能力是辅助项，不是理解 ProofPR 的入口：
 
@@ -69,6 +71,7 @@ npx proof-pr@latest guide
 | --- | --- |
 | 不确定是否装好 | `npx proof-pr@latest doctor` |
 | 自动修复常见接入问题 | `npx proof-pr@latest doctor --fix` |
+| 把补证请求写入文件 | `npx proof-pr@latest request --output proofpr-request.md` |
 | 生成 HTML 可视化报告 | `npx proof-pr@latest check --format html --output proofpr-report.html` |
 | 生成 SARIF | `npx proof-pr@latest check --format sarif --output proofpr.sarif` |
 | 查看内置案例 | `npx proof-pr@latest demo --list` |
@@ -142,12 +145,18 @@ ProofPR 会在这些时机运行：
 - PR synchronize：PR 分支继续 push。
 - PR reopened：重新打开 PR。
 
-### 4. 看报告
+### 4. 看报告或生成补证请求
 
 报告主要出现在 PR 评论区、GitHub Actions summary、workflow annotations 和 `proofpr-report` artifact。想先本地试跑，也可以直接执行：
 
 ```bash
 npx proof-pr@latest check
+```
+
+如果你只想得到一段可以直接发给贡献者的补证说明：
+
+```bash
+npx proof-pr@latest request
 ```
 
 真实 PR 评论截图来自 [demo PR #1](https://github.com/linsk27/proof-pr/pull/1)：
@@ -292,7 +301,7 @@ evidence:
 `init` 默认已经会在 GitHub Action 里保存 HTML 面板，对应 workflow 片段如下：
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.24
+- uses: linsk27/proof-pr@v0.1.25
   with:
     html-output: proofpr-report.html
 - uses: actions/upload-artifact@v4

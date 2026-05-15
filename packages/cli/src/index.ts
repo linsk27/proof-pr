@@ -9,6 +9,7 @@ import {
   loadConfig,
   parseLocale,
   parsePreset,
+  renderContributorRequest,
   renderHtmlReport,
   renderMarkdownReport,
   renderSarifReport,
@@ -22,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.24";
+const CLI_VERSION = "0.1.25";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -50,6 +51,14 @@ interface CheckCommandOptions {
   output?: string;
   locale?: ReportLocale;
   failOn: FailLevel;
+}
+
+interface RequestCommandOptions {
+  base?: string;
+  head: string;
+  config: string;
+  output?: string;
+  locale?: ReportLocale;
 }
 
 interface InitCommandOptions {
@@ -412,6 +421,30 @@ program
   });
 
 program
+  .command("request")
+  .description("Print a contributor-ready evidence request for the current branch.")
+  .option("--base <ref>", "Base git ref. Defaults to origin/main, origin/master, main, or master.")
+  .option("--head <ref>", "Head git ref used with --base.", "HEAD")
+  .option("--config <path>", "Path to .proofpr.yml.", ".proofpr.yml")
+  .option("--output <path>", "Write the request to a file instead of stdout.")
+  .option("--locale <locale>", "Report language: en or zh-CN.", "zh-CN")
+  .action(async (options: RequestCommandOptions) => {
+    const base = options.base ?? (await resolveDefaultBaseRef());
+    const diffText = await readCheckDiff(base, options.head);
+    const config = await loadConfig(options.config);
+    const result = scanDiff(diffText, { config });
+    const locale = parseLocale(options.locale, config.locale);
+    const output = renderContributorRequest(result, locale);
+
+    if (options.output) {
+      await writeOutput(options.output, `${output}\n`);
+      process.stdout.write(`ProofPR contributor request written to ${options.output}\n`);
+    } else {
+      process.stdout.write(`${output}\n`);
+    }
+  });
+
+program
   .command("scan", { isDefault: true })
   .description("Scan a git diff and print a ProofPR report.")
   .option("--base <ref>", "Base git ref. When provided, ProofPR scans base...head.")
@@ -551,7 +584,7 @@ function renderGuide(): string {
 它只回答一个问题：
 这个 PR 有没有足够证据，值得维护者开始 review？
 
-默认只用三条命令：
+默认只用四条命令：
 
 1. 先看效果，不改仓库
    npx proof-pr@latest demo workflow --locale zh-CN
@@ -563,6 +596,10 @@ function renderGuide(): string {
 3. 发 PR 前本地自查
    npx proof-pr@latest check
    自动识别常见 base 分支，并检查当前工作区相对 base 的最终改动。
+
+4. 直接生成补证请求
+   npx proof-pr@latest request
+   只输出一段可以贴给贡献者的补证说明，不展示完整扫描报告。
 
 报告会给出：
 - 是否建议继续 review、先补证据，还是先处理高风险。
@@ -581,6 +618,7 @@ function renderGuide(): string {
 高级命令按需使用：
 - npx proof-pr@latest template
 - npx proof-pr@latest demo --list
+- npx proof-pr@latest request --output proofpr-request.md
 - npx proof-pr@latest check --format sarif --output proofpr.sarif
 - npx proof-pr@latest benchmark --cases benchmarks/cases
 `;

@@ -23,6 +23,7 @@ npx proof-pr@latest guide
 | 先看效果，不改仓库 | `npx proof-pr@latest demo workflow --locale zh-CN` | 当前终端 |
 | 接入 GitHub PR 自动检查 | `npx proof-pr@latest init` | PR 评论、Actions summary、Checks、HTML artifact |
 | 发 PR 前本地自查 | `npx proof-pr@latest check` | 当前终端 |
+| 生成贡献者补证请求 | `npx proof-pr@latest request` | 当前终端 |
 
 ## 辅助命令
 
@@ -31,6 +32,7 @@ npx proof-pr@latest guide
 | 不确定是否装好 | `npx proof-pr@latest doctor` | 当前终端 |
 | 自动修复常见接入问题 | `npx proof-pr@latest doctor --fix` | 当前终端和接入文件 |
 | 已接入仓库但缺少 PR 模板 | `npx proof-pr@latest template` | `.github/pull_request_template.md` |
+| 把补证请求写入文件 | `npx proof-pr@latest request --output proofpr-request.md` | `proofpr-request.md` |
 | 想把报告保存成页面 | `npx proof-pr@latest check --format html --output proofpr-report.html` | `proofpr-report.html` |
 | 想接入 GitHub Code Scanning | `npx proof-pr@latest check --format sarif --output proofpr.sarif` | `proofpr.sarif` / Code Scanning |
 | 查看所有内置案例 | `npx proof-pr@latest demo --list` | 当前终端 |
@@ -115,7 +117,7 @@ npx proof-pr@latest doctor
 - `.github/workflows/proofpr.yml` 是否存在。
 - `.github/pull_request_template.md` 是否存在，以及是否提示验证、复现、截图或权限理由。
 - workflow 是否监听 `pull_request`。
-- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.24`。
+- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.25`。
 - 是否具备 `pull-requests: write` 和 `contents: read` 权限。
 - 是否启用了 `html-output` 和 `actions/upload-artifact`，方便下载 HTML 可视化报告。
 - 当前目录是否在 Git 仓库里，以及自动识别出的 base...HEAD diff 是否可读。
@@ -159,7 +161,23 @@ npx proof-pr@latest check --format html --output proofpr-report.html
 - 一键复制“补证清单”，发给贡献者补 PR 描述。
 - 查看“风险雷达”，先判断风险主要来自证据、供应链、Workflow、Secret 还是 Review 面。
 
-## 6. 生成 SARIF
+## 6. 只生成贡献者补证请求
+
+执行：
+
+```bash
+npx proof-pr@latest request
+```
+
+这个命令和 `check` 使用同一套默认 diff 逻辑，但只输出一段可以直接贴给贡献者的补证说明。适合维护者不想转发完整报告，只想让贡献者补充测试、复现、截图、依赖或权限理由时使用。
+
+写入文件：
+
+```bash
+npx proof-pr@latest request --output proofpr-request.md
+```
+
+## 7. 生成 SARIF
 
 执行：
 
@@ -169,7 +187,7 @@ npx proof-pr@latest check --format sarif --output proofpr.sarif
 
 SARIF 主要给 GitHub Code Scanning 或其他安全平台读取。完整接入方式见 [SARIF / Code Scanning](sarif-code-scanning.md)。
 
-## 7. 跑内置风险案例
+## 8. 跑内置风险案例
 
 执行：
 
@@ -179,7 +197,7 @@ npx proof-pr@latest demo workflow --locale zh-CN
 
 这个命令不需要修改你的项目，也不需要 examples 文件，适合快速理解 ProofPR 会如何判断 workflow、供应链依赖、secret、测试证据这些风险。依赖案例会展示大版本升级、非注册表来源、未固定版本和 lockfile 提示。
 
-## 8. 跑 benchmark
+## 9. 跑 benchmark
 
 执行：
 
@@ -189,7 +207,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 
 benchmark 用来验证规则样本是否仍按预期命中。普通使用者不必每天跑它；维护 ProofPR 规则、准备发版或怀疑规则退化时再跑。
 
-## 9. 调整审查强度
+## 10. 调整审查强度
 
 打开 `.proofpr.yml`，修改 `preset`：
 

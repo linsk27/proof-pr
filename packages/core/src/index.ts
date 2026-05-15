@@ -9,7 +9,13 @@ export {
 } from "./config.js";
 export { parseUnifiedDiff } from "./diff.js";
 export { analyzeEvidence } from "./evidence.js";
-export { renderHtmlReport, renderMarkdownReport, renderSarifReport, getReportMarker } from "./reporters.js";
+export {
+  renderContributorRequest,
+  renderHtmlReport,
+  renderMarkdownReport,
+  renderSarifReport,
+  getReportMarker
+} from "./reporters.js";
 export { scanDiff } from "./scan.js";
 export type {
   ChangeLine,

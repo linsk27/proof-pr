@@ -12,7 +12,7 @@ ProofPR 是给开源维护者和工程团队使用的 PR 证据门禁。它只�
 npx proof-pr@latest --version
 ```
 
-当前应输出 `0.1.24`。
+当前应输出 `0.1.25`。
 
 不知道怎么开始时：
 
@@ -22,7 +22,7 @@ npx proof-pr@latest
 npx proof-pr@latest guide
 ```
 
-默认只用三条命令。
+默认只用四条命令。
 
 先看效果，不改仓库：
 
@@ -46,6 +46,18 @@ npx proof-pr@latest check
 ```
 
 `check` 会自动选择常见主分支作为 base，并纳入已提交分支 diff、staged、unstaged 和未跟踪新文件。
+
+只生成可以发给贡献者的补证请求：
+
+```bash
+npx proof-pr@latest request
+```
+
+也可以写入文件：
+
+```bash
+npx proof-pr@latest request --output proofpr-request.md
+```
 
 ## 辅助命令
 
@@ -94,7 +106,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.24
+- uses: linsk27/proof-pr@v0.1.25
   with:
     fail-on: high
     comment: "true"
@@ -108,6 +120,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 - Review 门禁：正常 review、重点 review、先补证据、风险处理前不要合并。
 - 风险雷达：把 findings 归并成证据、供应链、Workflow、Secret 和 Review 面。
 - Review 行动清单：维护者可直接执行的 checklist。
+- Contributor Request：一段可直接发给贡献者的补证请求，可用 `proof-pr request` 单独输出。
 - 可选输出：GitHub annotations、SARIF、benchmark report、可筛选并可复制补证清单的独立 HTML 可视化报告；CLI 可用 `--output` 直接写文件。
 
 ## 常用预设

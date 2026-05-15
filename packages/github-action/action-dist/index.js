@@ -51341,6 +51341,9 @@ function renderHtmlReport(result, locale = "en") {
 </html>
 `;
 }
+function renderContributorRequest(result, locale = "en") {
+    return renderContributorFixPrompt(result, locale);
+}
 function getReportMarker() {
     return REPORT_MARKER;
 }
