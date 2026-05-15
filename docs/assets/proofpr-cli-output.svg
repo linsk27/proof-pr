@@ -6,7 +6,7 @@
   <circle cx="82" cy="70" r="8" fill="#FF5F56"/>
   <circle cx="108" cy="70" r="8" fill="#FFBD2E"/>
   <circle cx="134" cy="70" r="8" fill="#27C93F"/>
-  <text x="164" y="76" font-family="Consolas, 'Cascadia Mono', monospace" font-size="15" fill="#8B949E">proof-pr scan --base origin/main --head HEAD</text>
+  <text x="164" y="76" font-family="Consolas, 'Cascadia Mono', monospace" font-size="15" fill="#8B949E">proof-pr check</text>
 
   <text x="82" y="130" font-family="Consolas, 'Cascadia Mono', monospace" font-size="18" fill="#C9D1D9"># ProofPR Review</text>
   <text x="82" y="176" font-family="Consolas, 'Cascadia Mono', monospace" font-size="18" fill="#F85149">Risk: high</text>

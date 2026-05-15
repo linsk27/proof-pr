@@ -15,15 +15,15 @@
    引导贡献者填写验证、复现、截图、changelog 和权限理由。
 
 4. 本地检查当前分支
-   npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
-   适合在发 PR 前先看风险、证据评分和 Review 行动清单。
+   npx proof-pr@latest check
+   自动选择 origin/main / origin/master 等 base，适合在发 PR 前先看风险、证据评分和 Review 行动清单。
 
 5. 生成可分享 HTML 报告
-   npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html
+   npx proof-pr@latest check --format html --output proofpr-report.html
    生成后用浏览器打开 proofpr-report.html。
 
 6. 生成 GitHub Code Scanning 的 SARIF
-   npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif
+   npx proof-pr@latest check --format sarif --output proofpr.sarif
    适合在 CI 里配合 github/codeql-action/upload-sarif 使用。
 
 7. 不接入仓库，先试跑内置案例

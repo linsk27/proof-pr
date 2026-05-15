@@ -8,7 +8,7 @@ ProofPR 支持两种接入 Code Scanning 的方式：
 ## 方式一：CLI 输出 SARIF
 
 ```bash
-npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif
+npx proof-pr@latest check --format sarif --output proofpr.sarif
 ```
 
 然后用 GitHub 官方上传动作：
@@ -32,7 +32,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif
+      - run: npx proof-pr@latest check --format sarif --output proofpr.sarif
       - uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: proofpr.sarif
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.18
+      - uses: linsk27/proof-pr@v0.1.19
         with:
           fail-on: high
           comment: "true"

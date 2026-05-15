@@ -239,7 +239,7 @@ locale: zh-CN
 或在 CLI 中使用：
 
 ```bash
-proof-pr scan --base origin/main --head HEAD --locale zh-CN
+proof-pr check
 ```
 
 如果 Windows PowerShell 里出现 `????` 或中文乱码，通常是终端或脚本写入 GitHub API 时没有按 UTF-8 处理。ProofPR 的源码和报告内容使用 UTF-8；建议使用 Windows Terminal / PowerShell 7，或在命令前执行：

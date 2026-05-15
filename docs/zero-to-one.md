@@ -141,10 +141,10 @@ evidence:
 
 ```bash
 npx proof-pr@latest --version
-npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
+npx proof-pr@latest check
 ```
 
-第一行当前应输出 `0.1.18`，用于确认 npm latest 已经安装正确。
+第一行当前应输出 `0.1.19`，用于确认 npm latest 已经安装正确。
 
 扫描内置案例：
 
@@ -196,7 +196,7 @@ permissions:
 
 steps:
   - uses: actions/checkout@v4
-  - uses: linsk27/proof-pr@v0.1.18
+  - uses: linsk27/proof-pr@v0.1.19
     with:
       fail-on: high
       comment: "true"

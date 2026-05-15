@@ -13,9 +13,9 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 
 ## 现在能用吗
 
-- GitHub Release：[`v0.1.18`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.18)
-- npm：[`proof-pr@0.1.18`](https://www.npmjs.com/package/proof-pr)
-- GitHub Action：`linsk27/proof-pr@v0.1.18`
+- GitHub Release：[`v0.1.19`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.19)
+- npm：[`proof-pr@0.1.19`](https://www.npmjs.com/package/proof-pr)
+- GitHub Action：`linsk27/proof-pr@v0.1.19`
 - 当前源码 benchmark：`22/22 passed`
 - 接入体检：`npx proof-pr@latest doctor`
 - PR 模板：`npx proof-pr@latest template`
@@ -36,7 +36,7 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-这两个命令当前都应输出 `0.1.18`。
+这两个命令当前都应输出 `0.1.19`。
 
 不知道该用哪个功能时，直接打开中文功能菜单：
 
@@ -56,9 +56,9 @@ npx proof-pr@latest guide
 | 接入 GitHub PR 自动检查 | `npx proof-pr@latest init` |
 | 体检当前仓库接入状态 | `npx proof-pr@latest doctor` |
 | 已接入仓库，单独补 PR 模板 | `npx proof-pr@latest template` |
-| 本地检查当前分支 | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN` |
-| 生成 HTML 可视化报告 | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html` |
-| 生成 SARIF | `npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif` |
+| 本地检查当前分支 | `npx proof-pr@latest check` |
+| 生成 HTML 可视化报告 | `npx proof-pr@latest check --format html --output proofpr-report.html` |
+| 生成 SARIF | `npx proof-pr@latest check --format sarif --output proofpr.sarif` |
 | 查看全部功能 | `npx proof-pr@latest guide` |
 
 ## 它解决什么问题
@@ -134,7 +134,7 @@ ProofPR 会在这些时机运行：
 报告主要出现在 PR 评论区、GitHub Actions summary、workflow annotations 和 `proofpr-report` artifact。想先本地试跑，也可以直接执行：
 
 ```bash
-npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
+npx proof-pr@latest check
 ```
 
 真实 PR 评论截图来自 [demo PR #1](https://github.com/linsk27/proof-pr/pull/1)：
@@ -217,7 +217,13 @@ npx proof-pr@latest doctor
 扫描当前分支 diff：
 
 ```bash
-npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
+npx proof-pr@latest check
+```
+
+`check` 会自动选择 `origin/main`、`origin/master`、`main` 或 `master` 作为对比基准。主分支不是这些名字时再显式指定：
+
+```bash
+npx proof-pr@latest check --base origin/dev
 ```
 
 扫描内置案例：
@@ -231,7 +237,7 @@ npx proof-pr@latest demo ui-evidence --locale zh-CN
 生成独立 HTML 可视化报告：
 
 ```bash
-npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html
+npx proof-pr@latest check --format html --output proofpr-report.html
 ```
 
 HTML 报告不是静态截图：它可以按高/中/低风险筛选、搜索规则或文件，并把“需要贡献者补什么”一键复制到 PR 描述或评论里。
@@ -272,7 +278,7 @@ evidence:
 `init` 默认已经会在 GitHub Action 里保存 HTML 面板，对应 workflow 片段如下：
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.18
+- uses: linsk27/proof-pr@v0.1.19
   with:
     html-output: proofpr-report.html
 - uses: actions/upload-artifact@v4

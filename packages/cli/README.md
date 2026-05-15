@@ -12,7 +12,7 @@ ProofPR 是给开源维护者和工程团队使用的 PR 证据门禁。它在�
 npx proof-pr@latest --version
 ```
 
-当前应输出 `0.1.18`。
+当前应输出 `0.1.19`。
 
 不知道用哪个功能时：
 
@@ -54,7 +54,7 @@ npx proof-pr@latest doctor
 本地扫描当前分支：
 
 ```bash
-npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
+npx proof-pr@latest check
 ```
 
 扫描内置案例：
@@ -66,7 +66,7 @@ npx proof-pr@latest demo workflow --locale zh-CN
 生成独立 HTML 可视化报告：
 
 ```bash
-npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html
+npx proof-pr@latest check --format html --output proofpr-report.html
 ```
 
 HTML 报告支持筛选风险、搜索规则/文件/详情，并复制补证清单。
@@ -80,7 +80,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.18
+- uses: linsk27/proof-pr@v0.1.19
   with:
     fail-on: high
     comment: "true"

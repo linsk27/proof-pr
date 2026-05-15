@@ -60,14 +60,14 @@ comment:
 CLI 也可以临时指定：
 
 ```bash
-proof-pr scan --base origin/main --head HEAD --locale zh-CN
+proof-pr check --locale zh-CN
 ```
 
 如果要把报告保存成文件，使用 `--output`：
 
 ```bash
-proof-pr scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html
-proof-pr scan --base origin/main --head HEAD --format sarif --output proofpr.sarif
+proof-pr check --locale zh-CN --format html --output proofpr-report.html
+proof-pr check --format sarif --output proofpr.sarif
 ```
 
 ## `preset`

@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.18
+      - uses: linsk27/proof-pr@v0.1.19
         with:
           fail-on: high
           comment: "true"
@@ -138,16 +138,16 @@ npx proof-pr@latest demo workflow --locale zh-CN
 npx proof-pr@latest init
 npx proof-pr@latest doctor
 npx proof-pr@latest template
-npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
+npx proof-pr@latest check
 ```
 
-如果第一行输出 `0.1.18`，说明你正在使用当前最新发布版。
+如果第一行输出 `0.1.19`，说明你正在使用当前最新发布版。
 
 也可以全局安装：
 
 ```bash
 npm install -g proof-pr
-proof-pr scan --base origin/main --head HEAD --locale zh-CN
+proof-pr check
 ```
 
 也可以从源码运行：
@@ -157,7 +157,7 @@ git clone https://github.com/linsk27/proof-pr.git
 cd proof-pr
 pnpm install
 pnpm build
-node packages/cli/dist/index.js scan --base origin/main --head HEAD --locale zh-CN
+node packages/cli/dist/index.js check
 ```
 
 ## 常用命令
@@ -204,7 +204,7 @@ proof-pr benchmark --cases benchmarks/cases
 生成独立 HTML 可视化报告：
 
 ```bash
-proof-pr scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html
+proof-pr check --format html --output proofpr-report.html
 ```
 
 HTML 报告支持按风险严重程度筛选、搜索规则/文件/详情，并复制“补证清单”给贡献者。
@@ -235,18 +235,18 @@ proof-pr scan
 扫描指定 base/head：
 
 ```bash
-proof-pr scan --base origin/main --head HEAD
+proof-pr check
 ```
 
 输出中文报告：
 ```bash
-proof-pr scan --base origin/main --head HEAD --locale zh-CN
+proof-pr check
 ```
 
 输出 JSON：
 
 ```bash
-proof-pr scan --base origin/main --format json --output proofpr-report.json
+proof-pr check --format json --output proofpr-report.json
 ```
 
 加入 PR 描述证据检查：
@@ -258,7 +258,7 @@ proof-pr scan --base origin/main --pr-title "Fix login redirect" --pr-body-file 
 风险达到 medium 或 high 时让进程失败：
 
 ```bash
-proof-pr scan --base origin/main --fail-on medium
+proof-pr check --fail-on medium
 ```
 
 ## 怎么判断安装成功？

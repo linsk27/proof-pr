@@ -4,6 +4,12 @@
 
 暂无。
 
+## 0.1.19 - 2026-05-15
+
+- 新增 `check` 命令：`npx proof-pr@latest check` 会自动选择 `origin/main`、`origin/master`、`main` 或 `master` 作为 base，减少本地自查命令长度。
+- `guide`、`init`、`doctor` 输出改为优先推荐 `check`。
+- README、命令速查、快速开始、SARIF 文档和截图同步简化使用路径，`scan --base ...` 保留为高级用法。
+
 ## 0.1.18 - 2026-05-15
 
 - 新增供应链依赖规则：非注册表来源、未固定版本、manifest/lockfile 不一致、lockfile-only 变更和解析覆盖。

@@ -22,9 +22,9 @@ npx proof-pr@latest guide
 | 接入 GitHub PR 自动检查 | 第一次给仓库安装 ProofPR | `npx proof-pr@latest init` | PR 评论、Actions summary、Checks、HTML artifact |
 | 体检接入状态 | 安装后不知道是否配置正确 | `npx proof-pr@latest doctor` | 当前终端 |
 | 单独补 PR 模板 | 已接入仓库但缺少 PR 模板 | `npx proof-pr@latest template` | `.github/pull_request_template.md` |
-| 本地检查当前分支 | 发 PR 前自查 | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN` | 当前终端 |
-| 生成 HTML 可视化报告 | 想把报告保存、筛选风险、复制补证清单或上传 artifact | `npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html` | `proofpr-report.html` |
-| 生成 SARIF | 想接入 GitHub Code Scanning | `npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif` | `proofpr.sarif` / Code Scanning |
+| 本地检查当前分支 | 发 PR 前自查 | `npx proof-pr@latest check` | 当前终端 |
+| 生成 HTML 可视化报告 | 想把报告保存、筛选风险、复制补证清单或上传 artifact | `npx proof-pr@latest check --format html --output proofpr-report.html` | `proofpr-report.html` |
+| 生成 SARIF | 想接入 GitHub Code Scanning | `npx proof-pr@latest check --format sarif --output proofpr.sarif` | `proofpr.sarif` / Code Scanning |
 | 查看所有内置案例 | 想快速理解它会抓什么 | `npx proof-pr@latest demo --list` | 当前终端 |
 | 跑 benchmark | 维护规则或发版前回归 | `npx proof-pr@latest benchmark --cases benchmarks/cases` | 当前终端 |
 | 调整审查强度 | 想更严格检查安全、依赖或 MCP | 修改 `.proofpr.yml` 里的 `preset` | 下一次扫描报告 |
@@ -101,7 +101,7 @@ npx proof-pr@latest doctor
 - `.github/workflows/proofpr.yml` 是否存在。
 - `.github/pull_request_template.md` 是否存在，以及是否提示验证、复现、截图或权限理由。
 - workflow 是否监听 `pull_request`。
-- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.18`。
+- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.19`。
 - 是否具备 `pull-requests: write` 和 `contents: read` 权限。
 - 是否启用了 `html-output` 和 `actions/upload-artifact`，方便下载 HTML 可视化报告。
 - 当前目录是否在 Git 仓库里，以及 `origin/main...HEAD` diff 是否可读。
@@ -117,19 +117,23 @@ npx proof-pr@latest doctor --base origin/master
 执行：
 
 ```bash
-npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
+npx proof-pr@latest check
 ```
 
-适合在发 PR 前自查。它会对比 `origin/main...HEAD`，输出风险等级、证据评分、Review 门禁和行动清单。
+适合在发 PR 前自查。它会自动选择 `origin/main`、`origin/master`、`main` 或 `master` 作为 base，输出风险等级、证据评分、Review 门禁和行动清单。
 
-如果你的主分支叫 `master`，把 `origin/main` 换成 `origin/master`。
+如果你的主分支不是常见名字，可以显式传 base：
+
+```bash
+npx proof-pr@latest check --base origin/dev
+```
 
 ## 5. 生成 HTML 可视化报告
 
 执行：
 
 ```bash
-npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html
+npx proof-pr@latest check --format html --output proofpr-report.html
 ```
 
 生成后，用浏览器打开 `proofpr-report.html`。这个文件适合：
@@ -145,7 +149,7 @@ npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format 
 执行：
 
 ```bash
-npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif
+npx proof-pr@latest check --format sarif --output proofpr.sarif
 ```
 
 SARIF 主要给 GitHub Code Scanning 或其他安全平台读取。完整接入方式见 [SARIF / Code Scanning](sarif-code-scanning.md)。

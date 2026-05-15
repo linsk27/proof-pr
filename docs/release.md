@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.18`。
+当前最新公开版本是 `0.1.19`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.18
-git push origin v0.1.18
+git tag v0.1.19
+git push origin v0.1.19
 ```
 
 发布完成后需要检查：
@@ -66,9 +66,17 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.18
-npx proof-pr@latest --version -> 0.1.18
+npm view proof-pr version -> 0.1.19
+npx proof-pr@latest --version -> 0.1.19
 ```
+
+## `v0.1.19` 发布状态
+
+`v0.1.19` 是使用路径简化版，重点包括：
+
+- 新增 `proof-pr check`，本地自查默认自动选择常见 base 分支。
+- `guide`、`init`、`doctor` 输出优先推荐 `npx proof-pr@latest check`。
+- 文档和截图同步改成更短命令，`scan --base ...` 保留给需要 PR body、diff file 或特殊 base 的高级用法。
 
 ## `v0.1.18` 发布状态
 
@@ -120,7 +128,7 @@ npx proof-pr@latest --version -> 0.1.18
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.18` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.19` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 

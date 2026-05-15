@@ -22,7 +22,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.18";
+const CLI_VERSION = "0.1.19";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -35,6 +35,16 @@ interface ScanCommandOptions {
   prTitle?: string;
   prBody?: string;
   prBodyFile?: string;
+  config: string;
+  format: OutputFormat;
+  output?: string;
+  locale?: ReportLocale;
+  failOn: FailLevel;
+}
+
+interface CheckCommandOptions {
+  base?: string;
+  head: string;
   config: string;
   format: OutputFormat;
   output?: string;
@@ -364,6 +374,36 @@ program
   });
 
 program
+  .command("check")
+  .description("Scan the current branch with simple defaults.")
+  .option("--base <ref>", "Base git ref. Defaults to origin/main, origin/master, main, or master.")
+  .option("--head <ref>", "Head git ref used with --base.", "HEAD")
+  .option("--config <path>", "Path to .proofpr.yml.", ".proofpr.yml")
+  .option("--format <format>", "Output format: markdown, json, sarif, or html.", parseFormat, "markdown")
+  .option("--output <path>", "Write report output to a file instead of stdout.")
+  .option("--locale <locale>", "Report language: en or zh-CN.", "zh-CN")
+  .option("--fail-on <level>", "Exit with code 1 on risk level: low, medium, high, or never.", parseFailLevel, "never")
+  .action(async (options: CheckCommandOptions) => {
+    const base = options.base ?? (await resolveDefaultBaseRef());
+    const diffText = await readGitDiff(base, options.head);
+    const config = await loadConfig(options.config);
+    const result = scanDiff(diffText, { config });
+    const locale = parseLocale(options.locale, config.locale);
+    const output = renderOutput(result, options.format, locale);
+
+    if (options.output) {
+      await writeOutput(options.output, `${output}\n`);
+      process.stdout.write(`ProofPR ${options.format} report written to ${options.output}\n`);
+    } else {
+      process.stdout.write(`${output}\n`);
+    }
+
+    if (riskMeetsThreshold(result.risk, options.failOn)) {
+      process.exitCode = 1;
+    }
+  });
+
+program
   .command("scan", { isDefault: true })
   .description("Scan a git diff and print a ProofPR report.")
   .option("--base <ref>", "Base git ref. When provided, ProofPR scans base...head.")
@@ -454,7 +494,7 @@ program
     }
 
     process.stdout.write(
-      `ProofPR initialized.\n\nCreated:\n${created.map((item) => `- ${item}`).join("\n")}${skipped.length > 0 ? `\n\nSkipped:\n${skipped.map((item) => `- ${item}`).join("\n")}` : ""}\n\nNext:\n1. Commit these files.\n2. Open or update a pull request.\n3. Read the ProofPR comment, Actions summary, annotations${options.htmlReport ? `, and ${options.htmlOutput} artifact` : ""}.\n\nLocal check:\nnpx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN\n\nNeed another task?\nnpx proof-pr@latest guide\n`
+      `ProofPR initialized.\n\nCreated:\n${created.map((item) => `- ${item}`).join("\n")}${skipped.length > 0 ? `\n\nSkipped:\n${skipped.map((item) => `- ${item}`).join("\n")}` : ""}\n\nNext:\n1. Commit these files.\n2. Open or update a pull request.\n3. Read the ProofPR comment, Actions summary, annotations${options.htmlReport ? `, and ${options.htmlOutput} artifact` : ""}.\n\nLocal check:\nnpx proof-pr@latest check\n\nNeed another task?\nnpx proof-pr@latest guide\n`
     );
   });
 
@@ -518,15 +558,15 @@ function renderGuide(): string {
    引导贡献者填写验证、复现、截图、changelog 和权限理由。
 
 4. 本地检查当前分支
-   npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
-   适合在发 PR 前先看风险、证据评分和 Review 行动清单。
+   npx proof-pr@latest check
+   自动选择 origin/main / origin/master 等 base，适合在发 PR 前先看风险、证据评分和 Review 行动清单。
 
 5. 生成可分享 HTML 报告
-   npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN --format html --output proofpr-report.html
+   npx proof-pr@latest check --format html --output proofpr-report.html
    生成后用浏览器打开 proofpr-report.html。
 
 6. 生成 GitHub Code Scanning 的 SARIF
-   npx proof-pr@latest scan --base origin/main --head HEAD --format sarif --output proofpr.sarif
+   npx proof-pr@latest check --format sarif --output proofpr.sarif
    适合在 CI 里配合 github/codeql-action/upload-sarif 使用。
 
 7. 不接入仓库，先试跑内置案例
@@ -639,7 +679,7 @@ async function runDoctor(options: DoctorCommandOptions): Promise<DoctorReport> {
   await inspectGitDiff(options, checks, nextSteps);
 
   if (nextSteps.size === 0) {
-    nextSteps.add("当前接入状态正常；可以打开 PR，或运行 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN 做本地自查。");
+    nextSteps.add("当前接入状态正常；可以打开 PR，或运行 npx proof-pr@latest check 做本地自查。");
   }
 
   return { checks, nextSteps: [...nextSteps] };
@@ -807,6 +847,45 @@ async function readGitDiff(base: string | undefined, head: string): Promise<stri
 
   const { stdout } = await execFileAsync("git", args, { maxBuffer: 20 * 1024 * 1024 });
   return stdout;
+}
+
+async function resolveDefaultBaseRef(): Promise<string> {
+  const originHead = await readGitOutput(["symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD"]);
+
+  if (originHead) {
+    return originHead.replace(/^refs\/remotes\//, "");
+  }
+
+  const candidates = ["origin/main", "origin/master", "upstream/main", "upstream/master", "main", "master"];
+
+  for (const candidate of candidates) {
+    if (await gitCommitRefExists(candidate)) {
+      return candidate;
+    }
+  }
+
+  throw new Error(
+    "Could not auto-detect a base branch. Run `proof-pr check --base origin/main`, or use `proof-pr scan --base <ref> --head HEAD`."
+  );
+}
+
+async function gitCommitRefExists(ref: string): Promise<boolean> {
+  try {
+    await execFileAsync("git", ["rev-parse", "--verify", `${ref}^{commit}`]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function readGitOutput(args: string[]): Promise<string | undefined> {
+  try {
+    const { stdout } = await execFileAsync("git", args);
+    const value = stdout.trim();
+    return value.length > 0 ? value : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 async function readPullRequestBody(options: ScanCommandOptions): Promise<string | undefined> {
