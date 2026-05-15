@@ -13,9 +13,9 @@ ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。它�
 
 ## 现在能用吗
 
-- GitHub Release：[`v0.1.17`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.17)
-- npm：[`proof-pr@0.1.17`](https://www.npmjs.com/package/proof-pr)
-- GitHub Action：`linsk27/proof-pr@v0.1.17`
+- GitHub Release：[`v0.1.18`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.18)
+- npm：[`proof-pr@0.1.18`](https://www.npmjs.com/package/proof-pr)
+- GitHub Action：`linsk27/proof-pr@v0.1.18`
 - 当前源码 benchmark：`22/22 passed`
 - 接入体检：`npx proof-pr@latest doctor`
 - PR 模板：`npx proof-pr@latest template`
@@ -36,7 +36,7 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-这两个命令当前都应输出 `0.1.17`。
+这两个命令当前都应输出 `0.1.18`。
 
 不知道该用哪个功能时，直接打开中文功能菜单：
 
@@ -272,7 +272,7 @@ evidence:
 `init` 默认已经会在 GitHub Action 里保存 HTML 面板，对应 workflow 片段如下：
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.17
+- uses: linsk27/proof-pr@v0.1.18
   with:
     html-output: proofpr-report.html
 - uses: actions/upload-artifact@v4

@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.17`。
+当前最新公开版本是 `0.1.18`。
 
 ## 发布前检查
 
@@ -66,9 +66,19 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.17
-npx proof-pr@latest --version -> 0.1.17
+npm view proof-pr version -> 0.1.18
+npx proof-pr@latest --version -> 0.1.18
 ```
+
+## `v0.1.18` 发布状态
+
+`v0.1.18` 是依赖/供应链能力增强版，重点包括：
+
+- 新增 `dependency-non-registry-source`、`dependency-unpinned-version`、`dependency-lockfile-missing`、`dependency-lockfile-only-change`、`dependency-resolution-override`。
+- 依赖规则覆盖 npm、Python、Rust、Go 的常见 manifest；Java / Ruby 先进入敏感路径提醒。
+- Benchmark 增加 `supply-chain` 分类，总样本扩展到 `22/22 passed`。
+- `demo dependency` 改为供应链组合案例，能展示大版本升级、非注册表来源、未固定版本和缺少 lockfile。
+- 本版本用于验证 npm Trusted Publishing / GitHub OIDC 自动发布链路。
 
 ## `v0.1.17` 发布状态
 
@@ -110,7 +120,7 @@ npx proof-pr@latest --version -> 0.1.17
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.17` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.18` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 

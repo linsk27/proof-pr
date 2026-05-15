@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.17
+      - uses: linsk27/proof-pr@v0.1.18
         with:
           fail-on: high
           comment: "true"
@@ -141,7 +141,7 @@ npx proof-pr@latest template
 npx proof-pr@latest scan --base origin/main --head HEAD --locale zh-CN
 ```
 
-如果第一行输出 `0.1.17`，说明你正在使用当前最新发布版。
+如果第一行输出 `0.1.18`，说明你正在使用当前最新发布版。
 
 也可以全局安装：
 

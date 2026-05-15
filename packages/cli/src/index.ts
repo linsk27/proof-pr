@@ -22,7 +22,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.17";
+const CLI_VERSION = "0.1.18";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";

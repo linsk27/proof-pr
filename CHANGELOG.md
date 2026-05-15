@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+暂无。
+
+## 0.1.18 - 2026-05-15
+
 - 新增供应链依赖规则：非注册表来源、未固定版本、manifest/lockfile 不一致、lockfile-only 变更和解析覆盖。
 - 依赖检查覆盖 npm、Python、Rust、Go 的常见 manifest；Java / Ruby 先进入 `dependency-careful` 敏感路径提醒。
 - Benchmark 增加 `supply-chain` 分类，总样本从 14 个扩展到 22 个。
