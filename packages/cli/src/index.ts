@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.30";
+const CLI_VERSION = "0.1.31";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -1035,6 +1035,8 @@ function renderInitReport(results: InitFileResult[], options: InitCommandOptions
 文件:
 ${files}
 ${forceHint}
+默认配置已经可用；先提交这些文件并打开 PR，不需要先改配置。
+
 下一步直接复制:
 git add ${gitAddPaths}
 git commit -m "chore: add ProofPR"

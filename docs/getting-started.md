@@ -32,7 +32,7 @@ npx proof-pr@latest init
 - `.github/workflows/proofpr.yml`
 - `.github/pull_request_template.md`
 
-把这些文件提交到仓库，打开或更新 PR，就会自动生成报告。默认会同时输出 PR 评论、Actions summary、workflow annotations 和 `proofpr-report.html` artifact。PR 模板会提醒贡献者写清验证、复现、截图、changelog 和权限理由。
+默认配置已经可用。把这些文件提交到仓库，打开或更新 PR，就会自动生成报告。默认会同时输出 PR 评论、Actions summary、workflow annotations 和 `proofpr-report.html` artifact。PR 模板会提醒贡献者写清验证、复现、截图、changelog 和权限理由。
 
 `init` 可以重复运行。已有文件默认不会被覆盖；如果你想升级到当前版本模板，再运行 `npx proof-pr@latest init --force`。
 
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.30
+      - uses: linsk27/proof-pr@v0.1.31
         with:
           fail-on: high
           comment: "true"
@@ -145,7 +145,7 @@ npx proof-pr@latest request
 
 `check` 会自动选择常见主分支作为 base，并纳入已提交分支 diff、staged、unstaged 和未跟踪新文件。当前没有可扫描 diff 时，它只输出短提示和下一步建议。
 
-如果第一行输出 `0.1.30`，说明你正在使用当前最新发布版。
+如果第一行输出 `0.1.31`，说明你正在使用当前最新发布版。
 
 也可以全局安装：
 

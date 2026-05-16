@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.30`。
+当前最新公开版本是 `0.1.31`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.30
-git push origin v0.1.30
+git tag v0.1.31
+git push origin v0.1.31
 ```
 
 发布完成后需要检查：
@@ -66,9 +66,17 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.30
-npx proof-pr@latest --version -> 0.1.30
+npm view proof-pr version -> 0.1.31
+npx proof-pr@latest --version -> 0.1.31
 ```
+
+## `v0.1.31` 发布状态
+
+`v0.1.31` 是初始化引导增强版，重点包括：
+
+- `proof-pr init` 输出新增“默认配置已经可用”的明确提示，减少新用户接入后停下来研究配置的成本。
+- 初始化截图、README、npm 包 README、快速开始和发布文档同步更新。
+- 默认使用路径保持不变：`init`、`check`、`request`。
 
 ## `v0.1.30` 发布状态
 
@@ -218,7 +226,7 @@ npx proof-pr@latest --version -> 0.1.30
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.30` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.31` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 

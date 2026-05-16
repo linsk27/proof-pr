@@ -5,6 +5,8 @@
 [已创建] .github/workflows/proofpr.yml
 [已创建] .github/pull_request_template.md
 
+默认配置已经可用；先提交这些文件并打开 PR，不需要先改配置。
+
 下一步直接复制:
 git add .proofpr.yml .github/workflows/proofpr.yml .github/pull_request_template.md
 git commit -m "chore: add ProofPR"
