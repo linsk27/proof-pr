@@ -118,10 +118,12 @@ npx proof-pr@latest doctor
 - `.github/workflows/proofpr.yml` 是否存在。
 - `.github/pull_request_template.md` 是否存在，以及是否提示验证、复现、截图或权限理由。
 - workflow 是否监听 `pull_request`。
-- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.27`。
+- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.28`。
 - 是否具备 `pull-requests: write` 和 `contents: read` 权限。
 - 是否启用了 `html-output` 和 `actions/upload-artifact`，方便下载 HTML 可视化报告。
 - 当前目录是否在 Git 仓库里，以及自动识别出的 base...HEAD diff 是否可读。
+
+报告顶部会给一句话建议：接入正常时提示打开 PR 或运行 `check`，存在问题时提示先运行 `doctor --fix` 或按 Next steps 处理。
 
 `doctor` 默认会像 `check` 一样自动选择 `origin/main`、`origin/master`、`upstream/main`、`upstream/master`、`main` 或 `master`。如果你的主分支不是这些名字，可以这样指定：
 

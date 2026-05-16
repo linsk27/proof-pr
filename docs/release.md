@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.27`。
+当前最新公开版本是 `0.1.28`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.27
-git push origin v0.1.27
+git tag v0.1.28
+git push origin v0.1.28
 ```
 
 发布完成后需要检查：
@@ -66,9 +66,17 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.27
-npx proof-pr@latest --version -> 0.1.27
+npm view proof-pr version -> 0.1.28
+npx proof-pr@latest --version -> 0.1.28
 ```
+
+## `v0.1.28` 发布状态
+
+`v0.1.28` 是 doctor 引导增强版，重点包括：
+
+- `proof-pr doctor` 报告顶部新增一句话建议，直接告诉用户下一步是打开 PR、运行 `check`，还是先用 `doctor --fix`。
+- README、npm 包 README、快速开始、命令文档和 doctor 截图同步更新。
+- 保持默认使用路径不变：`init`、`check`、`request` 仍是主入口。
 
 ## `v0.1.27` 发布状态
 
@@ -194,7 +202,7 @@ npx proof-pr@latest --version -> 0.1.27
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.27` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.28` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 

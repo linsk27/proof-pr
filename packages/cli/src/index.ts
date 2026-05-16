@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.27";
+const CLI_VERSION = "0.1.28";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -910,6 +910,7 @@ function renderDoctorReport(report: DoctorReport): string {
   const failCount = report.checks.filter((check) => check.level === "fail").length;
   const warnCount = report.checks.filter((check) => check.level === "warn").length;
   const status = failCount > 0 ? "需要先修复" : warnCount > 0 ? "基本可用，但建议优化" : "接入正常";
+  const recommendation = renderDoctorRecommendation(report, failCount, warnCount);
   const fixes =
     report.fixes.length > 0
       ? `\nAuto-fix:\n${report.fixes.map((fix) => `- ${fix}`).join("\n")}\n`
@@ -926,6 +927,7 @@ function renderDoctorReport(report: DoctorReport): string {
 
 状态：${status}
 统计：${failCount} fail, ${warnCount} warn, ${report.checks.length} checks
+建议：${recommendation}
 ${fixes}
 
 Checks:
@@ -934,6 +936,22 @@ ${checks}
 Next:
 ${nextSteps}
 `;
+}
+
+function renderDoctorRecommendation(report: DoctorReport, failCount: number, warnCount: number): string {
+  if (report.fixes.length > 0) {
+    return "已自动处理可安全修复的接入文件；下一步运行 npx proof-pr@latest doctor 确认。";
+  }
+
+  if (failCount > 0) {
+    return "先运行 npx proof-pr@latest doctor --fix；如果仍有 fail，再按 Next steps 处理。";
+  }
+
+  if (warnCount > 0) {
+    return "可以先打开 PR 试用；想补齐接入细节时运行 npx proof-pr@latest doctor --fix。";
+  }
+
+  return "接入已可用；现在可以打开 PR，或本地运行 npx proof-pr@latest check。";
 }
 
 function renderInitReport(results: InitFileResult[], options: InitCommandOptions): string {
