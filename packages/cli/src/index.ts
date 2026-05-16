@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.26";
+const CLI_VERSION = "0.1.27";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -59,6 +59,7 @@ interface RequestCommandOptions {
   config: string;
   output?: string;
   locale?: ReportLocale;
+  full: boolean;
 }
 
 interface InitCommandOptions {
@@ -428,13 +429,14 @@ program
   .option("--config <path>", "Path to .proofpr.yml.", ".proofpr.yml")
   .option("--output <path>", "Write the request to a file instead of stdout.")
   .option("--locale <locale>", "Report language: en or zh-CN.", "zh-CN")
+  .option("--full", "Print the full evidence request template instead of the short PR comment.", false)
   .action(async (options: RequestCommandOptions) => {
     const base = options.base ?? (await resolveDefaultBaseRef());
     const diffText = await readCheckDiff(base, options.head);
     const config = await loadConfig(options.config);
     const result = scanDiff(diffText, { config });
     const locale = parseLocale(options.locale, config.locale);
-    const output = renderContributorRequest(result, locale);
+    const output = renderContributorRequest(result, locale, { style: options.full ? "full" : "short" });
 
     if (options.output) {
       await writeOutput(options.output, `${output}\n`);

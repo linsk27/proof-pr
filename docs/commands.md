@@ -33,6 +33,7 @@ npx proof-pr@latest guide
 | 先看效果，不改仓库 | `npx proof-pr@latest demo workflow --locale zh-CN` | 当前终端 |
 | 已接入仓库但缺少 PR 模板 | `npx proof-pr@latest template` | `.github/pull_request_template.md` |
 | 把补证请求写入文件 | `npx proof-pr@latest request --output proofpr-request.md` | `proofpr-request.md` |
+| 输出完整补证模板 | `npx proof-pr@latest request --full` | 当前终端 |
 | 想把报告保存成页面 | `npx proof-pr@latest check --format html --output proofpr-report.html` | `proofpr-report.html` |
 | 想接入 GitHub Code Scanning | `npx proof-pr@latest check --format sarif --output proofpr.sarif` | `proofpr.sarif` / Code Scanning |
 | 查看所有内置案例 | `npx proof-pr@latest demo --list` | 当前终端 |
@@ -117,7 +118,7 @@ npx proof-pr@latest doctor
 - `.github/workflows/proofpr.yml` 是否存在。
 - `.github/pull_request_template.md` 是否存在，以及是否提示验证、复现、截图或权限理由。
 - workflow 是否监听 `pull_request`。
-- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.26`。
+- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.27`。
 - 是否具备 `pull-requests: write` 和 `contents: read` 权限。
 - 是否启用了 `html-output` 和 `actions/upload-artifact`，方便下载 HTML 可视化报告。
 - 当前目录是否在 Git 仓库里，以及自动识别出的 base...HEAD diff 是否可读。
@@ -169,12 +170,18 @@ npx proof-pr@latest check --format html --output proofpr-report.html
 npx proof-pr@latest request
 ```
 
-这个命令和 `check` 使用同一套默认 diff 逻辑，但只输出一段可以直接贴给贡献者的补证说明。适合维护者不想转发完整报告，只想让贡献者补充测试、复现、截图、依赖或权限理由时使用。
+这个命令和 `check` 使用同一套默认 diff 逻辑，但只输出一段可以直接贴给贡献者的简短补证说明。适合维护者不想转发完整报告，只想让贡献者补充测试、复现、截图、依赖或权限理由时使用。
 
 写入文件：
 
 ```bash
 npx proof-pr@latest request --output proofpr-request.md
+```
+
+如果你需要完整补证模板：
+
+```bash
+npx proof-pr@latest request --full
 ```
 
 ## 7. 生成 SARIF

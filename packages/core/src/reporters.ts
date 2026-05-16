@@ -707,8 +707,14 @@ export function renderHtmlReport(result: ScanResult, locale: ReportLocale = "en"
 `;
 }
 
-export function renderContributorRequest(result: ScanResult, locale: ReportLocale = "en"): string {
-  return renderContributorFixPrompt(result, locale);
+export function renderContributorRequest(
+  result: ScanResult,
+  locale: ReportLocale = "en",
+  options: { style?: "short" | "full" } = {}
+): string {
+  return options.style === "full"
+    ? renderContributorFixPrompt(result, locale)
+    : renderShortContributorRequest(result, locale);
 }
 
 export function getReportMarker(): string {
@@ -1040,6 +1046,76 @@ function renderContributorFixPrompt(result: ScanResult, locale: ReportLocale): s
     }
   }
 
+  return lines.join("\n");
+}
+
+function renderShortContributorRequest(result: ScanResult, locale: ReportLocale): string {
+  const missingEvidence = missingEvidenceLabels(result, locale).slice(0, 4);
+  const actions = result.reviewPlan.actionItems.slice(0, 3);
+  const focusFiles = result.reviewPlan.focusFiles.slice(0, 3);
+
+  if (locale === "zh-CN") {
+    const lines = [
+      "这个 PR 建议先补充证据，再进入详细 review。",
+      ""
+    ];
+
+    if (missingEvidence.length > 0) {
+      lines.push("请补充：");
+      for (const item of missingEvidence) {
+        lines.push(`- ${item}`);
+      }
+    } else {
+      lines.push("ProofPR 没发现必须补充的证据项，请保留关键验证记录。");
+    }
+
+    if (actions.length > 0) {
+      lines.push("", "重点处理：");
+      for (const action of actions) {
+        lines.push(`- ${translateReviewActionTitle(action.actionId, action.title)}：${translateReviewActionDetail(action.actionId, action.detail)}`);
+      }
+    }
+
+    if (focusFiles.length > 0) {
+      lines.push("", "重点文件：");
+      for (const file of focusFiles) {
+        lines.push(`- ${file.path}`);
+      }
+    }
+
+    lines.push("", "补齐后更新 PR 描述或重新 push，ProofPR 会重新评估。");
+    return lines.join("\n");
+  }
+
+  const lines = [
+    "This PR should add evidence before detailed review.",
+    ""
+  ];
+
+  if (missingEvidence.length > 0) {
+    lines.push("Please add:");
+    for (const item of missingEvidence) {
+      lines.push(`- ${item}`);
+    }
+  } else {
+    lines.push("ProofPR did not find required missing evidence; keep the key verification notes visible.");
+  }
+
+  if (actions.length > 0) {
+    lines.push("", "Focus on:");
+    for (const action of actions) {
+      lines.push(`- ${action.title}: ${action.detail}`);
+    }
+  }
+
+  if (focusFiles.length > 0) {
+    lines.push("", "Focus files:");
+    for (const file of focusFiles) {
+      lines.push(`- ${file.path}`);
+    }
+  }
+
+  lines.push("", "After updating the PR description or pushing new commits, ProofPR will evaluate it again.");
   return lines.join("\n");
 }
 

@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.26`。
+当前最新公开版本是 `0.1.27`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.26
-git push origin v0.1.26
+git tag v0.1.27
+git push origin v0.1.27
 ```
 
 发布完成后需要检查：
@@ -66,9 +66,17 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.26
-npx proof-pr@latest --version -> 0.1.26
+npm view proof-pr version -> 0.1.27
+npx proof-pr@latest --version -> 0.1.27
 ```
+
+## `v0.1.27` 发布状态
+
+`v0.1.27` 是补证请求减负版，重点包括：
+
+- `proof-pr request` 默认输出更短的 PR 评论式补证请求，更适合直接贴给贡献者。
+- 新增 `proof-pr request --full`，需要完整补证模板时再显式使用。
+- README、npm 包 README、快速开始和命令速查同步说明短请求和完整模板的区别。
 
 ## `v0.1.26` 发布状态
 
@@ -186,7 +194,7 @@ npx proof-pr@latest --version -> 0.1.26
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.26` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.27` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 

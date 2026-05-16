@@ -622,10 +622,26 @@ index 0000000..1111111 100644
 `);
     const request = renderContributorRequest(result, "zh-CN");
 
+    expect(request).toContain("这个 PR 建议先补充证据");
+    expect(request).toContain("请补充：");
+    expect(request).toContain("重点处理：");
+    expect(request).toContain("补充测试或手动验证证据");
+  });
+
+  it("renders the full contributor evidence request template", () => {
+    const result = scanDiff(`diff --git a/src/auth.ts b/src/auth.ts
+index 0000000..1111111 100644
+--- a/src/auth.ts
++++ b/src/auth.ts
+@@ -1 +1,2 @@
+ export function auth() {}
++export function logout() {}
+`);
+    const request = renderContributorRequest(result, "zh-CN", { style: "full" });
+
     expect(request).toContain("请在这个 PR 描述中补充以下内容");
     expect(request).toContain("## 验证方式");
     expect(request).toContain("## ProofPR 需要处理的点");
-    expect(request).toContain("补充测试或手动验证证据");
   });
 
   it("renders a standalone HTML visual report", () => {
