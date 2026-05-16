@@ -118,7 +118,7 @@ npx proof-pr@latest doctor
 - `.github/workflows/proofpr.yml` 是否存在。
 - `.github/pull_request_template.md` 是否存在，以及是否提示验证、复现、截图或权限理由。
 - workflow 是否监听 `pull_request`。
-- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.28`。
+- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.29`。
 - 是否具备 `pull-requests: write` 和 `contents: read` 权限。
 - 是否启用了 `html-output` 和 `actions/upload-artifact`，方便下载 HTML 可视化报告。
 - 当前目录是否在 Git 仓库里，以及自动识别出的 base...HEAD diff 是否可读。
@@ -140,6 +140,8 @@ npx proof-pr@latest check
 ```
 
 适合在发 PR 前自查。它会自动选择 `origin/main`、`origin/master`、`main` 或 `master` 作为 base，并扫描当前工作区相对 base 的最终状态：已提交分支 diff、staged、unstaged 和未跟踪新文件都会纳入。输出包括风险等级、证据评分、Review 门禁和行动清单。
+
+如果当前没有可扫描 diff，`check` 会输出短提示，说明这不是错误，并提示你运行 `doctor`、`demo`，或提交改动后再检查。
 
 如果你的主分支不是常见名字，可以显式传 base：
 

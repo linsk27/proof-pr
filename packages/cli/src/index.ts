@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.28";
+const CLI_VERSION = "0.1.29";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -405,8 +405,14 @@ program
     const base = options.base ?? (await resolveDefaultBaseRef());
     const diffText = await readCheckDiff(base, options.head);
     const config = await loadConfig(options.config);
-    const result = scanDiff(diffText, { config });
     const locale = parseLocale(options.locale, config.locale);
+
+    if (!options.output && options.format === "markdown" && diffText.trim().length === 0) {
+      process.stdout.write(renderNoDiffCheckMessage(base, options.head, locale));
+      return;
+    }
+
+    const result = scanDiff(diffText, { config });
     const output = renderOutput(result, options.format, locale);
 
     if (options.output) {
@@ -621,6 +627,32 @@ function renderGuide(): string {
 - npx proof-pr@latest request --output proofpr-request.md
 - npx proof-pr@latest check --format sarif --output proofpr.sarif
 - npx proof-pr@latest benchmark --cases benchmarks/cases
+`;
+}
+
+function renderNoDiffCheckMessage(base: string, head: string, locale: ReportLocale): string {
+  if (locale === "zh-CN") {
+    return `ProofPR check
+
+当前没有可扫描的 diff，这不是错误。
+对比范围：${base}...${head}
+
+下一步：
+- 如果刚接入 ProofPR：提交改动后再运行 npx proof-pr@latest check。
+- 如果想确认接入是否完整：运行 npx proof-pr@latest doctor。
+- 如果想先看真实效果：运行 npx proof-pr@latest demo workflow --locale zh-CN。
+`;
+  }
+
+  return `ProofPR check
+
+No diff was found for ProofPR to scan. This is not an error.
+Range: ${base}...${head}
+
+Next:
+- If you just added ProofPR, commit your changes and run npx proof-pr@latest check again.
+- To verify setup, run npx proof-pr@latest doctor.
+- To see a real example first, run npx proof-pr@latest demo workflow.
 `;
 }
 

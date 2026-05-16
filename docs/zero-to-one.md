@@ -147,9 +147,9 @@ npx proof-pr@latest --version
 npx proof-pr@latest check
 ```
 
-`check` 会自动选择常见主分支作为 base，并纳入已提交分支 diff、staged、unstaged 和未跟踪新文件。
+`check` 会自动选择常见主分支作为 base，并纳入已提交分支 diff、staged、unstaged 和未跟踪新文件。当前没有可扫描 diff 时，它只输出短提示和下一步建议。
 
-第一行当前应输出 `0.1.28`，用于确认 npm latest 已经安装正确。
+第一行当前应输出 `0.1.29`，用于确认 npm latest 已经安装正确。
 
 扫描内置案例：
 
@@ -201,7 +201,7 @@ permissions:
 
 steps:
   - uses: actions/checkout@v4
-  - uses: linsk27/proof-pr@v0.1.28
+  - uses: linsk27/proof-pr@v0.1.29
     with:
       fail-on: high
       comment: "true"

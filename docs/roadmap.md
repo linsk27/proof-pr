@@ -31,7 +31,7 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
    代码侧材料已准备好，下一步需要仓库所有者在 GitHub 网页上确认发布。
 
 2. 发布链路稳定性
-   Trusted Publisher 已配置并通过 `v0.1.21` 到 `v0.1.28` 验证。后续重点是保持 release workflow 简单可审计，避免回退到本地 token 发布。
+   Trusted Publisher 已配置并通过 `v0.1.21` 到 `v0.1.29` 验证。后续重点是保持 release workflow 简单可审计，避免回退到本地 token 发布。
 
 3. 真实截图刷新
    用供应链增强规则重新跑一个 demo PR，补充新版依赖风险、HTML 报告和 benchmark 效果图。
@@ -62,4 +62,4 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 
 ## 下一版优先级
 
-下一步优先用 `0.1.28` 的短补证请求、简化入口和自动自检修复更新真实 demo PR 截图和 Marketplace 页面，并继续准备 GitHub Marketplace 上架材料。
+下一步优先用 `0.1.29` 的短补证请求、简化入口和自动自检修复更新真实 demo PR 截图和 Marketplace 页面，并继续准备 GitHub Marketplace 上架材料。
