@@ -12,7 +12,7 @@ ProofPR 是给开源维护者和工程团队使用的 PR 证据门禁。它只�
 npx proof-pr@latest --version
 ```
 
-当前应输出 `0.1.25`。
+当前应输出 `0.1.26`。
 
 不知道怎么开始时：
 
@@ -22,13 +22,7 @@ npx proof-pr@latest
 npx proof-pr@latest guide
 ```
 
-默认只用四条命令。
-
-先看效果，不改仓库：
-
-```bash
-npx proof-pr@latest demo workflow --locale zh-CN
-```
+默认只用三条命令。
 
 接入 GitHub PR 自动检查：
 
@@ -60,6 +54,12 @@ npx proof-pr@latest request --output proofpr-request.md
 ```
 
 ## 辅助命令
+
+先看效果，不改仓库：
+
+```bash
+npx proof-pr@latest demo workflow --locale zh-CN
+```
 
 不确定是否装好：
 
@@ -106,7 +106,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.25
+- uses: linsk27/proof-pr@v0.1.26
   with:
     fail-on: high
     comment: "true"

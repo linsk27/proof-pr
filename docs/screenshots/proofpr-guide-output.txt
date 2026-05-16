@@ -3,20 +3,17 @@
 它只回答一个问题：
 这个 PR 有没有足够证据，值得维护者开始 review？
 
-默认只用四条命令：
+真的只记三条命令：
 
-1. 先看效果，不改仓库
-   npx proof-pr@latest demo workflow --locale zh-CN
-
-2. 接入 GitHub PR 自动检查
+1. 接入 GitHub PR 自动检查
    npx proof-pr@latest init
    生成 .proofpr.yml、.github/workflows/proofpr.yml 和 PR 模板；提交后打开 PR 即可看到报告。
 
-3. 发 PR 前本地自查
+2. 发 PR 前本地自查
    npx proof-pr@latest check
    自动识别常见 base 分支，并检查当前工作区相对 base 的最终改动。
 
-4. 直接生成补证请求
+3. 直接生成补证请求
    npx proof-pr@latest request
    只输出一段可以贴给贡献者的补证说明，不展示完整扫描报告。
 
@@ -35,6 +32,7 @@
    npx proof-pr@latest check --format html --output proofpr-report.html
 
 高级命令按需使用：
+- npx proof-pr@latest demo workflow --locale zh-CN
 - npx proof-pr@latest template
 - npx proof-pr@latest demo --list
 - npx proof-pr@latest request --output proofpr-request.md
