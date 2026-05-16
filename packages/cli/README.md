@@ -12,7 +12,7 @@ ProofPR 是给开源维护者和工程团队使用的 PR 证据门禁。它只�
 npx proof-pr@latest --version
 ```
 
-当前应输出 `0.1.29`。
+当前应输出 `0.1.30`。
 
 不知道怎么开始时：
 
@@ -47,6 +47,8 @@ npx proof-pr@latest check
 ```bash
 npx proof-pr@latest request
 ```
+
+如果当前没有可扫描 diff，它会直接输出短提示，不会生成误导性的补证评论。
 
 也可以写入文件：
 
@@ -113,7 +115,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.29
+- uses: linsk27/proof-pr@v0.1.30
   with:
     fail-on: high
     comment: "true"

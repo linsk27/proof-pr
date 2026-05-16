@@ -21,9 +21,9 @@ ProofPR 会读取 PR diff、PR 描述和仓库配置，判断贡献者是否补�
 
 ## 现在能用吗
 
-- GitHub Release：[`v0.1.29`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.29)
-- npm：[`proof-pr@0.1.29`](https://www.npmjs.com/package/proof-pr)
-- GitHub Action：`linsk27/proof-pr@v0.1.29`
+- GitHub Release：[`v0.1.30`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.30)
+- npm：[`proof-pr@0.1.30`](https://www.npmjs.com/package/proof-pr)
+- GitHub Action：`linsk27/proof-pr@v0.1.30`
 - 当前源码 benchmark：`22/22 passed`
 - 默认接入：`npx proof-pr@latest init`
 - 本地自查：`npx proof-pr@latest check`
@@ -34,7 +34,7 @@ ProofPR 会读取 PR diff、PR 描述和仓库配置，判断贡献者是否补�
 
 - **已可正式试用**：CLI、GitHub Action、npm 包、GitHub Release、中文文档和截图都已经打通。
 - **核心边界明确**：ProofPR 不做通用代码审查，不判断代码好不好；它只做确定性 PR 证据门禁，帮助维护者先判断是否值得 review。
-- **发布链路已验证**：npm Trusted Publishing 已绑定 `linsk27/proof-pr` + `release.yml`，`v0.1.21` 到 `v0.1.29` 已通过 GitHub OIDC 自动发布到 npm。
+- **发布链路已验证**：npm Trusted Publishing 已绑定 `linsk27/proof-pr` + `release.yml`，`v0.1.21` 到 `v0.1.30` 已通过 GitHub OIDC 自动发布到 npm。
 - **下一步增长点**：继续减少首屏概念，补充真实 PR 案例和 Marketplace 上架材料。
 
 验证你拿到的是最新版本：
@@ -44,7 +44,7 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-这两个命令当前都应输出 `0.1.29`。
+这两个命令当前都应输出 `0.1.30`。
 
 不知道怎么开始时，直接运行中文向导：
 
@@ -161,6 +161,8 @@ npx proof-pr@latest check
 ```bash
 npx proof-pr@latest request
 ```
+
+如果当前分支没有可扫描 diff，`request` 也会输出短提示，不会生成误导性的补证评论。
 
 真实 PR 评论截图来自 [demo PR #1](https://github.com/linsk27/proof-pr/pull/1)：
 
@@ -304,7 +306,7 @@ evidence:
 `init` 默认已经会在 GitHub Action 里保存 HTML 面板，对应 workflow 片段如下：
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.29
+- uses: linsk27/proof-pr@v0.1.30
   with:
     html-output: proofpr-report.html
 - uses: actions/upload-artifact@v4

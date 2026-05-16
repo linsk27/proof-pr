@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.29
+      - uses: linsk27/proof-pr@v0.1.30
         with:
           fail-on: high
           comment: "true"
@@ -145,7 +145,7 @@ npx proof-pr@latest request
 
 `check` 会自动选择常见主分支作为 base，并纳入已提交分支 diff、staged、unstaged 和未跟踪新文件。当前没有可扫描 diff 时，它只输出短提示和下一步建议。
 
-如果第一行输出 `0.1.29`，说明你正在使用当前最新发布版。
+如果第一行输出 `0.1.30`，说明你正在使用当前最新发布版。
 
 也可以全局安装：
 
@@ -195,6 +195,8 @@ proof-pr request
 proof-pr request --output proofpr-request.md
 proof-pr request --full
 ```
+
+当前没有可扫描 diff 时，`request` 会输出短提示，不会生成误导性的补证评论。
 
 生成独立 HTML 可视化报告：
 

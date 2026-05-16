@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.29";
+const CLI_VERSION = "0.1.30";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -440,9 +440,13 @@ program
     const base = options.base ?? (await resolveDefaultBaseRef());
     const diffText = await readCheckDiff(base, options.head);
     const config = await loadConfig(options.config);
-    const result = scanDiff(diffText, { config });
     const locale = parseLocale(options.locale, config.locale);
-    const output = renderContributorRequest(result, locale, { style: options.full ? "full" : "short" });
+    const output =
+      diffText.trim().length === 0
+        ? renderNoDiffRequestMessage(base, options.head, locale)
+        : renderContributorRequest(scanDiff(diffText, { config }), locale, {
+            style: options.full ? "full" : "short"
+          });
 
     if (options.output) {
       await writeOutput(options.output, `${output}\n`);
@@ -653,6 +657,32 @@ Next:
 - If you just added ProofPR, commit your changes and run npx proof-pr@latest check again.
 - To verify setup, run npx proof-pr@latest doctor.
 - To see a real example first, run npx proof-pr@latest demo workflow.
+`;
+}
+
+function renderNoDiffRequestMessage(base: string, head: string, locale: ReportLocale): string {
+  if (locale === "zh-CN") {
+    return `ProofPR request
+
+当前没有可生成补证请求的 diff，这不是错误。
+对比范围：${base}...${head}
+
+下一步：
+- 如果刚接入 ProofPR：提交改动后再运行 npx proof-pr@latest request。
+- 如果想确认接入是否完整：运行 npx proof-pr@latest doctor。
+- 如果想先看真实补证示例：运行 npx proof-pr@latest demo ui-evidence --locale zh-CN。
+`;
+  }
+
+  return `ProofPR request
+
+No diff was found for ProofPR to turn into a contributor request. This is not an error.
+Range: ${base}...${head}
+
+Next:
+- If you just added ProofPR, commit your changes and run npx proof-pr@latest request again.
+- To verify setup, run npx proof-pr@latest doctor.
+- To see a real contributor request example, run npx proof-pr@latest demo ui-evidence.
 `;
 }
 

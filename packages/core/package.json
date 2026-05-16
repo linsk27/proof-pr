@@ -1,6 +1,6 @@
 {
   "name": "@proof-pr/core",
-  "version": "0.1.29",
+  "version": "0.1.30",
   "description": "Core rule engine for ProofPR.",
   "license": "MIT",
   "type": "module",

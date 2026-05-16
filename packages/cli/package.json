@@ -1,6 +1,6 @@
 {
   "name": "proof-pr",
-  "version": "0.1.29",
+  "version": "0.1.30",
   "description": "CLI for ProofPR, a maintainer-focused pull request evidence scanner.",
   "license": "MIT",
   "type": "module",

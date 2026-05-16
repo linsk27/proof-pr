@@ -4,6 +4,12 @@
 
 暂无。
 
+## 0.1.30 - 2026-05-17
+
+- `proof-pr request` 在当前分支没有可扫描 diff 时改为输出短提示，不再生成误导性的补证请求。
+- 空 diff 提示会说明这不是错误，并给出 `doctor`、`demo ui-evidence` 和提交改动后重新运行 `request` 的下一步。
+- README、npm 包 README、快速开始和命令文档同步说明 `check` / `request` 的空状态行为。
+
 ## 0.1.29 - 2026-05-17
 
 - `proof-pr check` 在当前分支没有可扫描 diff 时改为输出短提示，不再打印完整报告。

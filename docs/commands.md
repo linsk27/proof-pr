@@ -118,7 +118,7 @@ npx proof-pr@latest doctor
 - `.github/workflows/proofpr.yml` 是否存在。
 - `.github/pull_request_template.md` 是否存在，以及是否提示验证、复现、截图或权限理由。
 - workflow 是否监听 `pull_request`。
-- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.29`。
+- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.30`。
 - 是否具备 `pull-requests: write` 和 `contents: read` 权限。
 - 是否启用了 `html-output` 和 `actions/upload-artifact`，方便下载 HTML 可视化报告。
 - 当前目录是否在 Git 仓库里，以及自动识别出的 base...HEAD diff 是否可读。
@@ -175,6 +175,8 @@ npx proof-pr@latest request
 ```
 
 这个命令和 `check` 使用同一套默认 diff 逻辑，但只输出一段可以直接贴给贡献者的简短补证说明。适合维护者不想转发完整报告，只想让贡献者补充测试、复现、截图、依赖或权限理由时使用。
+
+如果当前没有可扫描 diff，`request` 会输出短提示，说明这不是错误，并提示你运行 `doctor`、`demo ui-evidence`，或提交改动后再生成补证请求。
 
 写入文件：
 
