@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.31";
+const CLI_VERSION = "0.1.32";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -318,7 +318,8 @@ const program = new Command();
 program
   .name("proof-pr")
   .description("Review pull request evidence, scope, and safety before maintainers spend time on it.")
-  .version(CLI_VERSION);
+  .version(CLI_VERSION)
+  .addHelpText("after", renderRootHelpFooter());
 
 program
   .command("guide")
@@ -336,6 +337,7 @@ program
   .option("--base <ref>", "Base git ref used for local diff checks. Defaults to the same auto-detected base as check.")
   .option("--head <ref>", "Head git ref used for local diff checks.", "HEAD")
   .option("--fix", "Create or refresh ProofPR setup files when the fix is safe.", false)
+  .addHelpText("after", renderDoctorHelpFooter())
   .action(async (options: DoctorCommandOptions) => {
     const report = await runDoctor(options);
     process.stdout.write(renderDoctorReport(report));
@@ -401,6 +403,7 @@ program
   .option("--output <path>", "Write report output to a file instead of stdout.")
   .option("--locale <locale>", "Report language: en or zh-CN.", "zh-CN")
   .option("--fail-on <level>", "Exit with code 1 on risk level: low, medium, high, or never.", parseFailLevel, "never")
+  .addHelpText("after", renderCheckHelpFooter())
   .action(async (options: CheckCommandOptions) => {
     const base = options.base ?? (await resolveDefaultBaseRef());
     const diffText = await readCheckDiff(base, options.head);
@@ -436,6 +439,7 @@ program
   .option("--output <path>", "Write the request to a file instead of stdout.")
   .option("--locale <locale>", "Report language: en or zh-CN.", "zh-CN")
   .option("--full", "Print the full evidence request template instead of the short PR comment.", false)
+  .addHelpText("after", renderRequestHelpFooter())
   .action(async (options: RequestCommandOptions) => {
     const base = options.base ?? (await resolveDefaultBaseRef());
     const diffText = await readCheckDiff(base, options.head);
@@ -522,6 +526,7 @@ program
   )
   .option("--fail-on <level>", "Workflow failure threshold: low, medium, high, or never.", parseFailLevel, "high")
   .option("--force", "Overwrite existing files.", false)
+  .addHelpText("after", renderInitHelpFooter())
   .action(async (options: InitCommandOptions) => {
     const results: InitFileResult[] = [
       {
@@ -631,6 +636,61 @@ function renderGuide(): string {
 - npx proof-pr@latest request --output proofpr-request.md
 - npx proof-pr@latest check --format sarif --output proofpr.sarif
 - npx proof-pr@latest benchmark --cases benchmarks/cases
+`;
+}
+
+function renderRootHelpFooter(): string {
+  return `
+常用复制：
+  npx proof-pr@latest init
+  npx proof-pr@latest check
+  npx proof-pr@latest request
+
+中文向导：
+  npx proof-pr@latest guide
+`;
+}
+
+function renderInitHelpFooter(): string {
+  return `
+最常用：
+  npx proof-pr@latest init
+
+说明：
+  默认配置已经可用，提交生成文件后打开 PR 即可看到报告。
+`;
+}
+
+function renderCheckHelpFooter(): string {
+  return `
+最常用：
+  npx proof-pr@latest check
+  npx proof-pr@latest check --format html --output proofpr-report.html
+
+说明：
+  当前没有可扫描 diff 时，check 会给短提示，不会输出完整空报告。
+`;
+}
+
+function renderRequestHelpFooter(): string {
+  return `
+最常用：
+  npx proof-pr@latest request
+  npx proof-pr@latest request --full
+
+说明：
+  request 只生成可贴给贡献者的补证说明，不展示完整扫描报告。
+`;
+}
+
+function renderDoctorHelpFooter(): string {
+  return `
+最常用：
+  npx proof-pr@latest doctor
+  npx proof-pr@latest doctor --fix
+
+说明：
+  doctor 会在报告顶部直接给下一步建议。
 `;
 }
 

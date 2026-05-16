@@ -4,6 +4,12 @@
 
 暂无。
 
+## 0.1.32 - 2026-05-17
+
+- CLI `--help`、`init --help`、`check --help`、`request --help` 和 `doctor --help` 新增中文“常用复制”区域。
+- README、npm 包 README、快速开始和命令文档同步说明 help 现在会直接给最短使用路径。
+- 默认使用路径继续保持为 `init`、`check`、`request`。
+
 ## 0.1.31 - 2026-05-17
 
 - `proof-pr init` 输出新增“默认配置已经可用”的明确提示，减少新用户接入后停下来研究配置的成本。

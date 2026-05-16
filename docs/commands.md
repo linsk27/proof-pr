@@ -14,6 +14,8 @@ npx proof-pr@latest
 npx proof-pr@latest guide
 ```
 
+也可以运行 `npx proof-pr@latest --help`。帮助信息底部会给出 `init`、`check`、`request` 三条常用复制命令。
+
 ![ProofPR 中文功能菜单](screenshots/proofpr-guide-output.png)
 
 ## 默认路径
@@ -118,7 +120,7 @@ npx proof-pr@latest doctor
 - `.github/workflows/proofpr.yml` 是否存在。
 - `.github/pull_request_template.md` 是否存在，以及是否提示验证、复现、截图或权限理由。
 - workflow 是否监听 `pull_request`。
-- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.31`。
+- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.32`。
 - 是否具备 `pull-requests: write` 和 `contents: read` 权限。
 - 是否启用了 `html-output` 和 `actions/upload-artifact`，方便下载 HTML 可视化报告。
 - 当前目录是否在 Git 仓库里，以及自动识别出的 base...HEAD diff 是否可读。
