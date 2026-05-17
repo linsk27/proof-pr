@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.43";
+const CLI_VERSION = "0.1.44";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -605,6 +605,8 @@ program
     }
   });
 
+orderRootHelpCommands(program);
+
 const args = process.argv.slice(2);
 const parseTask =
   args.length === 0
@@ -678,6 +680,29 @@ function renderRootHelpFooter(): string {
 高级命令：
   npx proof-pr@latest guide 里有 demo、HTML、SARIF、benchmark 的按需用法。
 `;
+}
+
+function orderRootHelpCommands(command: Command): void {
+  const order = new Map([
+    ["guide", 0],
+    ["init", 1],
+    ["doctor", 2],
+    ["check", 3],
+    ["request", 4],
+    ["demo", 5],
+    ["template", 50],
+    ["scan", 51],
+    ["benchmark", 52],
+    ["help", 100]
+  ]);
+
+  const commands = command.commands as Command[];
+
+  commands.sort((left: Command, right: Command) => {
+    const leftOrder = order.get(left.name()) ?? 90;
+    const rightOrder = order.get(right.name()) ?? 90;
+    return leftOrder === rightOrder ? left.name().localeCompare(right.name()) : leftOrder - rightOrder;
+  });
 }
 
 function renderInitHelpFooter(): string {
@@ -1135,17 +1160,15 @@ ${forceHint}
 下一步直接复制:
 git add ${gitAddPaths}
 git commit -m "chore: add ProofPR"
+npx proof-pr@latest doctor
+
+发 PR 前本地自查:
+npx proof-pr@latest check
 
 打开或更新 Pull Request 后，报告会出现在:
 - PR 评论
 - GitHub Actions 摘要
 - Workflow 标注${options.htmlReport ? `\n- ${options.htmlOutput} 报告文件` : ""}
-
-本地先自查:
-npx proof-pr@latest check
-
-检查接入是否完整:
-npx proof-pr@latest doctor
 `;
 }
 
