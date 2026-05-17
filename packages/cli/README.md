@@ -12,7 +12,7 @@ ProofPR 是给开源维护者和工程团队使用的 PR 证据门禁。它只�
 npx proof-pr@latest --version
 ```
 
-当前应输出 `0.1.49`。
+当前应输出 `0.1.50`。
 
 不知道怎么开始时：
 
@@ -51,7 +51,7 @@ npx proof-pr@latest check
 ```
 
 `check` 会自动选择常见主分支作为 base，并纳入已提交分支 diff、staged、unstaged 和未跟踪新文件。
-本地运行时通常没有 PR 标题和描述上下文，报告会提示这一点；打开 PR 后会结合 PR 标题和描述重新评估证据。需要本地模拟 PR 描述时，可以把描述写入 `pr.md` 后运行 `npx proof-pr@latest check --pr-body-file pr.md`。
+本地运行时通常没有 PR 标题和描述上下文，报告会提示这一点；打开 PR 后会结合 PR 标题和描述重新评估证据。需要本地模拟 PR 描述时，可以把描述写入 `pr.md` 后运行 `npx proof-pr@latest check --pr-body-file pr.md`；这个命令也会出现在 `check --help` 的常用复制里。
 如果当前没有可扫描 diff，它会直接输出短提示，不会再打印完整空报告；刚接入但还没有业务改动时不用处理。
 
 只生成可以发给贡献者的补证请求：
@@ -67,6 +67,8 @@ npx proof-pr@latest request
 ```bash
 npx proof-pr@latest request --pr-body-file pr.md
 ```
+
+这个命令也会出现在 `request --help` 的常用复制里。
 
 也可以写入文件：
 
@@ -125,7 +127,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.49
+- uses: linsk27/proof-pr@v0.1.50
   with:
     fail-on: high
     comment: "true"

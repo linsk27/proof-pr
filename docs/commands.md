@@ -121,7 +121,7 @@ npx proof-pr@latest doctor
 - `.github/workflows/proofpr.yml` 是否存在。
 - `.github/pull_request_template.md` 是否存在，以及是否提示验证、复现、截图或权限理由。
 - workflow 是否监听 `pull_request`。
-- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.49`。
+- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.50`。
 - 是否具备 `pull-requests: write` 和 `contents: read` 权限。
 - 是否启用了 `html-output` 和 `actions/upload-artifact`，方便下载 HTML 可视化报告。
 - 当前目录是否在 Git 仓库里，以及自动识别出的 base...HEAD diff 是否可读。
@@ -149,6 +149,8 @@ npx proof-pr@latest check
 ```bash
 npx proof-pr@latest check --pr-body-file pr.md
 ```
+
+这个命令也会出现在 `check --help` 的常用复制里。
 
 如果当前没有可扫描 diff，`check` 会输出短提示，说明这不是错误；刚接入但还没有业务改动时不需要处理，提交业务改动后再检查即可。
 
@@ -190,6 +192,8 @@ npx proof-pr@latest request
 ```bash
 npx proof-pr@latest request --pr-body-file pr.md
 ```
+
+这个命令也会出现在 `request --help` 的常用复制里。
 
 如果当前没有可扫描 diff，`request` 会输出短提示，说明这不是错误；刚接入但还没有业务改动时不需要处理，提交业务改动后再生成补证请求即可。
 

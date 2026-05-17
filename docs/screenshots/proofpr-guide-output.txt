@@ -35,6 +35,9 @@
 需要可分享页面：
    npx proof-pr@latest check --format html --output proofpr-report.html
 
+需要本地模拟 PR 描述：
+   npx proof-pr@latest check --pr-body-file pr.md
+
 高级命令按需使用：
 - npx proof-pr@latest template
 - npx proof-pr@latest demo --list

@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.49";
+const CLI_VERSION = "0.1.50";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -682,6 +682,9 @@ function renderGuide(): string {
 需要可分享页面：
    npx proof-pr@latest check --format html --output proofpr-report.html
 
+需要本地模拟 PR 描述：
+   npx proof-pr@latest check --pr-body-file pr.md
+
 高级命令按需使用：
 - npx proof-pr@latest template
 - npx proof-pr@latest demo --list
@@ -746,6 +749,7 @@ function renderCheckHelpFooter(): string {
 最常用：
   npx proof-pr@latest check
   npx proof-pr@latest check --format html --output proofpr-report.html
+  npx proof-pr@latest check --pr-body-file pr.md
 
 说明：
   当前没有可扫描 diff 时，check 会给短提示，不会输出完整空报告。
@@ -758,6 +762,7 @@ function renderRequestHelpFooter(): string {
 最常用：
   npx proof-pr@latest request
   npx proof-pr@latest request --full
+  npx proof-pr@latest request --pr-body-file pr.md
 
 说明：
   request 只生成可贴给贡献者的补证说明，不展示完整扫描报告。

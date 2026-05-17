@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.49`。
+当前最新公开版本是 `0.1.50`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.49
-git push origin v0.1.49
+git tag v0.1.50
+git push origin v0.1.50
 ```
 
 发布完成后需要检查：
@@ -66,9 +66,17 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.49
-npx proof-pr@latest --version -> 0.1.49
+npm view proof-pr version -> 0.1.50
+npx proof-pr@latest --version -> 0.1.50
 ```
+
+## `v0.1.50` 发布状态
+
+`v0.1.50` 是 PR 描述文件入口可发现性增强版，重点包括：
+
+- `check --help` 的常用复制命令补充 `npx proof-pr@latest check --pr-body-file pr.md`。
+- `request --help` 的常用复制命令补充 `npx proof-pr@latest request --pr-body-file pr.md`。
+- 默认参数列表仍保持简洁；README、命令文档、快速开始和 npm README 同步说明这些命令在需要本地模拟 PR 描述时使用。
 
 ## `v0.1.49` 发布状态
 
@@ -370,7 +378,7 @@ npx proof-pr@latest --version -> 0.1.49
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.49` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.50` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 
