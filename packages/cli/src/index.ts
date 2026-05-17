@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.40";
+const CLI_VERSION = "0.1.41";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -332,7 +332,7 @@ function localizeHelpMetadata(text: string | undefined): string {
 
 program
   .name("proof-pr")
-  .description("PR 证据门禁：在维护者投入 review 前，检查证据、范围和高风险改动。")
+  .description("PR 证据门禁：在维护者投入审查前，检查证据、范围和高风险改动。")
   .version(CLI_VERSION, "-V, --version", "显示版本号。")
   .helpOption("-h, --help", "显示帮助信息。")
   .addHelpCommand("help [command]", "显示某个命令的帮助信息。")
@@ -377,7 +377,7 @@ program
   .action(async (options: TemplateCommandOptions) => {
     await writeIfMissing(options.output, renderPullRequestTemplate(), options.force);
     process.stdout.write(
-      `ProofPR PR 模板已写入 ${options.output}\n\n下一步:\n1. 提交这个模板文件。\n2. 让贡献者在相关场景补充验证、复现、截图、changelog 和权限理由。\n3. 运行 npx proof-pr@latest doctor 检查接入状态。\n`
+      `ProofPR PR 模板已写入 ${options.output}\n\n下一步:\n1. 提交这个模板文件。\n2. 让贡献者在相关场景补充验证、复现、截图、变更说明和权限理由。\n3. 运行 npx proof-pr@latest doctor 检查接入状态。\n`
     );
   });
 
@@ -621,7 +621,7 @@ function renderGuide(): string {
   return `ProofPR = PR 证据门禁
 
 它只回答一个问题：
-这个 PR 有没有足够证据，值得维护者开始 review？
+这个 PR 有没有足够证据，值得维护者开始审查？
 
 真的只记三条命令：
 
@@ -638,9 +638,9 @@ function renderGuide(): string {
    只输出一段可以贴给贡献者的补证说明，不展示完整扫描报告。
 
 报告会给出：
-- 是否建议继续 review、先补证据，还是先处理高风险。
-- 缺什么证据：测试、复现、截图、changelog、权限理由。
-- 风险主要在哪：供应链、Workflow、Secret、证据完整性或审查范围。
+- 是否建议继续审查、先补证据，还是先处理高风险。
+- 缺什么证据：测试、复现、截图、变更说明、权限理由。
+- 风险主要在哪：供应链、Workflow、密钥、证据完整性或审查范围。
 
 不确定装好没有：
    npx proof-pr@latest doctor
@@ -986,7 +986,7 @@ async function inspectPullRequestTemplate(
     checks.push({ level: "pass", title: "PR 模板覆盖复现、截图或权限理由提示" });
   } else {
     checks.push({ level: "warn", title: "PR 模板缺少复现、截图或权限理由提示" });
-    nextSteps.add("在 PR 模板中加入复现、截图、changelog、权限理由等可选栏目。");
+    nextSteps.add("在 PR 模板中加入复现、截图、变更说明、权限理由等可选栏目。");
   }
 }
 
@@ -1355,7 +1355,7 @@ function renderPullRequestTemplate(): string {
 ## 发布风险
 
 - [ ] 无破坏性变更
-- [ ] 需要迁移说明 / changelog
+- [ ] 需要迁移说明 / 变更说明
 - [ ] 需要灰度或回滚方案
 `;
 }

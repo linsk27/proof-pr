@@ -9,21 +9,21 @@
 
 ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。
 
-它不是 AI code reviewer，也不是漏洞库。它只在 review 开始前回答一个问题：
+它不是 AI code reviewer，也不是漏洞库。它只在审查开始前回答一个问题：
 
-> 这个 PR 有没有足够证据，值得维护者开始 review？
+> 这个 PR 有没有足够证据，值得维护者开始审查？
 
-ProofPR 会读取 PR diff、PR 描述和仓库配置，判断贡献者是否补齐了测试、复现、截图、changelog、权限理由，以及这次改动是否碰到依赖、workflow、secret、MCP 或其他高风险区域。输出结果会收敛成三类信息：
+ProofPR 会读取 PR diff、PR 描述和仓库配置，判断贡献者是否补齐了测试、复现、截图、变更说明、权限理由，以及这次改动是否碰到依赖、workflow、secret、MCP 或其他高风险区域。输出结果会收敛成三类信息：
 
-- **能不能开始 review**：继续 review、先补证据，还是高风险先别合并。
-- **缺什么证据**：测试、复现、截图、changelog、权限理由。
-- **先看哪里**：风险雷达把问题归到证据完整性、供应链、Workflow 权限、Secret 泄露和 Review 面。
+- **能不能开始审查**：继续审查、先补证据，还是高风险先别合并。
+- **缺什么证据**：测试、复现、截图、变更说明、权限理由。
+- **先看哪里**：风险雷达把问题归到证据完整性、供应链、Workflow 权限、密钥泄露和审查范围。
 
 ## 现在能用吗
 
-- GitHub Release：[`v0.1.40`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.40)
-- npm：[`proof-pr@0.1.40`](https://www.npmjs.com/package/proof-pr)
-- GitHub Action：`linsk27/proof-pr@v0.1.40`
+- GitHub Release：[`v0.1.41`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.41)
+- npm：[`proof-pr@0.1.41`](https://www.npmjs.com/package/proof-pr)
+- GitHub Action：`linsk27/proof-pr@v0.1.41`
 - 当前源码 benchmark：`22/22 passed`
 - 默认接入：`npx proof-pr@latest init`
 - 本地自查：`npx proof-pr@latest check`
@@ -33,8 +33,8 @@ ProofPR 会读取 PR diff、PR 描述和仓库配置，判断贡献者是否补�
 项目当前状态：
 
 - **已可正式试用**：CLI、GitHub Action、npm 包、GitHub Release、中文文档和截图都已经打通。
-- **核心边界明确**：ProofPR 不做通用代码审查，不判断代码好不好；它只做确定性 PR 证据门禁，帮助维护者先判断是否值得 review。
-- **发布链路已验证**：npm Trusted Publishing 已绑定 `linsk27/proof-pr` + `release.yml`，`v0.1.21` 到 `v0.1.40` 已通过 GitHub OIDC 自动发布到 npm。
+- **核心边界明确**：ProofPR 不做通用代码审查，不判断代码好不好；它只做确定性 PR 证据门禁，帮助维护者先判断是否值得审查。
+- **发布链路已验证**：npm Trusted Publishing 已绑定 `linsk27/proof-pr` + `release.yml`，`v0.1.21` 到 `v0.1.41` 已通过 GitHub OIDC 自动发布到 npm。
 - **下一步增长点**：继续减少首屏概念，补充真实 PR 案例和 Marketplace 上架材料。
 
 验证你拿到的是最新版本：
@@ -44,7 +44,7 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-这两个命令当前都应输出 `0.1.40`。
+这两个命令当前都应输出 `0.1.41`。
 
 不知道怎么开始时，直接运行中文向导：
 
@@ -84,9 +84,9 @@ npx proof-pr@latest guide
 | 常见 PR 问题 | ProofPR 给维护者什么 |
 | --- | --- |
 | PR 描述很薄，只写了 fixed bug。 | 判断描述质量，要求补充动机、复现、验证和影响。 |
-| 改了代码但没有测试，也没有手动验证说明。 | 输出 `needs-evidence`，让维护者先要证据再深度 review。 |
-| 改了 `.github/workflows/**`、依赖、`.env`、MCP 配置。 | 把敏感文件列出来，给出重点 review 清单。 |
-| 新增依赖、大版本升级、非注册表来源、未固定版本、`postinstall` 脚本。 | 提醒核查供应链来源、changelog、迁移说明、解析覆盖和 lockfile 是否同步。 |
+| 改了代码但没有测试，也没有手动验证说明。 | 输出 `needs-evidence`，让维护者先要证据再深度审查。 |
+| 改了 `.github/workflows/**`、依赖、`.env`、MCP 配置。 | 把敏感文件列出来，给出重点审查清单。 |
+| 新增依赖、大版本升级、非注册表来源、未固定版本、`postinstall` 脚本。 | 提醒核查供应链来源、变更说明、迁移说明、解析覆盖和 lockfile 是否同步。 |
 | 使用 `pull_request_target` 并 checkout PR head。 | 标记为高风险组合，避免高权限上下文运行不可信 PR 代码。 |
 | 团队想要求 UI 改动必须有截图。 | 用 Evidence Contract 声明路径级证据要求。 |
 | 想把扫描结果做成可分享页面。 | 输出可搜索、可筛选、可复制补证清单的独立 HTML 风险面板。 |
@@ -121,7 +121,7 @@ npx proof-pr@latest init
 - `.github/workflows/proofpr.yml`
 - `.github/pull_request_template.md`
 
-默认配置已经适合开源仓库试用；PR 模板会引导贡献者补充验证、复现、截图、changelog 和权限理由。
+默认配置已经适合开源仓库试用；PR 模板会引导贡献者补充验证、复现、截图、变更说明和权限理由。
 生成的 workflow 还会默认保存 `proofpr-report.html` artifact，维护者可以在 Actions 页面直接下载可视化报告。
 如果仓库里已经有这些文件，`init` 默认会保留不覆盖，并告诉你哪些文件已存在；需要刷新到当前模板时再加 `--force`。
 
@@ -198,11 +198,11 @@ Benchmark 输出，证明规则样本仍按预期命中：
 
 | 输出 | 含义 |
 | --- | --- |
-| `Risk` / `风险等级` | `low`、`medium`、`high`，表示整体 review 风险。 |
+| `Risk` / `风险等级` | `low`、`medium`、`high`，表示整体审查风险。 |
 | `Evidence score` / `证据评分` | 0-100 分，越高代表 PR 证据越充分。 |
-| `Review gate` / `Review 门禁` | 建议正常 review、重点 review、先补证据，或风险处理前不要合并。 |
-| `Risk Radar` / `风险雷达` | 把 rule id 归并成证据完整性、供应链、Workflow 权限、Secret 泄露和 Review 面，先告诉维护者该从哪里看。 |
-| `Review Plan` / `Review 行动清单` | 可直接执行的维护者 checklist 和重点文件。 |
+| `审查门禁` | 建议常规审查、重点审查、先补证据，或风险处理前不要合并。 |
+| `Risk Radar` / `风险雷达` | 把 rule id 归并成证据完整性、供应链、Workflow 权限、密钥泄露和审查范围，先告诉维护者该从哪里看。 |
+| `审查行动清单` | 可直接执行的维护者 checklist 和重点文件。 |
 | `一键补证建议` | 可复制给贡献者的 PR 描述补充模板，减少来回追问。 |
 
 报告会出现在：
@@ -222,7 +222,7 @@ Benchmark 输出，证明规则样本仍按预期命中：
 | PR 描述质量 | body 缺失或过薄。 |
 | 测试和验证证据 | 代码改动没有测试文件，也没有验证说明。 |
 | 复现上下文 | 缺少复现步骤、before/after、预期/实际结果。 |
-| Evidence Contract | 命中仓库自定义路径，但缺少要求的截图、验证、changelog 或权限理由。 |
+| Evidence Contract | 命中仓库自定义路径，但缺少要求的截图、验证、变更说明或权限理由。 |
 | 敏感路径 | `.github/workflows/**`、`.env*`、依赖文件、Dockerfile、MCP 配置等。 |
 | secrets | 常见 API key、token、数据库连接串。 |
 | 依赖变化 | 新增依赖、大版本升级、非注册表来源、未固定版本、manifest/lockfile 不一致、lockfile-only 变更、解析覆盖。 |
@@ -308,7 +308,7 @@ evidence:
 `init` 默认已经会在 GitHub Action 里保存 HTML 面板，对应 workflow 片段如下：
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.40
+- uses: linsk27/proof-pr@v0.1.41
   with:
     html-output: proofpr-report.html
 - uses: actions/upload-artifact@v4
@@ -334,11 +334,11 @@ ProofPR 的准确性不是“能不能发现所有代码 bug”。它做的是 *
 
 - 不调用大模型，不上传代码。
 - 不判断作者是不是用了 AI。
-- 不替代人工代码 review。
+- 不替代人工代码审查。
 - 只基于 diff、PR 描述和配置里的规则做可复现判断。
-- 用 benchmark case 验证规则命中、风险等级和 Review 门禁是否符合预期。
+- 用 benchmark case 验证规则命中、风险等级和审查门禁是否符合预期。
 
-这让它适合作为开源仓库的第一道门：先过滤“证据不足、风险边界不清”的 PR，让维护者把时间花在真正值得 review 的改动上。
+这让它适合作为开源仓库的第一道门：先过滤“证据不足、风险边界不清”的 PR，让维护者把时间花在真正值得审查的改动上。
 
 ## 文档
 

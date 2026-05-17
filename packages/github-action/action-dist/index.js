@@ -51458,7 +51458,7 @@ function renderChineseMarkdownReport(result) {
         `- 验证证据：${formatChineseBoolean(result.summary.verificationEvidence)}`,
         `- 复现上下文：${formatChineseBoolean(result.summary.reproductionEvidence)}`,
         `- 截图或视觉证据：${formatChineseBoolean(result.summary.screenshotEvidence)}`,
-        `- Changelog 或迁移证据：${formatChineseBoolean(result.summary.changelogEvidence)}`,
+        `- 变更说明或迁移证据：${formatChineseBoolean(result.summary.changelogEvidence)}`,
         `- 权限理由证据：${formatChineseBoolean(result.summary.permissionRationaleEvidence)}`,
         ""
     ];
@@ -51467,7 +51467,7 @@ function renderChineseMarkdownReport(result) {
     appendQuickFixSection(lines, result, "zh-CN");
     appendReviewPlanSection(lines, result, "zh-CN");
     if (result.findings.length === 0) {
-        lines.push("## 风险发现", "", "启用的规则没有发现需要优先关注的 review 风险。", "");
+        lines.push("## 风险发现", "", "启用的规则没有发现需要优先关注的审查风险。", "");
         return lines.join("\n");
     }
     lines.push("## 风险发现", "");
@@ -51517,7 +51517,7 @@ function appendRiskRadarSection(lines, result, locale) {
 function appendQuickFixSection(lines, result, locale) {
     lines.push(locale === "zh-CN" ? "## 可复制补证清单" : "## Copyable Fix Checklist", "");
     lines.push(locale === "zh-CN"
-        ? "贡献者可以直接复制下面内容补到 PR 描述里，维护者也可以把它作为 review 回复。"
+        ? "贡献者可以直接复制下面内容补到 PR 描述里，维护者也可以把它作为审查回复。"
         : "Contributors can paste this into the PR description; maintainers can also use it as a review reply.");
     lines.push("", "```md", renderContributorFixPrompt(result, locale), "```", "");
 }
@@ -51549,7 +51549,7 @@ function renderContributorFixPrompt(result, locale) {
     const focusFiles = result.reviewPlan.focusFiles.slice(0, 5);
     if (locale === "zh-CN") {
         const lines = [
-            "请在这个 PR 描述中补充以下内容，方便维护者继续 review：",
+            "请在这个 PR 描述中补充以下内容，方便维护者继续审查：",
             missingEvidence.length > 0 ? `ProofPR 当前最缺：${missingEvidence.join("、")}。` : "ProofPR 当前没有发现必须补充的证据项，可以保留关键验证记录。",
             "",
             "## 验证方式",
@@ -51618,7 +51618,7 @@ function renderShortContributorRequest(result, locale) {
     const focusFiles = result.reviewPlan.focusFiles.slice(0, 3);
     if (locale === "zh-CN") {
         const lines = [
-            "这个 PR 建议先补充证据，再进入详细 review。",
+            "这个 PR 建议先补充证据，再进入详细审查。",
             ""
         ];
         if (missingEvidence.length > 0) {
@@ -51688,7 +51688,7 @@ function missingEvidenceLabels(result, locale) {
         labels.push(locale === "zh-CN" ? "截图或录屏" : "screenshot or recording");
     }
     if (!result.summary.changelogEvidence && result.findings.some((finding) => finding.ruleId.includes("dependency-major-upgrade"))) {
-        labels.push(locale === "zh-CN" ? "changelog 或迁移说明" : "changelog or migration notes");
+        labels.push(locale === "zh-CN" ? "变更说明或迁移说明" : "changelog or migration notes");
     }
     if (!result.summary.permissionRationaleEvidence && result.findings.some((finding) => finding.ruleId.includes("workflow"))) {
         labels.push(locale === "zh-CN" ? "权限变更理由" : "permission rationale");
@@ -51746,7 +51746,7 @@ function maintainerFocus(findings, locale) {
         }
         else if (finding.ruleId.startsWith("evidence-contract:")) {
             focus.add(locale === "zh-CN"
-                ? "先要求贡献者补齐仓库定义的证据契约，再投入深度 review。"
+                ? "先要求贡献者补齐仓库定义的证据契约，再投入深度审查。"
                 : "Ask the contributor to satisfy the repository-defined evidence contract before deep review.");
         }
         else if (finding.ruleId === "workflow-permission-change") {
@@ -51761,7 +51761,7 @@ function maintainerFocus(findings, locale) {
         }
         else if (finding.ruleId === "thin-pr-description") {
             focus.add(locale === "zh-CN"
-                ? "深入 review 前要求补充更清楚的 PR 描述。"
+                ? "深入审查前要求补充更清楚的 PR 描述。"
                 : "Ask for a clearer PR description before deep review.");
         }
         else if (finding.ruleId === "missing-reproduction-context") {
@@ -51771,7 +51771,7 @@ function maintainerFocus(findings, locale) {
         }
         else if (finding.ruleId === "change-size") {
             focus.add(locale === "zh-CN"
-                ? "要求拆分 PR，或提供逐文件 review 指南。"
+                ? "要求拆分 PR，或提供逐文件审查指南。"
                 : "Request a smaller PR or a file-by-file review guide.");
         }
         else if (finding.ruleId === "dependency-major-upgrade") {
@@ -51837,18 +51837,18 @@ function translateFinding(finding) {
         return {
             title: "证据契约未满足",
             message: "该 PR 命中了仓库自定义证据契约，但 PR 描述中缺少必需证据。",
-            recommendation: "建议要求贡献者补齐缺失证据后再深入 review。"
+            recommendation: "建议要求贡献者补齐缺失证据后再深入审查。"
         };
     }
     if (finding.ruleId === "change-size") {
         const files = finding.evidence?.find((item) => item.startsWith("files: "))?.replace("files: ", "");
         const lines = finding.evidence?.find((item) => item.startsWith("changed lines: "))?.replace("changed lines: ", "");
         return {
-            title: finding.severity === "high" ? "review 面积过大" : "review 面积偏大",
+            title: finding.severity === "high" ? "审查范围过大" : "审查范围偏大",
             message: files && lines ? `该改动涉及 ${files} 个文件、${lines} 行变更。` : finding.message,
             recommendation: finding.severity === "high"
-                ? "建议要求拆分 PR，或提供清晰的 review map 后再投入深度 review。"
-                : "建议要求贡献者解释改动边界，并标出最需要重点 review 的文件。"
+                ? "建议要求拆分 PR，或提供清晰的逐文件审查说明后再投入深度审查。"
+                : "建议要求贡献者解释改动边界，并标出最需要重点审查的文件。"
         };
     }
     if (finding.ruleId === "sensitive-path") {
@@ -51862,14 +51862,14 @@ function translateFinding(finding) {
         return {
             title: "缺少验证证据",
             message: "代码发生变更，但没有检测到测试文件改动或 PR 验证说明。",
-            recommendation: "建议要求补充测试，或提供清晰的手动验证说明后再深入 review。"
+            recommendation: "建议要求补充测试，或提供清晰的手动验证说明后再深入审查。"
         };
     }
     if (finding.ruleId === "thin-pr-description") {
         const missing = finding.title.toLowerCase().includes("missing");
         return {
             title: missing ? "PR 描述为空" : "PR 描述过薄",
-            message: missing ? "PR 正文为空，维护者缺少 review 前的上下文。" : "PR 正文较短，可能不足以支撑有效 review。",
+            message: missing ? "PR 正文为空，维护者缺少审查前的上下文。" : "PR 正文较短，可能不足以支撑有效审查。",
             recommendation: "建议要求补充改动动机、验证证据、兼容性和发布影响说明。"
         };
     }
@@ -51877,7 +51877,7 @@ function translateFinding(finding) {
         return {
             title: "缺少复现或 before/after 上下文",
             message: "PR 未提到复现步骤、预期行为、实际行为或 before/after 说明。",
-            recommendation: "建议要求补充复现步骤或 before/after 说明，方便 reviewer 验证改动路径。"
+            recommendation: "建议要求补充复现步骤或 before/after 说明，方便维护者验证改动路径。"
         };
     }
     if (finding.ruleId === "dependency-added") {
@@ -51891,7 +51891,7 @@ function translateFinding(finding) {
         return {
             title: "依赖发生大版本升级",
             message: finding.path ? `${finding.path} 中有依赖跨越了大版本边界。` : finding.message,
-            recommendation: "请核查 changelog、迁移说明、peer dependencies 影响，以及测试是否覆盖升级后的关键路径。"
+            recommendation: "请核查变更说明、迁移说明、peer dependencies 影响，以及测试是否覆盖升级后的关键路径。"
         };
     }
     if (finding.ruleId === "dependency-lifecycle-script") {
@@ -51968,9 +51968,9 @@ function translateFinding(finding) {
     }
     if (finding.ruleId.startsWith("secret-detected")) {
         return {
-            title: "可能提交了 secret",
-            message: finding.message.replace("Added line looks like it contains", "新增行疑似包含"),
-            recommendation: "请将凭证移到 secret manager 或 CI secret store，轮换任何已暴露的值，并只提交占位符。"
+            title: "可能提交了密钥",
+            message: `新增行疑似包含${translateSecretPatternLabel(finding.ruleId)}。`,
+            recommendation: "请将凭证移到密钥管理器或 CI Secret，轮换任何已暴露的值，并只提交占位符。"
         };
     }
     return finding;
@@ -51988,6 +51988,17 @@ function translateEvidence(item) {
         .replace(/\bpermission-rationale\b/g, "权限理由")
         .replace("line ", "第 ")
         .replace(": ", " 行：");
+}
+function translateSecretPatternLabel(ruleId) {
+    const patternId = ruleId.split(":")[1] ?? "";
+    return {
+        "openai-key": " OpenAI API key",
+        "anthropic-key": " Anthropic API key",
+        "github-token": " GitHub token",
+        "aws-access-key": " AWS access key id",
+        "database-url": "数据库连接串",
+        "generic-secret-assignment": "通用密钥赋值"
+    }[patternId] ?? "疑似密钥";
 }
 function translateRisk(risk) {
     return { low: "低", medium: "中", high: "高" }[risk] ?? risk;
@@ -52012,8 +52023,8 @@ function formatEvidenceGrade(grade, locale) {
 function formatReviewDecision(decision, locale) {
     if (locale === "zh-CN") {
         return {
-            ready: "可以进入常规 review",
-            "review-carefully": "带着重点进入 review",
+            ready: "可以进入常规审查",
+            "review-carefully": "带着重点进入审查",
             "needs-evidence": "先要求补充证据",
             "block-merge": "处理风险前不建议合并"
         }[decision] ?? decision;
@@ -52034,9 +52045,9 @@ function formatPriority(priority, locale) {
 function translateReviewActionTitle(actionId, fallback) {
     return {
         "block-merge-until-resolved": "风险处理前不要合并",
-        "ask-for-evidence-before-review": "深入 review 前先要求补充证据",
-        "review-with-focus": "带着重点清单进行 review",
-        "normal-review": "进入常规 review",
+        "ask-for-evidence-before-review": "深入审查前先要求补充证据",
+        "review-with-focus": "带着重点清单进行审查",
+        "normal-review": "进入常规审查",
         "satisfy-evidence-contract": "要求补齐证据契约",
         "improve-pr-description": "要求补充更清楚的 PR 描述",
         "add-verification-evidence": "要求补充测试或手动验证证据",
@@ -52047,7 +52058,7 @@ function translateReviewActionTitle(actionId, fallback) {
         "review-untrusted-checkout": "审查 PR head checkout 的权限边界",
         "review-package-lifecycle-script": "审查包生命周期脚本",
         "review-mcp-execution-surface": "审查 MCP 命令、参数和凭证处理",
-        "request-review-map-or-split": "要求拆分 PR 或提供逐文件 review map",
+        "request-review-map-or-split": "要求拆分 PR 或提供逐文件审查说明",
         "verify-dependency-change": "核查依赖来源和 lockfile 影响",
         "review-major-dependency-upgrade": "核查依赖大版本升级影响",
         "verify-non-registry-dependency-source": "核查非注册表依赖来源",
@@ -52055,28 +52066,28 @@ function translateReviewActionTitle(actionId, fallback) {
         "add-matching-lockfile-update": "要求补充匹配的 lockfile",
         "explain-lockfile-only-change": "要求说明 lockfile-only 变化",
         "review-dependency-resolution-override": "审查依赖解析覆盖",
-        "assign-sensitive-file-review": "安排敏感文件重点 review"
+        "assign-sensitive-file-review": "安排敏感文件重点审查"
     }[actionId] ?? fallback;
 }
 function translateReviewActionDetail(actionId, fallback) {
     return {
-        "block-merge-until-resolved": "在高风险 finding 被解释、降低或移除前，把这个 PR 视为不可合并。",
-        "ask-for-evidence-before-review": "要求测试、截图、复现步骤或更清楚的 PR 描述，再投入详细 review。",
-        "review-with-focus": "优先使用下面的风险发现和重点文件作为第一轮 review map。",
-        "normal-review": "当前证据足够支撑维护者进行常规 review。",
+        "block-merge-until-resolved": "在高风险发现被解释、降低或移除前，把这个 PR 视为不可合并。",
+        "ask-for-evidence-before-review": "要求测试、截图、复现步骤或更清楚的 PR 描述，再投入详细审查。",
+        "review-with-focus": "优先使用下面的风险发现和重点文件作为第一轮审查地图。",
+        "normal-review": "当前证据足够支撑维护者进行常规审查。",
         "satisfy-evidence-contract": "该 PR 命中了仓库自定义证据契约，但 PR 描述里缺少必需证据。",
         "improve-pr-description": "贡献者应说明为什么改、改了什么、如何验证，以及是否有发布或兼容性风险。",
         "add-verification-evidence": "要求测试输出、CI 链接、截图，或简短的手动验证说明。",
         "add-reproduction-context": "PR 应包含复现步骤、预期/实际行为，或相关 before/after 截图。",
-        "rotate-secret": "在 secret 从 PR 中移除并完成轮换前，不要合并。",
+        "rotate-secret": "在密钥从 PR 中移除并完成轮换前，不要合并。",
         "justify-workflow-permissions": "确认写权限或 OIDC 是否必要，并检查不可信 PR 是否能触发该 workflow。",
         "review-privileged-pr-trigger": "确认 workflow 不会用写权限 token、secret 或仓库权限执行不可信 PR 代码。",
         "review-untrusted-checkout": "确认 job 不会在写权限 token、仓库 secret 或 pull_request_target 高权限上下文中运行不可信 PR 代码。",
         "review-package-lifecycle-script": "检查 install、postinstall、prepare 或 publish 脚本是否会执行非预期代码。",
         "review-mcp-execution-surface": "检查 MCP 配置是否提交凭证，或意外扩大本地执行面。",
-        "request-review-map-or-split": "要求贡献者拆分无关改动，或标出最需要重点 review 的文件。",
+        "request-review-map-or-split": "要求贡献者拆分无关改动，或标出最需要重点审查的文件。",
         "verify-dependency-change": "检查包名、维护者、许可证、安装脚本，以及 lockfile 是否符合预期依赖变化。",
-        "review-major-dependency-upgrade": "检查 changelog、迁移说明、peer dependencies，以及测试是否覆盖升级后的关键路径。",
+        "review-major-dependency-upgrade": "检查变更说明、迁移说明、peer dependencies，以及测试是否覆盖升级后的关键路径。",
         "verify-non-registry-dependency-source": "要求说明 git、URL、file、link 或 portal 依赖的必要性，并确认来源固定且符合项目策略。",
         "pin-dependency-version": "把 latest、通配符、空版本或过宽版本范围替换为明确版本范围，并同步 lockfile。",
         "add-matching-lockfile-update": "依赖清单变更应包含包管理器 lockfile，或在 PR 中说明为什么没有 lockfile。",
@@ -52089,8 +52100,11 @@ function translateFocusReason(reasonId, fallback) {
     if (reasonId.startsWith("evidence-contract:")) {
         return "仓库自定义证据契约未满足";
     }
+    if (reasonId.startsWith("secret-detected")) {
+        return "疑似密钥提交";
+    }
     return {
-        "change-size": "review 面积相关 finding",
+        "change-size": "审查范围相关发现",
         "sensitive-path": "敏感路径发生变更",
         "dependency-added": "依赖清单发生变更",
         "dependency-major-upgrade": "依赖发生大版本升级",
@@ -52109,11 +52123,11 @@ function translateFocusReason(reasonId, fallback) {
 }
 function translateScoreMessage(message) {
     return {
-        "PR description provides review context.": "PR 描述提供了 review 上下文。",
+        "PR description provides review context.": "PR 描述提供了审查上下文。",
         "Verification evidence was found.": "检测到测试或手动验证证据。",
         "Reproduction or before/after context was found.": "检测到复现步骤或 before/after 上下文。",
         "Screenshot or visual evidence was found.": "检测到截图或视觉证据。",
-        "Changelog or migration evidence was found.": "检测到 changelog 或迁移证据。",
+        "Changelog or migration evidence was found.": "检测到变更说明或迁移证据。",
         "Permission rationale evidence was found.": "检测到权限理由证据。",
         "Test files changed with the PR.": "PR 同时修改了测试文件。",
         "No configured sensitive files changed.": "没有改动已配置的敏感文件。"
@@ -52122,17 +52136,17 @@ function translateScoreMessage(message) {
 function translateDeduction(reasonId, fallback) {
     return {
         "missing-pr-description": "PR 描述缺失。",
-        "thin-pr-description": "PR 描述过薄，不足以支撑可靠 review。",
+        "thin-pr-description": "PR 描述过薄，不足以支撑可靠审查。",
         "no-pr-context": "扫描时没有可用的 PR 描述上下文。",
         "missing-verification": "没有检测到测试或手动验证证据。",
         "missing-reproduction-context": "没有检测到复现步骤、before/after 或预期/实际上下文。",
-        "secret-detected": "检测到疑似已提交 secret。",
+        "secret-detected": "检测到疑似已提交密钥。",
         "workflow-permission-change": "Workflow 权限变化需要重点审查。",
         "mcp-credential-risk": "MCP 配置扩大了本地执行面或凭证风险。",
-        "large-review-surface": "PR 规模过大，常规 review 可靠性会下降。",
-        "broad-review-surface": "PR review 面积偏大。",
-        "sensitive-path-high": "高敏感文件发生变更，需要重点 review。",
-        "sensitive-path-medium": "敏感文件发生变更，需要重点 review。",
+        "large-review-surface": "PR 规模过大，常规审查可靠性会下降。",
+        "broad-review-surface": "PR 审查范围偏大。",
+        "sensitive-path-high": "高敏感文件发生变更，需要重点审查。",
+        "sensitive-path-medium": "敏感文件发生变更，需要重点审查。",
         "dependency-change": "依赖清单发生变更。",
         "dependency-major-upgrade": "依赖发生大版本升级。",
         "dependency-lifecycle-script": "包生命周期脚本可能在安装或发布阶段执行代码。",
@@ -52152,7 +52166,7 @@ function htmlLabels(locale) {
         return {
             report: "可视化报告",
             subtitle: "把 PR 风险、证据质量、审查门禁和维护者行动清单整理成一个可分享的静态页面。",
-            generated: "Generated by ProofPR",
+            generated: "由 ProofPR 生成",
             risk: "风险等级",
             evidenceScore: "证据评分",
             reviewGate: "审查门禁",
@@ -52172,7 +52186,7 @@ function htmlLabels(locale) {
             verification: "验证证据",
             reproduction: "复现上下文",
             screenshot: "截图证据",
-            changelog: "Changelog",
+            changelog: "变更说明",
             permissionRationale: "权限理由",
             reviewPlan: "审查行动清单",
             noActions: "没有额外行动项。",
@@ -52181,7 +52195,7 @@ function htmlLabels(locale) {
             copyFix: "复制补证清单",
             copiedFix: "已复制",
             riskRadar: "风险雷达",
-            riskRadarHint: "按维护者视角归并风险来源，帮助先判断这轮 review 应该看哪里。",
+            riskRadarHint: "按维护者视角归并风险来源，帮助先判断这轮审查应该看哪里。",
             findingDistribution: "风险发现分布",
             findingFilters: "筛选风险发现",
             allFindings: "全部",
@@ -52204,7 +52218,7 @@ function htmlLabels(locale) {
             detail: "详情",
             evidence: "证据",
             recommendation: "建议",
-            footer: "ProofPR 不替代人工 review，它帮助维护者先判断证据是否足够、风险边界是否清楚。"
+            footer: "ProofPR 不替代人工审查，它帮助维护者先判断证据是否足够、风险边界是否清楚。"
         };
     }
     return {
@@ -52364,10 +52378,10 @@ function buildRiskLenses(findings, locale) {
 function riskLensDefinitions(locale) {
     if (locale === "zh-CN") {
         return [
-            { id: "evidence", label: "证据完整性", hint: "PR 描述、验证、复现、截图、changelog 和证据契约是否足够。" },
+            { id: "evidence", label: "证据完整性", hint: "PR 描述、验证、复现、截图、变更说明和证据契约是否足够。" },
             { id: "supply-chain", label: "供应链", hint: "依赖来源、版本固定、lockfile、解析覆盖和安装脚本是否可信。" },
             { id: "workflow", label: "Workflow 权限", hint: "GitHub Actions 权限、OIDC、pull_request_target 和 PR head checkout 是否安全。" },
-            { id: "secrets", label: "Secret 泄露", hint: "diff 中是否出现疑似 token、API key 或数据库连接串。" },
+            { id: "secrets", label: "密钥泄露", hint: "diff 中是否出现疑似 token、API key 或数据库连接串。" },
             { id: "review-surface", label: "审查范围", hint: "改动规模、敏感路径、MCP 或本地 agent 配置是否需要重点审查。" }
         ];
     }

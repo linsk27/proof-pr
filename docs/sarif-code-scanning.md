@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.40
+      - uses: linsk27/proof-pr@v0.1.41
         with:
           fail-on: high
           comment: "true"
@@ -72,7 +72,7 @@ jobs:
 
 ## 会看到什么
 
-上传成功后，GitHub 会在仓库的 `Security` -> `Code scanning` 页面显示 ProofPR finding。带 `path` 的 finding 会关联到具体文件，例如：
+上传成功后，GitHub 会在仓库的 `Security` -> `Code scanning` 页面显示 ProofPR 风险发现。带 `path` 的发现会关联到具体文件，例如：
 
 - `.github/workflows/release.yml` 的 workflow 权限变化。
 - `.env` 的疑似 secret。

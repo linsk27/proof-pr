@@ -32,7 +32,7 @@ npx proof-pr@latest init
 - `.github/workflows/proofpr.yml`
 - `.github/pull_request_template.md`
 
-默认配置已经可用。把这些文件提交到仓库，打开或更新 PR，就会自动生成报告。默认会同时输出 PR 评论、Actions summary、workflow annotations 和 `proofpr-report.html` artifact。PR 模板会提醒贡献者写清验证、复现、截图、changelog 和权限理由。
+默认配置已经可用。把这些文件提交到仓库，打开或更新 PR，就会自动生成报告。默认会同时输出 PR 评论、Actions summary、workflow annotations 和 `proofpr-report.html` artifact。PR 模板会提醒贡献者写清验证、复现、截图、变更说明和权限理由。
 
 `init` 可以重复运行。已有文件默认不会被覆盖；如果你想升级到当前版本模板，再运行 `npx proof-pr@latest init --force`。
 
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.40
+      - uses: linsk27/proof-pr@v0.1.41
         with:
           fail-on: high
           comment: "true"
@@ -116,7 +116,7 @@ on:
 - PR 页面 `Conversation`：这里会出现 `ProofPR 审查报告` 评论。
 - 仓库 `Actions` 页面：这里可以看到 `ProofPR` workflow 的运行日志和 job summary。
 - PR 顶部的 checks 状态：如果风险达到 `fail-on` 阈值，检查项会失败，提醒维护者先处理风险。
-- 报告里的 `风险雷达`：把风险归并成证据、供应链、Workflow、Secret 和 Review 面，帮助你先决定看哪里。
+- 报告里的 `风险雷达`：把风险归并成证据、供应链、Workflow、密钥和审查范围，帮助你先决定看哪里。
 - GitHub annotations：`v0.1.5` 起会把 finding 输出为 workflow annotations，方便在 PR 文件视图里定位。
 - Actions artifact：默认会上传 `proofpr-report`，里面是可搜索、可筛选、可复制补证清单的 `proofpr-report.html`。
 
@@ -147,7 +147,7 @@ npx proof-pr@latest request
 
 `check` 会自动选择常见主分支作为 base，并纳入已提交分支 diff、staged、unstaged 和未跟踪新文件。当前没有可扫描 diff 时，它只输出短提示和下一步建议。
 
-如果第一行输出 `0.1.40`，说明你正在使用当前最新发布版。
+如果第一行输出 `0.1.41`，说明你正在使用当前最新发布版。
 
 也可以全局安装：
 
@@ -263,9 +263,9 @@ GitHub Action 安装成功后，你会在 PR 页面看到：
 
 - Actions 中出现 `ProofPR` workflow。
 - PR 评论区出现 `ProofPR 审查报告`。
-- 报告里有 `风险等级`、`证据评分`、`Review 门禁`、`Review 行动清单`、`证据概览`、`风险发现`。
+- 报告里有 `风险等级`、`证据评分`、`审查门禁`、`审查行动清单`、`证据概览`、`风险发现`。
 
-其中 `证据评分` 是 0-100 分，用来判断 PR 是否提供了足够 review 证据；`Review 门禁` 会给出下一步建议，例如正常 review、要求补充证据，或在风险处理前不建议合并；`Review 行动清单` 可以直接当成维护者处理 PR 的 checklist。
+其中 `证据评分` 是 0-100 分，用来判断 PR 是否提供了足够审查证据；`审查门禁` 会给出下一步建议，例如常规审查、要求补充证据，或在风险处理前不建议合并；`审查行动清单` 可以直接当成维护者处理 PR 的 checklist。
 
 如果没有出现评论，先检查 workflow 权限是否包含：
 

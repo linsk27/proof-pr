@@ -22,7 +22,7 @@ Pull Request / git diff
 执行规则引擎
         |
         v
-计算风险等级、证据评分和 Review 门禁
+计算风险等级、证据评分和审查门禁
         |
         v
 输出 Markdown / JSON / SARIF / annotations
@@ -72,7 +72,7 @@ on:
     types: [opened, synchronize, reopened]
 ```
 
-因此普通分支 push 不会单独生成报告。只有打开 PR、向已打开的 PR 分支继续推送、或重新打开 PR 时，GitHub Action 才会运行。这个设计是为了让报告围绕 review 场景出现，而不是让每一次分支推送都产生噪音。
+因此普通分支 push 不会单独生成报告。只有打开 PR、向已打开的 PR 分支继续推送、或重新打开 PR 时，GitHub Action 才会运行。这个设计是为了让报告围绕审查场景出现，而不是让每一次分支推送都产生噪音。
 
 报告可以在 PR 评论区、GitHub Actions job summary 和 PR checks 状态里看到。同一个 PR 多次运行时，ProofPR 会更新已有评论，而不是每次新建一条评论。
 
@@ -108,7 +108,7 @@ preset: open-source-maintainer
 
 当前内置规则：
 
-- `change-size`：根据文件数和增删行数判断 review 面积是否过大。
+- `change-size`：根据文件数和增删行数判断审查范围是否过大。
 - `sensitive-path`：通过 glob 匹配敏感路径，例如 `.github/workflows/**`、`.env*`、`mcp*.json`、依赖文件。
 - `missing-tests`：源码路径变化但没有测试文件变化，也没有 PR 验证说明时触发。
 - `thin-pr-description`：PR body 为空或太短时触发。
@@ -156,26 +156,26 @@ evidence:
 - `verification`：测试、CI、手动验证，或测试文件变化。
 - `reproduction`：复现步骤、before/after、预期/实际行为。
 - `screenshot`：截图、录屏、效果图、前后对比。
-- `changelog`：changelog、release notes、迁移说明、破坏性变更说明。
+- `changelog`：变更说明、release notes、迁移说明、破坏性变更说明。
 - `permission-rationale`：最小权限、写权限、OIDC、不可信 PR 或 token 权限说明。
 
 这让 ProofPR 更像“仓库维护策略执行器”，而不是只靠固定规则猜测风险。
 
 ## 风险评分
 
-ProofPR 会把规则 finding 汇总为整体风险：
+ProofPR 会把规则命中的风险发现汇总为整体风险：
 
-- 有 `high` finding，整体风险为 `high`。
-- 有多个 `medium` finding，整体风险为 `high`。
-- 有一个 `medium` finding，整体风险为 `medium`。
-- 多个 `low` finding 也会抬升为 `medium`。
+- 有 `high` 风险发现，整体风险为 `high`。
+- 有多个 `medium` 风险发现，整体风险为 `high`。
+- 有一个 `medium` 风险发现，整体风险为 `medium`。
+- 多个 `low` 风险发现也会抬升为 `medium`。
 - 没有明显风险时为 `low`。
 
 这个评分逻辑故意保持简单，方便维护者理解和调整。
 
 ## 证据评分
 
-风险等级回答的是“这个 PR 有多危险”，证据评分回答的是“这个 PR 提供的 review 证据够不够”。
+风险等级回答的是“这个 PR 有多危险”，证据评分回答的是“这个 PR 提供的审查证据够不够”。
 
 ProofPR 会从 100 分开始，根据缺失的证据和触发的规则扣分：
 
@@ -205,24 +205,24 @@ ProofPR 会从 100 分开始，根据缺失的证据和触发的规则扣分：
 - `thin`：50-69，证据偏薄。
 - `risky`：0-49，证据不足。
 
-## Review 门禁
+## 审查门禁
 
-Review 门禁把风险等级和证据评分合并成一个维护者动作建议：
+审查门禁把风险等级和证据评分合并成一个维护者动作建议：
 
-- `ready`：可以进入常规 review。
-- `review-carefully`：带着重点进入 review。
+- `ready`：可以进入常规审查。
+- `review-carefully`：带着重点进入审查。
 - `needs-evidence`：先要求贡献者补充测试、复现、截图或说明。
 - `block-merge`：处理风险前不建议合并。
 
 这一步是 ProofPR 和普通扫描器的核心区别：它不是只告诉你“哪里有风险”，还告诉维护者“下一步应该怎么处理这个 PR”。
 
-## Review 行动清单
+## 审查行动清单
 
-Review 行动清单会把 finding 和证据评分转换成可执行 checklist，例如：
+审查行动清单会把风险发现和证据评分转换成可执行 checklist，例如：
 
 - 要求补充测试或手动验证证据。
 - 要求补充复现步骤或 before/after 上下文。
-- 要求拆分 PR 或提供逐文件 review map。
+- 要求拆分 PR 或提供逐文件审查说明。
 - 要求解释 workflow 权限变更。
 - 要求轮换并移除疑似暴露的 secret。
 
@@ -288,13 +288,13 @@ ProofPR 的准确性不是“发现代码 bug 的准确率”，而是“规则�
 pnpm benchmark
 ```
 
-Benchmark case 会声明输入 diff、PR 描述、配置和期望 finding。命令会输出通过/失败结果，帮助维护者讨论误报、漏报和规则调整。
+Benchmark case 会声明输入 diff、PR 描述、配置和期望风险发现。命令会输出通过/失败结果，帮助维护者讨论误报、漏报和规则调整。
 
-这也是 ProofPR 当前更诚实的边界：它能提高 PR triage 的一致性，但不能替代人工代码 review，也不能保证业务逻辑正确。
+这也是 ProofPR 当前更诚实的边界：它能提高 PR triage 的一致性，但不能替代人工代码审查，也不能保证业务逻辑正确。
 
 ## 项目价值
 
-ProofPR 的价值不在于“自动判断代码好坏”，而在于帮助维护者把 review 前置问题标准化：
+ProofPR 的价值不在于“自动判断代码好坏”，而在于帮助维护者把审查前置问题标准化：
 
 - PR 是否太大，是否应该拆分。
 - 是否触碰了 CI、依赖、secret、MCP 等高风险区域。
@@ -302,7 +302,7 @@ ProofPR 的价值不在于“自动判断代码好坏”，而在于帮助维护
 - 是否存在疑似凭证泄露。
 - 是否应该让检查失败，提醒维护者先处理风险再合并。
 
-这对开源项目尤其有用，因为维护者时间有限，外部贡献质量差异很大。ProofPR 让维护者先看到结构化证据，再决定投入多少 review 时间。
+这对开源项目尤其有用，因为维护者时间有限，外部贡献质量差异很大。ProofPR 让维护者先看到结构化证据，再决定投入多少审查时间。
 
 ## 安全边界
 
@@ -314,4 +314,4 @@ ProofPR 的默认行为：
 - 对疑似 secret 做脱敏。
 - 只基于 diff、PR 文本和配置文件生成报告。
 
-因此它更像一个 PR review 前置检查器，而不是代码审计平台。
+因此它更像一个 PR 审查前置检查器，而不是代码审计平台。

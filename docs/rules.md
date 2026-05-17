@@ -1,10 +1,10 @@
 # 规则
 
-ProofPR 的规则只回答一个维护者真正关心的问题：在深入 review 之前，我应该先检查哪些证据？
+ProofPR 的规则只回答一个维护者真正关心的问题：在深入审查之前，我应该先检查哪些证据？
 
 ## `change-size`
 
-标记 review 面积过大的 PR。改动文件太多或改动行数太大时，维护者通常需要先要求拆分 PR 或补充 review map。
+标记审查范围过大的 PR。改动文件太多或改动行数太大时，维护者通常需要先要求拆分 PR 或补充逐文件审查说明。
 
 ## `sensitive-path`
 
@@ -16,7 +16,7 @@ ProofPR 的规则只回答一个维护者真正关心的问题：在深入 revie
 
 ## `thin-pr-description`
 
-当 PR body 为空或过短时触发。维护者需要足够的背景信息才能判断是否值得深入 review。
+当 PR body 为空或过短时触发。维护者需要足够的背景信息才能判断是否值得深入审查。
 
 ## `missing-reproduction-context`
 
@@ -52,7 +52,7 @@ evidence:
 
 ## `dependency-major-upgrade`
 
-标记依赖跨越大版本边界的升级，例如 `react` 从 `18.x` 升到 `19.x`。这类变化通常需要核查 changelog、迁移说明、peer dependencies 和测试覆盖。
+标记依赖跨越大版本边界的升级，例如 `react` 从 `18.x` 升到 `19.x`。这类变化通常需要核查变更说明、迁移说明、peer dependencies 和测试覆盖。
 
 ## `dependency-lifecycle-script`
 

@@ -1,6 +1,6 @@
 # 路线图
 
-ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代的 PR 证据门禁**。核心目标是帮助维护者先判断 PR 是否值得投入 review 时间，再进入代码细节。
+ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代的 PR 证据门禁**。核心目标是帮助维护者先判断 PR 是否值得投入审查时间，再进入代码细节。
 
 ## 已经完成
 
@@ -9,14 +9,14 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 - 中文报告：支持 `locale: zh-CN` 和 `--locale zh-CN`。
 - 风险等级：`low`、`medium`、`high`。
 - Evidence Score：0-100 证据评分。
-- Review Gate：维护者下一步动作建议。
-- Review Plan：可勾选行动清单和重点文件。
+- 审查门禁：维护者下一步动作建议。
+- 审查行动清单：可勾选行动清单和重点文件。
 - 规则预设：`open-source-maintainer`、`security-strict`、`ai-generated-pr`、`mcp-security`、`dependency-careful`。
-- GitHub Check annotations：在 workflow annotations / PR 文件视图标出风险 finding。
+- GitHub Check annotations：在 workflow annotations / PR 文件视图标出风险发现。
 - SARIF / Code Scanning：CLI 可输出 SARIF，Action 可写出 `sarif-output`。
 - 真实案例库：提供可复现的 diff 样例。
 - Evidence Contract：仓库可以定义路径级证据要求。
-- Benchmark：用样本 case 验证规则命中、风险等级和 Review 门禁，并在 CI 中自动运行。
+- Benchmark：用样本 case 验证规则命中、风险等级和审查门禁，并在 CI 中自动运行。
 - Doctor：一条命令体检 `.proofpr.yml`、workflow、Action 版本、PR 权限和本地 diff。
 - Demo：无需 clone 仓库即可运行内置案例，适合首次体验和文档传播。
 - PR 模板：`init` 默认生成模板，`template` 可单独补模板，帮助贡献者提前提供证据。
@@ -31,7 +31,7 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
    代码侧材料已准备好，下一步需要仓库所有者在 GitHub 网页上确认发布。
 
 2. 发布链路稳定性
-   Trusted Publisher 已配置并通过 `v0.1.21` 到 `v0.1.40` 验证。后续重点是保持 release workflow 简单可审计，避免回退到本地 token 发布。
+   Trusted Publisher 已配置并通过 `v0.1.21` 到 `v0.1.41` 验证。后续重点是保持 release workflow 简单可审计，避免回退到本地 token 发布。
 
 3. 真实截图刷新
    用供应链增强规则重新跑一个 demo PR，补充新版依赖风险、HTML 报告和 benchmark 效果图。
@@ -58,8 +58,8 @@ ProofPR 的长期定位不是“又一个代码扫描器”，而是 **AI 时代
 - gitleaks 更擅长 secret 扫描。
 - GitHub dependency-review 更擅长依赖漏洞检查。
 - AI code reviewer 更擅长解释代码或提出修改建议。
-- ProofPR 专注于 review 前置判断：这个 PR 有没有足够证据值得维护者投入时间。
+- ProofPR 专注于审查前置判断：这个 PR 有没有足够证据值得维护者投入时间。
 
 ## 下一版优先级
 
-下一步优先用 `0.1.40` 的中文帮助、中文错误提示、中文 doctor 状态和简化报告术语更新真实 demo PR 截图、Marketplace 页面和从 0 到 1 教程，并继续准备 GitHub Marketplace 上架材料。
+下一步优先补充真实项目案例和 Marketplace 上架材料，继续保持默认路径只围绕 `init`、`check`、`request`、`doctor` 四个入口。

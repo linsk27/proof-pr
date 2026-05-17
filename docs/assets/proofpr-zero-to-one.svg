@@ -65,5 +65,5 @@
   </g>
 
   <rect x="48" y="350" width="1060" height="34" rx="8" fill="#e2e8f0"/>
-  <text x="70" y="372" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="14" fill="#334155">核心思路：先看证据，再投入 review。ProofPR 不替代人工审查，只把风险和缺失证据提前整理出来。</text>
+  <text x="70" y="372" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="14" fill="#334155">核心思路：先看证据，再投入审查。ProofPR 不替代人工审查，只把风险和缺失证据提前整理出来。</text>
 </svg>

@@ -15,9 +15,9 @@
   <text x="82" y="296" font-family="Consolas, 'Cascadia Mono', monospace" font-size="16" fill="#8B949E">- Additions: 480</text>
   <text x="82" y="326" font-family="Consolas, 'Cascadia Mono', monospace" font-size="16" fill="#8B949E">- Sensitive files changed: 2</text>
   <text x="82" y="356" font-family="Consolas, 'Cascadia Mono', monospace" font-size="16" fill="#8B949E">- Verification evidence: no</text>
-  <text x="82" y="408" font-family="Consolas, 'Cascadia Mono', monospace" font-size="18" fill="#C9D1D9">## Findings</text>
+  <text x="82" y="408" font-family="Consolas, 'Cascadia Mono', monospace" font-size="18" fill="#C9D1D9">## 风险发现</text>
   <text x="82" y="448" font-family="Consolas, 'Cascadia Mono', monospace" font-size="16" fill="#FFA657">[workflow-permission-change] .github/workflows/release.yml</text>
   <text x="82" y="478" font-family="Consolas, 'Cascadia Mono', monospace" font-size="16" fill="#FFA657">[missing-tests] Code changed without test evidence</text>
   <text x="82" y="508" font-family="Consolas, 'Cascadia Mono', monospace" font-size="16" fill="#FFA657">[mcp-credential-risk] MCP command/env surface changed</text>
-  <text x="82" y="552" font-family="Consolas, 'Cascadia Mono', monospace" font-size="15" fill="#3FB950">Report generated. Maintainers can review evidence first.</text>
+  <text x="82" y="552" font-family="Consolas, 'Cascadia Mono', monospace" font-size="15" fill="#3FB950">Report generated. Maintainers check evidence first.</text>
 </svg>

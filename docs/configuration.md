@@ -158,7 +158,7 @@ evidence:
 | `verification` | 测试命令、CI、手动验证、测试文件变更。 |
 | `reproduction` | 复现步骤、before/after、预期/实际行为。 |
 | `screenshot` | 截图、录屏、效果图、前后对比图。 |
-| `changelog` | changelog、release notes、迁移说明、破坏性变更说明。 |
+| `changelog` | 变更说明、release notes、迁移说明、破坏性变更说明。 |
 | `permission-rationale` | 权限理由、最小权限、OIDC、写权限、不可信 PR 说明。 |
 
 ## `comment`
@@ -184,6 +184,6 @@ Action 输出项：
 | 输出项 | 说明 |
 | --- | --- |
 | `risk` | 整体风险等级。 |
-| `findings` | finding 数量。 |
+| `findings` | 风险发现数量。 |
 | `evidence-score` | 0-100 证据评分。 |
-| `review-decision` | Review 门禁结论。 |
+| `review-decision` | 审查门禁结论。 |

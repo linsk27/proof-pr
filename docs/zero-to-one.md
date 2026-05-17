@@ -18,9 +18,9 @@ npx proof-pr@latest demo workflow --locale zh-CN
 
 - 一条 `ProofPR 审查报告` PR 评论。
 - 一份 GitHub Actions job summary。
-- 一组 GitHub annotations，用来定位具体 finding。
+- 一组 GitHub annotations，用来定位具体风险发现。
 - 一个 `proofpr-report` artifact，里面是可搜索、可筛选的 HTML 可视化报告。
-- 一块 `风险雷达`，先告诉维护者风险集中在证据、供应链、Workflow、Secret 还是 Review 面。
+- 一块 `风险雷达`，先告诉维护者风险集中在证据、供应链、Workflow、密钥还是审查范围。
 - 可选的 SARIF 文件，上传到 GitHub Code Scanning。
 
 ![ProofPR 输出位置示意图](assets/proofpr-output-locations.svg)
@@ -41,7 +41,7 @@ npx proof-pr@latest init
 - `.github/workflows/proofpr.yml`
 - `.github/pull_request_template.md`
 
-默认配置已经会输出中文报告、上传 HTML 可视化报告，并使用开源维护者预设。PR 模板会引导贡献者补充验证、复现、截图、changelog 和权限理由。
+默认配置已经会输出中文报告、上传 HTML 可视化报告，并使用开源维护者预设。PR 模板会引导贡献者补充验证、复现、截图、变更说明和权限理由。
 
 这条命令可以重复运行。已有文件默认会保留不覆盖；如果以后想刷新到当前版本模板，再运行 `npx proof-pr@latest init --force`。
 
@@ -94,8 +94,8 @@ git commit -m "chore: add ProofPR"
 
 - `Risk`：整体风险。
 - `Evidence score`：证据是否充分。
-- `Review gate`：下一步动作建议。
-- `Review Plan`：维护者 checklist。
+- `审查门禁`：下一步动作建议。
+- `审查行动清单`：维护者 checklist。
 
 ## 第 6 步：看 Actions 和 annotations
 
@@ -149,7 +149,7 @@ npx proof-pr@latest check
 
 `check` 会自动选择常见主分支作为 base，并纳入已提交分支 diff、staged、unstaged 和未跟踪新文件。当前没有可扫描 diff 时，它只输出短提示和下一步建议。
 
-第一行当前应输出 `0.1.40`，用于确认 npm latest 已经安装正确。
+第一行当前应输出 `0.1.41`，用于确认 npm latest 已经安装正确。
 
 扫描内置案例：
 
@@ -163,7 +163,7 @@ npx proof-pr@latest scan --diff-file examples/cases/secret-leak.diff --locale zh
 
 ![ProofPR 真实 CLI 输出截图](screenshots/ai-vue-flask-cli-output.png)
 
-如果你想快速理解高风险 workflow finding，可以扫描内置案例：
+如果你想快速理解高风险 workflow 发现，可以扫描内置案例：
 
 ```bash
 npx proof-pr@latest scan --diff-file examples/cases/workflow-untrusted-checkout.diff --locale zh-CN
@@ -201,7 +201,7 @@ permissions:
 
 steps:
   - uses: actions/checkout@v4
-  - uses: linsk27/proof-pr@v0.1.40
+  - uses: linsk27/proof-pr@v0.1.41
     with:
       fail-on: high
       comment: "true"
@@ -226,7 +226,7 @@ steps:
 - PR 评论区有 `ProofPR 审查报告`。
 - Actions 的 `ProofPR` workflow 成功运行。
 - Actions 运行详情里有 `proofpr-report` artifact。
-- 报告里有 `风险等级`、`证据评分`、`Review 门禁`、`Review 行动清单`。
+- 报告里有 `风险等级`、`证据评分`、`审查门禁`、`审查行动清单`。
 
 如果没有评论，优先检查 workflow 权限：
 

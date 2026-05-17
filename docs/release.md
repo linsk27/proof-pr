@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.40`。
+当前最新公开版本是 `0.1.41`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.40
-git push origin v0.1.40
+git tag v0.1.41
+git push origin v0.1.41
 ```
 
 发布完成后需要检查：
@@ -66,17 +66,25 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.40
-npx proof-pr@latest --version -> 0.1.40
+npm view proof-pr version -> 0.1.41
+npx proof-pr@latest --version -> 0.1.41
 ```
+
+## `v0.1.41` 发布状态
+
+`v0.1.41` 是中文体验继续收敛版，重点包括：
+
+- 中文报告、CLI 向导和 README 继续减少 `review`、`finding`、`Changelog` 等英文术语，统一使用“审查”“风险发现”“变更说明”。
+- HTML 风险雷达把 `Secret 泄露` 改成“密钥泄露”，降低中文用户理解成本。
+- 文档截图使用新版 CLI 输出重新生成，避免 README 和真实命令输出不一致。
 
 ## `v0.1.40` 发布状态
 
 `v0.1.40` 是中文报告术语简化版，重点包括：
 
-- 中文 Markdown 报告把 `Review 门禁` 改为“审查门禁”。
+- 中文 Markdown 报告统一使用“审查门禁”。
 - 风险雷达表头从 `Findings` 改为“发现数”，说明文字从 `rule id` 改为“规则 ID”。
-- 风险雷达中的 `Review 面` 改为“审查范围”，HTML 报告标题同步更新。
+- 风险雷达中的“审查范围”术语同步到 Markdown 和 HTML 报告。
 
 ## `v0.1.39` 发布状态
 
@@ -212,7 +220,7 @@ npx proof-pr@latest --version -> 0.1.40
 
 `v0.1.23` 是产品定位收敛版，重点包括：
 
-- README 第一屏收敛为“PR 证据门禁”：判断 PR 是否带够证据、值不值得 review。
+- README 第一屏收敛为“PR 证据门禁”：判断 PR 是否带够证据、值不值得审查。
 - CLI 默认向导从功能菜单改为三步路径：先看效果、接入仓库、本地自查。
 - `doctor`、HTML、SARIF、benchmark 等能力下沉为辅助命令，避免首次用户误以为 ProofPR 是杂项扫描工具箱。
 - npm 包 README 和中文文档入口同步精简定位。
@@ -221,7 +229,7 @@ npx proof-pr@latest --version -> 0.1.40
 
 `v0.1.22` 是报告直观性增强版，重点包括：
 
-- Markdown 和 HTML 报告新增“风险雷达”，把 rule id 归并为证据完整性、供应链、Workflow 权限、Secret 泄露和 Review 面。
+- Markdown 和 HTML 报告新增“风险雷达”，把 rule id 归并为证据完整性、供应链、Workflow 权限、密钥泄露和审查范围。
 - HTML 报告新增风险来源条形图，维护者可以先看风险主要集中在哪一类，再进入 finding 细节。
 - README、快速开始、命令速查和截图同步说明风险雷达的含义。
 
@@ -238,7 +246,7 @@ npx proof-pr@latest --version -> 0.1.40
 `v0.1.20` 是本地自查准确性和中文体验增强版，重点包括：
 
 - `proof-pr check` 默认扫描当前工作区相对 base 的最终状态，包含已提交分支 diff、staged、unstaged 和未跟踪新文件。
-- 中文报告补齐供应链规则、Review 行动项、证据扣分项和重点文件原因的翻译。
+- 中文报告补齐供应链规则、审查行动项、证据扣分项和重点文件原因的翻译。
 
 ## `v0.1.19` 发布状态
 
@@ -294,11 +302,11 @@ npx proof-pr@latest --version -> 0.1.40
 - CLI `scan` 支持 `--output`，可直接把 HTML、SARIF、JSON 或 Markdown 报告写入文件。
 - GitHub Action 支持 `html-output`，可把可视化报告上传为 artifact。
 - README 和中文文档补充真实截图、从 0 到 1 使用路径和报告解释。
-- HTML 报告集中展示风险等级、证据评分、Review 门禁、行动清单、重点文件、扣分原因和可执行补证建议。
+- HTML 报告集中展示风险等级、证据评分、审查门禁、行动清单、重点文件、扣分原因和可执行补证建议。
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.40` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.41` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 

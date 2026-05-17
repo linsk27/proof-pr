@@ -1,6 +1,6 @@
 # 命令速查
 
-ProofPR 不是通用扫描器。它是 PR 证据门禁，默认只围绕一件事工作：判断 PR 有没有足够证据，值得维护者开始 review。
+ProofPR 不是通用扫描器。它是 PR 证据门禁，默认只围绕一件事工作：判断 PR 有没有足够证据，值得维护者开始审查。
 
 如果不知道怎么开始，先运行：
 
@@ -84,7 +84,7 @@ npx proof-pr@latest init
 - `.github/workflows/proofpr.yml`
 - `.github/pull_request_template.md`
 
-提交这些文件后，打开或更新 Pull Request，ProofPR 会自动运行。默认结果会出现在 PR 评论、Actions summary、workflow annotations 和 `proofpr-report` artifact。PR 模板会提醒贡献者补充验证、复现、截图、changelog 和权限理由。
+提交这些文件后，打开或更新 Pull Request，ProofPR 会自动运行。默认结果会出现在 PR 评论、Actions summary、workflow annotations 和 `proofpr-report` artifact。PR 模板会提醒贡献者补充验证、复现、截图、变更说明和权限理由。
 
 这个命令可以重复执行。已有文件默认保留不覆盖；如果想把配置、workflow 和 PR 模板刷新到当前版本模板，再使用：
 
@@ -120,7 +120,7 @@ npx proof-pr@latest doctor
 - `.github/workflows/proofpr.yml` 是否存在。
 - `.github/pull_request_template.md` 是否存在，以及是否提示验证、复现、截图或权限理由。
 - workflow 是否监听 `pull_request`。
-- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.40`。
+- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.41`。
 - 是否具备 `pull-requests: write` 和 `contents: read` 权限。
 - 是否启用了 `html-output` 和 `actions/upload-artifact`，方便下载 HTML 可视化报告。
 - 当前目录是否在 Git 仓库里，以及自动识别出的 base...HEAD diff 是否可读。
@@ -141,7 +141,7 @@ npx proof-pr@latest doctor --base origin/master
 npx proof-pr@latest check
 ```
 
-适合在发 PR 前自查。它会自动选择 `origin/main`、`origin/master`、`main` 或 `master` 作为 base，并扫描当前工作区相对 base 的最终状态：已提交分支 diff、staged、unstaged 和未跟踪新文件都会纳入。输出包括风险等级、证据评分、Review 门禁和行动清单。
+适合在发 PR 前自查。它会自动选择 `origin/main`、`origin/master`、`main` 或 `master` 作为 base，并扫描当前工作区相对 base 的最终状态：已提交分支 diff、staged、unstaged 和未跟踪新文件都会纳入。输出包括风险等级、证据评分、审查门禁和行动清单。
 
 如果当前没有可扫描 diff，`check` 会输出短提示，说明这不是错误，并提示你运行 `doctor`、`demo`，或提交改动后再检查。
 
@@ -166,7 +166,7 @@ npx proof-pr@latest check --format html --output proofpr-report.html
 - 截图放进文档或 issue。
 - 在页面里按高/中/低风险筛选，搜索规则、文件或详情。
 - 一键复制“补证清单”，发给贡献者补 PR 描述。
-- 查看“风险雷达”，先判断风险主要来自证据、供应链、Workflow、Secret 还是 Review 面。
+- 查看“风险雷达”，先判断风险主要来自证据、供应链、Workflow、密钥还是审查范围。
 
 ## 6. 只生成贡献者补证请求
 

@@ -35,5 +35,5 @@
   <text x="952" y="296" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#DDF4FF">CLI 输出</text>
 
   <rect x="92" y="368" width="936" height="44" rx="12" fill="#EAF5FF" stroke="#B6E3FF"/>
-  <text x="120" y="396" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#0969DA">目标：让维护者先 review 证据，再决定是否深入 review 代码。</text>
+  <text x="120" y="396" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#0969DA">目标：让维护者先审查证据，再决定是否深入审查代码。</text>
 </svg>
