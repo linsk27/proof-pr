@@ -4,6 +4,12 @@
 
 暂无。
 
+## 0.1.37 - 2026-05-18
+
+- CLI 总错误前缀从 `ProofPR failed` 改为中文。
+- `template` 目标文件已存在时，错误提示改为中文并明确使用 `--force` 覆盖。
+- 自动识别不到 base 分支时，错误提示改为中文并给出可复制命令。
+
 ## 0.1.36 - 2026-05-18
 
 - CLI help 的 `Usage`、`Options`、`Commands`、`Arguments`、默认值提示和 help 命令说明改为中文。

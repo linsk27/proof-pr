@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.36";
+const CLI_VERSION = "0.1.37";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -613,7 +613,7 @@ const parseTask =
 
 parseTask.catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);
-  process.stderr.write(`ProofPR failed: ${message}\n`);
+  process.stderr.write(`ProofPR 执行失败：${message}\n`);
   process.exitCode = 1;
 });
 
@@ -1175,7 +1175,7 @@ async function resolveDefaultBaseRef(): Promise<string> {
   }
 
   throw new Error(
-    "Could not auto-detect a base branch. Run `proof-pr check --base origin/main`, or use `proof-pr scan --base <ref> --head HEAD`."
+    "无法自动识别 base 分支。请运行 `proof-pr check --base origin/main`，或使用 `proof-pr scan --base <ref> --head HEAD`。"
   );
 }
 
@@ -1246,7 +1246,7 @@ async function readPullRequestBody(options: ScanCommandOptions): Promise<string 
 
 async function writeIfMissing(path: string, contents: string, force: boolean): Promise<void> {
   if (!force && (await pathExists(path))) {
-    throw new Error(`${path} already exists. Pass --force to overwrite it.`);
+    throw new Error(`${path} 已存在。如需覆盖，请追加 --force。`);
   }
 
   await mkdir(dirname(path), { recursive: true });
