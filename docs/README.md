@@ -17,8 +17,8 @@
 
 ## 当前发布
 
-- GitHub Release：[`v0.1.45`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.45)
-- npm：[`proof-pr@0.1.45`](https://www.npmjs.com/package/proof-pr)
+- GitHub Release：[`v0.1.46`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.46)
+- npm：[`proof-pr@0.1.46`](https://www.npmjs.com/package/proof-pr)
 - 核心能力：判断 PR 是否值得审查、指出缺失证据、标出高风险改动区域，并生成维护者行动清单。
 - 辅助能力：HTML 报告、GitHub annotations、SARIF、benchmark、真实案例库和 npm Trusted Publishing 发布流程。
 
@@ -29,7 +29,7 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-当前都应输出 `0.1.45`。
+当前都应输出 `0.1.46`。
 
 不知道怎么开始时：
 

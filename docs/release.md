@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.45`。
+当前最新公开版本是 `0.1.46`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.45
-git push origin v0.1.45
+git tag v0.1.46
+git push origin v0.1.46
 ```
 
 发布完成后需要检查：
@@ -66,9 +66,17 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.45
-npx proof-pr@latest --version -> 0.1.45
+npm view proof-pr version -> 0.1.46
+npx proof-pr@latest --version -> 0.1.46
 ```
+
+## `v0.1.46` 发布状态
+
+`v0.1.46` 是 doctor 空状态建议优化版，重点包括：
+
+- 当接入正常但当前分支没有可扫描 diff 时，`doctor` 不再直接建议立刻运行 `check`。
+- 新建议会明确说明“当前没有可扫描改动”，并提示提交业务改动后再运行 `check`，或打开/更新 PR 查看自动报告。
+- doctor 文档截图同步刷新，避免用户把空 diff 状态误认为接入故障。
 
 ## `v0.1.45` 发布状态
 
@@ -338,7 +346,7 @@ npx proof-pr@latest --version -> 0.1.45
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.45` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.46` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 

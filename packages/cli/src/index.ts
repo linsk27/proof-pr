@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.45";
+const CLI_VERSION = "0.1.46";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -913,7 +913,11 @@ async function runDoctor(options: DoctorCommandOptions): Promise<DoctorReport> {
   await inspectGitDiff(options, checks, nextSteps);
 
   if (nextSteps.size === 0) {
-    nextSteps.add("当前接入状态正常；可以打开 PR，或运行 npx proof-pr@latest check 做本地自查。");
+    if (doctorHasEmptyDiff(checks)) {
+      nextSteps.add("当前没有可扫描改动；接入已正常。提交业务改动后运行 npx proof-pr@latest check，或打开/更新 PR 查看自动报告。");
+    } else {
+      nextSteps.add("当前接入状态正常；可以打开 PR，或运行 npx proof-pr@latest check 做本地自查。");
+    }
   }
 
   return { checks, nextSteps: [...nextSteps], fixes };
@@ -1155,7 +1159,20 @@ function renderDoctorRecommendation(report: DoctorReport, failCount: number, war
     return "可以先打开 PR 试用；想补齐接入细节时运行 npx proof-pr@latest doctor --fix。";
   }
 
+  if (doctorHasEmptyDiff(report.checks)) {
+    return "接入已可用；当前没有可扫描改动，提交业务改动后再运行 npx proof-pr@latest check。";
+  }
+
   return "接入已可用；现在可以打开 PR，或本地运行 npx proof-pr@latest check。";
+}
+
+function doctorHasEmptyDiff(checks: DoctorCheck[]): boolean {
+  return checks.some(
+    (check) =>
+      check.level === "pass" &&
+      check.title.startsWith("可以读取 ") &&
+      check.detail === "当前没有可扫描的 diff。"
+  );
 }
 
 function renderInitReport(results: InitFileResult[], options: InitCommandOptions): string {
