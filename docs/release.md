@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.38`。
+当前最新公开版本是 `0.1.39`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.38
-git push origin v0.1.38
+git tag v0.1.39
+git push origin v0.1.39
 ```
 
 发布完成后需要检查：
@@ -66,9 +66,17 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.38
-npx proof-pr@latest --version -> 0.1.38
+npm view proof-pr version -> 0.1.39
+npx proof-pr@latest --version -> 0.1.39
 ```
+
+## `v0.1.39` 发布状态
+
+`v0.1.39` 是 doctor 检查项状态中文化版，重点包括：
+
+- `doctor` 检查项状态从 `[pass]`、`[warn]`、`[fail]`、`[info]` 改为中文。
+- 文档截图同步更新，首次体检输出更适合中文用户直接阅读。
+- 默认使用路径继续保持为 `init`、`doctor`、`check`、`request`。
 
 ## `v0.1.38` 发布状态
 
@@ -282,7 +290,7 @@ npx proof-pr@latest --version -> 0.1.38
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.38` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.39` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 

@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.38";
+const CLI_VERSION = "0.1.39";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -1055,6 +1055,12 @@ function renderDoctorReport(report: DoctorReport): string {
   const warnCount = report.checks.filter((check) => check.level === "warn").length;
   const status = failCount > 0 ? "需要先修复" : warnCount > 0 ? "基本可用，但建议优化" : "接入正常";
   const recommendation = renderDoctorRecommendation(report, failCount, warnCount);
+  const levelText: Record<DoctorLevel, string> = {
+    pass: "通过",
+    warn: "警告",
+    fail: "失败",
+    info: "信息"
+  };
   const fixes =
     report.fixes.length > 0
       ? `\n自动修复:\n${report.fixes.map((fix) => `- ${fix}`).join("\n")}\n`
@@ -1062,7 +1068,7 @@ function renderDoctorReport(report: DoctorReport): string {
   const checks = report.checks
     .map((check) => {
       const detail = check.detail ? `\n       ${check.detail}` : "";
-      return `[${check.level}] ${check.title}${detail}`;
+      return `[${levelText[check.level]}] ${check.title}${detail}`;
     })
     .join("\n");
   const nextSteps = report.nextSteps.map((step) => `- ${step}`).join("\n");
