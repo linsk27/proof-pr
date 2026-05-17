@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.42`。
+当前最新公开版本是 `0.1.43`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.42
-git push origin v0.1.42
+git tag v0.1.43
+git push origin v0.1.43
 ```
 
 发布完成后需要检查：
@@ -66,9 +66,17 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.42
-npx proof-pr@latest --version -> 0.1.42
+npm view proof-pr version -> 0.1.43
+npx proof-pr@latest --version -> 0.1.43
 ```
+
+## `v0.1.43` 发布状态
+
+`v0.1.43` 是自检入口前置版，重点包括：
+
+- 中文向导把默认路径从三条扩展为四条：`init`、`doctor`、`check`、`request`。
+- 顶层 `--help` 的常用复制命令补上 `doctor`，让用户接入后能先自检。
+- README、命令速查、快速开始和 npm 包 README 同步把 `doctor` 放入默认路径，而不是只作为辅助命令。
 
 ## `v0.1.42` 发布状态
 
@@ -314,7 +322,7 @@ npx proof-pr@latest --version -> 0.1.42
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.42` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.43` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 

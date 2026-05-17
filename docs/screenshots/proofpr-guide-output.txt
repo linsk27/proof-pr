@@ -3,17 +3,21 @@
 它只回答一个问题：
 这个 PR 有没有足够证据，值得维护者开始审查？
 
-真的只记三条命令：
+真的只记四条命令：
 
 1. 接入 GitHub PR 自动检查
    npx proof-pr@latest init
    生成 .proofpr.yml、.github/workflows/proofpr.yml 和 PR 模板；提交后打开 PR 即可看到报告。
 
-2. 发 PR 前本地自查
+2. 体检接入是否正确
+   npx proof-pr@latest doctor
+   检查配置、workflow、PR 模板、Action 版本、权限和本地 diff，并直接给下一步建议。
+
+3. 发 PR 前本地自查
    npx proof-pr@latest check
    自动识别常见 base 分支，并检查当前工作区相对 base 的最终改动。
 
-3. 直接生成补证请求
+4. 直接生成补证请求
    npx proof-pr@latest request
    只输出一段可以贴给贡献者的补证说明，不展示完整扫描报告。
 
@@ -22,17 +26,16 @@
 - 缺什么证据：测试、复现、截图、变更说明、权限理由。
 - 风险主要在哪：供应链、Workflow、密钥、证据完整性或审查范围。
 
-不确定装好没有：
-   npx proof-pr@latest doctor
-
 想自动修复常见接入问题：
    npx proof-pr@latest doctor --fix
+
+想先体验，不改仓库：
+   npx proof-pr@latest demo workflow --locale zh-CN
 
 需要可分享页面：
    npx proof-pr@latest check --format html --output proofpr-report.html
 
 高级命令按需使用：
-- npx proof-pr@latest demo workflow --locale zh-CN
 - npx proof-pr@latest template
 - npx proof-pr@latest demo --list
 - npx proof-pr@latest request --output proofpr-request.md

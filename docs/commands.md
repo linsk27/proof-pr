@@ -14,7 +14,7 @@ npx proof-pr@latest
 npx proof-pr@latest guide
 ```
 
-也可以运行 `npx proof-pr@latest --help`。帮助信息会显示中文命令说明，底部会给出 `init`、`check`、`request` 三条常用复制命令。
+也可以运行 `npx proof-pr@latest --help`。帮助信息会显示中文命令说明，底部会给出 `init`、`doctor`、`check`、`request` 四条常用复制命令。
 
 ![ProofPR 中文功能菜单](screenshots/proofpr-guide-output.png)
 
@@ -23,6 +23,7 @@ npx proof-pr@latest guide
 | 目标 | 命令 | 结果在哪里看 |
 | --- | --- | --- |
 | 接入 GitHub PR 自动检查 | `npx proof-pr@latest init` | PR 评论、Actions summary、Checks、HTML artifact |
+| 体检接入是否正确 | `npx proof-pr@latest doctor` | 当前终端 |
 | 发 PR 前本地自查 | `npx proof-pr@latest check` | 当前终端 |
 | 生成贡献者补证请求 | `npx proof-pr@latest request` | 当前终端 |
 
@@ -30,7 +31,6 @@ npx proof-pr@latest guide
 
 | 场景 | 命令 | 结果在哪里看 |
 | --- | --- | --- |
-| 不确定是否装好 | `npx proof-pr@latest doctor` | 当前终端 |
 | 自动修复常见接入问题 | `npx proof-pr@latest doctor --fix` | 当前终端和接入文件 |
 | 先看效果，不改仓库 | `npx proof-pr@latest demo workflow --locale zh-CN` | 当前终端 |
 | 已接入仓库但缺少 PR 模板 | `npx proof-pr@latest template` | `.github/pull_request_template.md` |
@@ -120,7 +120,7 @@ npx proof-pr@latest doctor
 - `.github/workflows/proofpr.yml` 是否存在。
 - `.github/pull_request_template.md` 是否存在，以及是否提示验证、复现、截图或权限理由。
 - workflow 是否监听 `pull_request`。
-- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.42`。
+- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.43`。
 - 是否具备 `pull-requests: write` 和 `contents: read` 权限。
 - 是否启用了 `html-output` 和 `actions/upload-artifact`，方便下载 HTML 可视化报告。
 - 当前目录是否在 Git 仓库里，以及自动识别出的 base...HEAD diff 是否可读。
