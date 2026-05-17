@@ -587,6 +587,8 @@ index 0000000..1111111 100644
     expect(report).toContain("风险雷达");
     expect(report).toContain("审查行动清单");
     expect(report).toContain("风险发现");
+    expect(report).toContain("本地扫描提示");
+    expect(report).toContain("打开 PR 后，ProofPR 会结合 PR 标题和描述重新评估证据");
   });
 
   it("renders Simplified Chinese supply-chain finding text", () => {

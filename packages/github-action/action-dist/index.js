@@ -51418,6 +51418,7 @@ function renderEnglishMarkdownReport(result) {
         `- Permission rationale: ${formatBoolean(result.summary.permissionRationaleEvidence)}`,
         ""
     ];
+    appendUnavailablePrContextNote(lines, result, "en");
     appendEvidenceScoreSection(lines, result, "en");
     appendRiskRadarSection(lines, result, "en");
     appendQuickFixSection(lines, result, "en");
@@ -51462,6 +51463,7 @@ function renderChineseMarkdownReport(result) {
         `- 权限理由证据：${formatChineseBoolean(result.summary.permissionRationaleEvidence)}`,
         ""
     ];
+    appendUnavailablePrContextNote(lines, result, "zh-CN");
     appendEvidenceScoreSection(lines, result, "zh-CN");
     appendRiskRadarSection(lines, result, "zh-CN");
     appendQuickFixSection(lines, result, "zh-CN");
@@ -51476,6 +51478,14 @@ function renderChineseMarkdownReport(result) {
     }
     lines.push("## 维护者关注点", "", ...maintainerFocus(result.findings, "zh-CN").map((item) => `- ${item}`), "");
     return lines.join("\n");
+}
+function appendUnavailablePrContextNote(lines, result, locale) {
+    if (result.summary.pullRequestDescription !== "unavailable") {
+        return;
+    }
+    lines.push(locale === "zh-CN"
+        ? "> 本地扫描提示：这次扫描没有 PR 描述上下文；打开 PR 后，ProofPR 会结合 PR 标题和描述重新评估证据。"
+        : "> Local scan note: PR description context was not available; in GitHub PR mode, ProofPR will re-evaluate using the PR title and body.", "");
 }
 function appendEvidenceScoreSection(lines, result, locale) {
     lines.push(locale === "zh-CN" ? "## 证据评分细节" : "## Evidence Score", "");
