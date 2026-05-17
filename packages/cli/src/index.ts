@@ -3,7 +3,7 @@ import { execFile } from "node:child_process";
 import { access, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { promisify } from "node:util";
-import { Command, Help, InvalidArgumentError, type Argument, type Option } from "commander";
+import { Command, Help, InvalidArgumentError, Option, type Argument } from "commander";
 import {
   listConfigPresets,
   loadConfig,
@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.44";
+const CLI_VERSION = "0.1.45";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -353,12 +353,20 @@ program
 program
   .command("doctor")
   .description("体检当前仓库是否已正确接入 ProofPR。")
-  .option("--config <path>", ".proofpr.yml 配置文件路径。", ".proofpr.yml")
-  .option("--workflow-path <path>", "GitHub Actions workflow 文件路径。", ".github/workflows/proofpr.yml")
-  .option("--pr-template-path <path>", "Pull Request 模板文件路径。", ".github/pull_request_template.md")
-  .option("--base <ref>", "本地 diff 检查使用的 base 引用，默认和 check 一样自动识别。")
-  .option("--head <ref>", "本地 diff 检查使用的 head 引用。", "HEAD")
-  .option("--fix", "在安全时创建或刷新 ProofPR 接入文件。", false)
+  .addOption(new Option("--config <path>", ".proofpr.yml 配置文件路径。").default(".proofpr.yml").hideHelp())
+  .addOption(
+    new Option("--workflow-path <path>", "GitHub Actions workflow 文件路径。")
+      .default(".github/workflows/proofpr.yml")
+      .hideHelp()
+  )
+  .addOption(
+    new Option("--pr-template-path <path>", "Pull Request 模板文件路径。")
+      .default(".github/pull_request_template.md")
+      .hideHelp()
+  )
+  .addOption(new Option("--base <ref>", "本地 diff 检查使用的 base 引用，默认和 check 一样自动识别。").hideHelp())
+  .addOption(new Option("--head <ref>", "本地 diff 检查使用的 head 引用。").default("HEAD").hideHelp())
+  .addOption(new Option("--fix", "在安全时创建或刷新 ProofPR 接入文件。").default(false))
   .addHelpText("after", renderDoctorHelpFooter())
   .action(async (options: DoctorCommandOptions) => {
     const report = await runDoctor(options);
@@ -418,13 +426,18 @@ program
 program
   .command("check")
   .description("发 PR 前扫描当前分支。")
-  .option("--base <ref>", "base Git 引用，默认自动选择 origin/main、origin/master、main 或 master。")
-  .option("--head <ref>", "和 --base 对比的 head Git 引用。", "HEAD")
-  .option("--config <path>", ".proofpr.yml 配置文件路径。", ".proofpr.yml")
-  .option("--format <format>", "输出格式：markdown、json、sarif 或 html。", parseFormat, "markdown")
+  .addOption(new Option("--base <ref>", "base Git 引用，默认自动选择 origin/main、origin/master、main 或 master。").hideHelp())
+  .addOption(new Option("--head <ref>", "和 --base 对比的 head Git 引用。").default("HEAD").hideHelp())
+  .addOption(new Option("--config <path>", ".proofpr.yml 配置文件路径。").default(".proofpr.yml").hideHelp())
+  .addOption(new Option("--format <format>", "输出格式：markdown、json、sarif 或 html。").argParser(parseFormat).default("markdown"))
   .option("--output <path>", "把报告写入文件，而不是输出到终端。")
-  .option("--locale <locale>", "报告语言：en 或 zh-CN。", "zh-CN")
-  .option("--fail-on <level>", "风险达到指定等级时返回退出码 1：low、medium、high 或 never。", parseFailLevel, "never")
+  .addOption(new Option("--locale <locale>", "报告语言：en 或 zh-CN。").default("zh-CN").hideHelp())
+  .addOption(
+    new Option("--fail-on <level>", "风险达到指定等级时返回退出码 1：low、medium、high 或 never。")
+      .argParser(parseFailLevel)
+      .default("never")
+      .hideHelp()
+  )
   .addHelpText("after", renderCheckHelpFooter())
   .action(async (options: CheckCommandOptions) => {
     const base = options.base ?? (await resolveDefaultBaseRef());
@@ -455,11 +468,11 @@ program
 program
   .command("request")
   .description("生成可直接发给贡献者的补证请求。")
-  .option("--base <ref>", "base Git 引用，默认自动选择 origin/main、origin/master、main 或 master。")
-  .option("--head <ref>", "和 --base 对比的 head Git 引用。", "HEAD")
-  .option("--config <path>", ".proofpr.yml 配置文件路径。", ".proofpr.yml")
+  .addOption(new Option("--base <ref>", "base Git 引用，默认自动选择 origin/main、origin/master、main 或 master。").hideHelp())
+  .addOption(new Option("--head <ref>", "和 --base 对比的 head Git 引用。").default("HEAD").hideHelp())
+  .addOption(new Option("--config <path>", ".proofpr.yml 配置文件路径。").default(".proofpr.yml").hideHelp())
   .option("--output <path>", "把补证请求写入文件，而不是输出到终端。")
-  .option("--locale <locale>", "报告语言：en 或 zh-CN。", "zh-CN")
+  .addOption(new Option("--locale <locale>", "报告语言：en 或 zh-CN。").default("zh-CN").hideHelp())
   .option("--full", "输出完整补证模板，而不是简短 PR 评论。", false)
   .addHelpText("after", renderRequestHelpFooter())
   .action(async (options: RequestCommandOptions) => {
@@ -526,27 +539,32 @@ program
 program
   .command("init")
   .description("生成默认可用的配置、GitHub Actions workflow 和 PR 模板。")
-  .option("--config-path <path>", "ProofPR 配置文件写入路径。", ".proofpr.yml")
-  .option(
-    "--workflow-path <path>",
-    "GitHub Actions workflow 写入路径。",
-    ".github/workflows/proofpr.yml"
+  .addOption(new Option("--config-path <path>", "ProofPR 配置文件写入路径。").default(".proofpr.yml").hideHelp())
+  .addOption(
+    new Option("--workflow-path <path>", "GitHub Actions workflow 写入路径。")
+      .default(".github/workflows/proofpr.yml")
+      .hideHelp()
   )
-  .option("--no-pr-template", "不生成 .github/pull_request_template.md。")
-  .option(
-    "--pr-template-path <path>",
-    "PR 模板写入路径。",
-    ".github/pull_request_template.md"
+  .addOption(new Option("--no-pr-template", "不生成 .github/pull_request_template.md。").hideHelp())
+  .addOption(
+    new Option("--pr-template-path <path>", "PR 模板写入路径。")
+      .default(".github/pull_request_template.md")
+      .hideHelp()
   )
-  .option("--no-html-report", "不生成和上传默认 HTML 可视化报告文件。")
-  .option("--html-output <path>", "GitHub Actions 中生成的 HTML 报告路径。", "proofpr-report.html")
-  .option(
-    "--preset <preset>",
-    `配置预设：${listConfigPresets().join(", ")}。`,
-    parsePresetOption,
-    "open-source-maintainer"
+  .addOption(new Option("--no-html-report", "不生成和上传默认 HTML 可视化报告文件。").hideHelp())
+  .addOption(new Option("--html-output <path>", "GitHub Actions 中生成的 HTML 报告路径。").default("proofpr-report.html").hideHelp())
+  .addOption(
+    new Option("--preset <preset>", `配置预设：${listConfigPresets().join(", ")}。`)
+      .argParser(parsePresetOption)
+      .default("open-source-maintainer")
+      .hideHelp()
   )
-  .option("--fail-on <level>", "Workflow 失败阈值：low、medium、high 或 never。", parseFailLevel, "high")
+  .addOption(
+    new Option("--fail-on <level>", "Workflow 失败阈值：low、medium、high 或 never。")
+      .argParser(parseFailLevel)
+      .default("high")
+      .hideHelp()
+  )
   .option("--force", "覆盖已有文件。", false)
   .addHelpText("after", renderInitHelpFooter())
   .action(async (options: InitCommandOptions) => {
@@ -712,6 +730,7 @@ function renderInitHelpFooter(): string {
 
 说明：
   默认配置已经可用，提交生成文件后打开 PR 即可看到报告。
+  高级参数仍可使用；普通接入不需要设置。
 `;
 }
 
@@ -723,6 +742,7 @@ function renderCheckHelpFooter(): string {
 
 说明：
   当前没有可扫描 diff 时，check 会给短提示，不会输出完整空报告。
+  base、config、locale 等高级参数仍可使用；通常不需要设置。
 `;
 }
 
@@ -734,6 +754,7 @@ function renderRequestHelpFooter(): string {
 
 说明：
   request 只生成可贴给贡献者的补证说明，不展示完整扫描报告。
+  base、config、locale 等高级参数仍可使用；通常不需要设置。
 `;
 }
 
@@ -745,6 +766,7 @@ function renderDoctorHelpFooter(): string {
 
 说明：
   doctor 会在报告顶部直接给下一步建议。
+  base、config、workflow 路径等高级参数仍可使用；通常不需要设置。
 `;
 }
 

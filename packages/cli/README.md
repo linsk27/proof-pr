@@ -12,7 +12,7 @@ ProofPR 是给开源维护者和工程团队使用的 PR 证据门禁。它只�
 npx proof-pr@latest --version
 ```
 
-当前应输出 `0.1.44`。
+当前应输出 `0.1.45`。
 
 不知道怎么开始时：
 
@@ -23,6 +23,7 @@ npx proof-pr@latest guide
 ```
 
 `npx proof-pr@latest --help` 会显示中文命令说明，底部也会给出四条常用复制命令。
+各子命令的 `--help` 默认只显示常用参数，高级参数仍可使用；普通接入不需要先理解完整参数表。
 
 默认只用四条命令。
 
@@ -117,7 +118,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.44
+- uses: linsk27/proof-pr@v0.1.45
   with:
     fail-on: high
     comment: "true"

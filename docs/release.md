@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.44`。
+当前最新公开版本是 `0.1.45`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.44
-git push origin v0.1.44
+git tag v0.1.45
+git push origin v0.1.45
 ```
 
 发布完成后需要检查：
@@ -66,9 +66,17 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.44
-npx proof-pr@latest --version -> 0.1.44
+npm view proof-pr version -> 0.1.45
+npx proof-pr@latest --version -> 0.1.45
 ```
+
+## `v0.1.45` 发布状态
+
+`v0.1.45` 是帮助页减负版，重点包括：
+
+- `init --help` 只展示 `--force`，把路径、预设、HTML 等高级参数隐藏，避免首次接入被参数表打断。
+- `doctor --help` 只展示 `--fix`，`check --help` 只展示报告格式和输出文件，`request --help` 只展示写文件和完整模板。
+- 高级参数仍然兼容可用，README、命令文档和 npm README 已说明“普通接入不需要先理解完整参数表”。
 
 ## `v0.1.44` 发布状态
 
@@ -330,7 +338,7 @@ npx proof-pr@latest --version -> 0.1.44
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.44` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.45` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 
