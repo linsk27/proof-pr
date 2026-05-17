@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.46";
+const CLI_VERSION = "0.1.47";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -778,7 +778,8 @@ function renderNoDiffCheckMessage(base: string, head: string, locale: ReportLoca
 对比范围：${base}...${head}
 
 下一步：
-- 如果刚接入 ProofPR：提交改动后再运行 npx proof-pr@latest check。
+- 如果只是刚接入、还没有业务改动：不用处理，这是正常状态。
+- 提交业务改动后再运行 npx proof-pr@latest check，或打开/更新 PR 查看自动报告。
 - 如果想确认接入是否完整：运行 npx proof-pr@latest doctor。
 - 如果想先看真实效果：运行 npx proof-pr@latest demo workflow --locale zh-CN。
 `;
@@ -790,7 +791,8 @@ No diff was found for ProofPR to scan. This is not an error.
 Range: ${base}...${head}
 
 Next:
-- If you just added ProofPR, commit your changes and run npx proof-pr@latest check again.
+- If you just added ProofPR and have no product/code changes yet, there is nothing to fix.
+- After you make product/code changes, run npx proof-pr@latest check again or open/update a PR.
 - To verify setup, run npx proof-pr@latest doctor.
 - To see a real example first, run npx proof-pr@latest demo workflow.
 `;
@@ -804,7 +806,8 @@ function renderNoDiffRequestMessage(base: string, head: string, locale: ReportLo
 对比范围：${base}...${head}
 
 下一步：
-- 如果刚接入 ProofPR：提交改动后再运行 npx proof-pr@latest request。
+- 如果只是刚接入、还没有业务改动：不用处理，这是正常状态。
+- 提交业务改动后再运行 npx proof-pr@latest request，或打开/更新 PR 查看自动报告。
 - 如果想确认接入是否完整：运行 npx proof-pr@latest doctor。
 - 如果想先看真实补证示例：运行 npx proof-pr@latest demo ui-evidence --locale zh-CN。
 `;
@@ -816,7 +819,8 @@ No diff was found for ProofPR to turn into a contributor request. This is not an
 Range: ${base}...${head}
 
 Next:
-- If you just added ProofPR, commit your changes and run npx proof-pr@latest request again.
+- If you just added ProofPR and have no product/code changes yet, there is nothing to fix.
+- After you make product/code changes, run npx proof-pr@latest request again or open/update a PR.
 - To verify setup, run npx proof-pr@latest doctor.
 - To see a real contributor request example, run npx proof-pr@latest demo ui-evidence.
 `;

@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.46`。
+当前最新公开版本是 `0.1.47`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.46
-git push origin v0.1.46
+git tag v0.1.47
+git push origin v0.1.47
 ```
 
 发布完成后需要检查：
@@ -66,9 +66,17 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.46
-npx proof-pr@latest --version -> 0.1.46
+npm view proof-pr version -> 0.1.47
+npx proof-pr@latest --version -> 0.1.47
 ```
+
+## `v0.1.47` 发布状态
+
+`v0.1.47` 是空状态文案收敛版，重点包括：
+
+- `check` 在没有可扫描 diff 时明确说明：刚接入但还没有业务改动时不用处理。
+- `request` 在没有可生成补证请求的 diff 时也使用同样逻辑，避免生成补证请求前让用户误以为出错。
+- 命令文档、快速开始和 npm README 同步说明空 diff 是正常状态，提交业务改动后再检查即可。
 
 ## `v0.1.46` 发布状态
 
@@ -346,7 +354,7 @@ npx proof-pr@latest --version -> 0.1.46
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.46` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.47` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 
