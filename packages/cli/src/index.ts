@@ -3,7 +3,7 @@ import { execFile } from "node:child_process";
 import { access, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { promisify } from "node:util";
-import { Command, InvalidArgumentError } from "commander";
+import { Command, Help, InvalidArgumentError, type Argument, type Option } from "commander";
 import {
   listConfigPresets,
   loadConfig,
@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.35";
+const CLI_VERSION = "0.1.36";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -314,11 +314,33 @@ index 1111111..2222222 100644
 ];
 
 const program = new Command();
+const defaultHelp = new Help();
+const HELP_TITLE_TRANSLATIONS: Record<string, string> = {
+  "Usage:": "用法:",
+  "Arguments:": "参数:",
+  "Options:": "选项:",
+  "Commands:": "命令:"
+};
+
+function localizeHelpMetadata(text: string | undefined): string {
+  return (text ?? "")
+    .replace(/\bchoices:/g, "可选值:")
+    .replace(/\bdefault:/g, "默认值:")
+    .replace(/\bpreset:/g, "预设值:")
+    .replace(/\benv:/g, "环境变量:");
+}
 
 program
   .name("proof-pr")
   .description("PR 证据门禁：在维护者投入 review 前，检查证据、范围和高风险改动。")
-  .version(CLI_VERSION)
+  .version(CLI_VERSION, "-V, --version", "显示版本号。")
+  .helpOption("-h, --help", "显示帮助信息。")
+  .addHelpCommand("help [command]", "显示某个命令的帮助信息。")
+  .configureHelp({
+    styleTitle: (title) => HELP_TITLE_TRANSLATIONS[title] ?? title,
+    optionDescription: (option: Option) => localizeHelpMetadata(defaultHelp.optionDescription(option)),
+    argumentDescription: (argument: Argument) => localizeHelpMetadata(defaultHelp.argumentDescription(argument))
+  })
   .addHelpText("after", renderRootHelpFooter());
 
 program
@@ -331,12 +353,12 @@ program
 program
   .command("doctor")
   .description("体检当前仓库是否已正确接入 ProofPR。")
-  .option("--config <path>", "Path to .proofpr.yml.", ".proofpr.yml")
-  .option("--workflow-path <path>", "Path to the GitHub Actions workflow.", ".github/workflows/proofpr.yml")
-  .option("--pr-template-path <path>", "Path to the pull request template.", ".github/pull_request_template.md")
-  .option("--base <ref>", "Base git ref used for local diff checks. Defaults to the same auto-detected base as check.")
-  .option("--head <ref>", "Head git ref used for local diff checks.", "HEAD")
-  .option("--fix", "Create or refresh ProofPR setup files when the fix is safe.", false)
+  .option("--config <path>", ".proofpr.yml 配置文件路径。", ".proofpr.yml")
+  .option("--workflow-path <path>", "GitHub Actions workflow 文件路径。", ".github/workflows/proofpr.yml")
+  .option("--pr-template-path <path>", "Pull Request 模板文件路径。", ".github/pull_request_template.md")
+  .option("--base <ref>", "本地 diff 检查使用的 base 引用，默认和 check 一样自动识别。")
+  .option("--head <ref>", "本地 diff 检查使用的 head 引用。", "HEAD")
+  .option("--fix", "在安全时创建或刷新 ProofPR 接入文件。", false)
   .addHelpText("after", renderDoctorHelpFooter())
   .action(async (options: DoctorCommandOptions) => {
     const report = await runDoctor(options);
@@ -350,8 +372,8 @@ program
 program
   .command("template")
   .description("生成适合 ProofPR 的 PR 模板。")
-  .option("--output <path>", "Path to write the pull request template.", ".github/pull_request_template.md")
-  .option("--force", "Overwrite the existing template.", false)
+  .option("--output <path>", "PR 模板写入路径。", ".github/pull_request_template.md")
+  .option("--force", "覆盖已有模板文件。", false)
   .action(async (options: TemplateCommandOptions) => {
     await writeIfMissing(options.output, renderPullRequestTemplate(), options.force);
     process.stdout.write(
@@ -362,11 +384,11 @@ program
 program
   .command("demo")
   .description("运行内置案例，不需要接入仓库也能先看效果。")
-  .argument("[case]", "Demo case id. Use --list to see available cases.", "workflow")
-  .option("--list", "List built-in demo cases.", false)
-  .option("--format <format>", "Output format: markdown, json, sarif, or html.", parseFormat, "markdown")
-  .option("--output <path>", "Write demo report output to a file instead of stdout.")
-  .option("--locale <locale>", "Report language: en or zh-CN.", "zh-CN")
+  .argument("[case]", "内置案例 id，可用 --list 查看。", "workflow")
+  .option("--list", "列出全部内置案例。", false)
+  .option("--format <format>", "输出格式：markdown、json、sarif 或 html。", parseFormat, "markdown")
+  .option("--output <path>", "把 demo 报告写入文件，而不是输出到终端。")
+  .option("--locale <locale>", "报告语言：en 或 zh-CN。", "zh-CN")
   .action(async (caseId: string, options: DemoCommandOptions) => {
     if (options.list) {
       process.stdout.write(renderDemoList());
@@ -375,7 +397,7 @@ program
 
     const demoCase = DEMO_CASES.find((item) => item.id === caseId);
     if (!demoCase) {
-      throw new Error(`Unknown demo case "${caseId}". Run "proof-pr demo --list" to see available cases.`);
+      throw new Error(`未知 demo 案例 "${caseId}"。运行 "proof-pr demo --list" 查看可用案例。`);
     }
 
     const result = scanDiff(demoCase.diffText, {
@@ -387,7 +409,7 @@ program
 
     if (options.output) {
       await writeOutput(options.output, `${output}\n`);
-      process.stdout.write(`ProofPR demo ${options.format} report written to ${options.output}\n`);
+      process.stdout.write(`ProofPR demo ${options.format} 报告已写入 ${options.output}\n`);
     } else {
       process.stdout.write(`${output}\n`);
     }
@@ -396,13 +418,13 @@ program
 program
   .command("check")
   .description("发 PR 前扫描当前分支。")
-  .option("--base <ref>", "Base git ref. Defaults to origin/main, origin/master, main, or master.")
-  .option("--head <ref>", "Head git ref used with --base.", "HEAD")
-  .option("--config <path>", "Path to .proofpr.yml.", ".proofpr.yml")
-  .option("--format <format>", "Output format: markdown, json, sarif, or html.", parseFormat, "markdown")
-  .option("--output <path>", "Write report output to a file instead of stdout.")
-  .option("--locale <locale>", "Report language: en or zh-CN.", "zh-CN")
-  .option("--fail-on <level>", "Exit with code 1 on risk level: low, medium, high, or never.", parseFailLevel, "never")
+  .option("--base <ref>", "base Git 引用，默认自动选择 origin/main、origin/master、main 或 master。")
+  .option("--head <ref>", "和 --base 对比的 head Git 引用。", "HEAD")
+  .option("--config <path>", ".proofpr.yml 配置文件路径。", ".proofpr.yml")
+  .option("--format <format>", "输出格式：markdown、json、sarif 或 html。", parseFormat, "markdown")
+  .option("--output <path>", "把报告写入文件，而不是输出到终端。")
+  .option("--locale <locale>", "报告语言：en 或 zh-CN。", "zh-CN")
+  .option("--fail-on <level>", "风险达到指定等级时返回退出码 1：low、medium、high 或 never。", parseFailLevel, "never")
   .addHelpText("after", renderCheckHelpFooter())
   .action(async (options: CheckCommandOptions) => {
     const base = options.base ?? (await resolveDefaultBaseRef());
@@ -420,7 +442,7 @@ program
 
     if (options.output) {
       await writeOutput(options.output, `${output}\n`);
-      process.stdout.write(`ProofPR ${options.format} report written to ${options.output}\n`);
+      process.stdout.write(`ProofPR ${options.format} 报告已写入 ${options.output}\n`);
     } else {
       process.stdout.write(`${output}\n`);
     }
@@ -433,12 +455,12 @@ program
 program
   .command("request")
   .description("生成可直接发给贡献者的补证请求。")
-  .option("--base <ref>", "Base git ref. Defaults to origin/main, origin/master, main, or master.")
-  .option("--head <ref>", "Head git ref used with --base.", "HEAD")
-  .option("--config <path>", "Path to .proofpr.yml.", ".proofpr.yml")
-  .option("--output <path>", "Write the request to a file instead of stdout.")
-  .option("--locale <locale>", "Report language: en or zh-CN.", "zh-CN")
-  .option("--full", "Print the full evidence request template instead of the short PR comment.", false)
+  .option("--base <ref>", "base Git 引用，默认自动选择 origin/main、origin/master、main 或 master。")
+  .option("--head <ref>", "和 --base 对比的 head Git 引用。", "HEAD")
+  .option("--config <path>", ".proofpr.yml 配置文件路径。", ".proofpr.yml")
+  .option("--output <path>", "把补证请求写入文件，而不是输出到终端。")
+  .option("--locale <locale>", "报告语言：en 或 zh-CN。", "zh-CN")
+  .option("--full", "输出完整补证模板，而不是简短 PR 评论。", false)
   .addHelpText("after", renderRequestHelpFooter())
   .action(async (options: RequestCommandOptions) => {
     const base = options.base ?? (await resolveDefaultBaseRef());
@@ -454,7 +476,7 @@ program
 
     if (options.output) {
       await writeOutput(options.output, `${output}\n`);
-      process.stdout.write(`ProofPR contributor request written to ${options.output}\n`);
+      process.stdout.write(`ProofPR 贡献者补证请求已写入 ${options.output}\n`);
     } else {
       process.stdout.write(`${output}\n`);
     }
@@ -463,17 +485,17 @@ program
 program
   .command("scan", { isDefault: true })
   .description("扫描指定 diff 并输出 ProofPR 报告。")
-  .option("--base <ref>", "Base git ref. When provided, ProofPR scans base...head.")
-  .option("--head <ref>", "Head git ref used with --base.", "HEAD")
-  .option("--diff-file <path>", "Read a unified diff from a file instead of running git diff.")
-  .option("--pr-title <title>", "Pull request title used for evidence checks.")
-  .option("--pr-body <body>", "Pull request body used for evidence checks.")
-  .option("--pr-body-file <path>", "Read a pull request body from a Markdown file.")
-  .option("--config <path>", "Path to .proofpr.yml.", ".proofpr.yml")
-  .option("--format <format>", "Output format: markdown, json, sarif, or html.", parseFormat, "markdown")
-  .option("--output <path>", "Write report output to a file instead of stdout.")
-  .option("--locale <locale>", "Report language: en or zh-CN.")
-  .option("--fail-on <level>", "Exit with code 1 on risk level: low, medium, high, or never.", parseFailLevel, "never")
+  .option("--base <ref>", "base Git 引用；传入后 ProofPR 会扫描 base...head。")
+  .option("--head <ref>", "和 --base 对比的 head Git 引用。", "HEAD")
+  .option("--diff-file <path>", "从文件读取 unified diff，而不是运行 git diff。")
+  .option("--pr-title <title>", "用于证据检查的 Pull Request 标题。")
+  .option("--pr-body <body>", "用于证据检查的 Pull Request 描述。")
+  .option("--pr-body-file <path>", "从 Markdown 文件读取 Pull Request 描述。")
+  .option("--config <path>", ".proofpr.yml 配置文件路径。", ".proofpr.yml")
+  .option("--format <format>", "输出格式：markdown、json、sarif 或 html。", parseFormat, "markdown")
+  .option("--output <path>", "把报告写入文件，而不是输出到终端。")
+  .option("--locale <locale>", "报告语言：en 或 zh-CN。")
+  .option("--fail-on <level>", "风险达到指定等级时返回退出码 1：low、medium、high 或 never。", parseFailLevel, "never")
   .action(async (options: ScanCommandOptions) => {
     const diffText = options.diffFile
       ? await readFile(options.diffFile, "utf8")
@@ -491,7 +513,7 @@ program
 
     if (options.output) {
       await writeOutput(options.output, `${output}\n`);
-      process.stdout.write(`ProofPR ${options.format} report written to ${options.output}\n`);
+      process.stdout.write(`ProofPR ${options.format} 报告已写入 ${options.output}\n`);
     } else {
       process.stdout.write(`${output}\n`);
     }
@@ -504,28 +526,28 @@ program
 program
   .command("init")
   .description("生成默认可用的配置、GitHub Actions workflow 和 PR 模板。")
-  .option("--config-path <path>", "Path to write the ProofPR configuration file.", ".proofpr.yml")
+  .option("--config-path <path>", "ProofPR 配置文件写入路径。", ".proofpr.yml")
   .option(
     "--workflow-path <path>",
-    "Path to write the GitHub Actions workflow.",
+    "GitHub Actions workflow 写入路径。",
     ".github/workflows/proofpr.yml"
   )
-  .option("--no-pr-template", "Skip creating .github/pull_request_template.md.")
+  .option("--no-pr-template", "不生成 .github/pull_request_template.md。")
   .option(
     "--pr-template-path <path>",
-    "Path to write the pull request template.",
+    "PR 模板写入路径。",
     ".github/pull_request_template.md"
   )
-  .option("--no-html-report", "Skip writing and uploading the default HTML visual report artifact.")
-  .option("--html-output <path>", "Path for the HTML report generated in GitHub Actions.", "proofpr-report.html")
+  .option("--no-html-report", "不生成和上传默认 HTML 可视化报告 artifact。")
+  .option("--html-output <path>", "GitHub Actions 中生成的 HTML 报告路径。", "proofpr-report.html")
   .option(
     "--preset <preset>",
-    `Config preset: ${listConfigPresets().join(", ")}.`,
+    `配置预设：${listConfigPresets().join(", ")}。`,
     parsePresetOption,
     "open-source-maintainer"
   )
-  .option("--fail-on <level>", "Workflow failure threshold: low, medium, high, or never.", parseFailLevel, "high")
-  .option("--force", "Overwrite existing files.", false)
+  .option("--fail-on <level>", "Workflow 失败阈值：low、medium、high 或 never。", parseFailLevel, "high")
+  .option("--force", "覆盖已有文件。", false)
   .addHelpText("after", renderInitHelpFooter())
   .action(async (options: InitCommandOptions) => {
     const results: InitFileResult[] = [
@@ -556,9 +578,9 @@ program
 program
   .command("benchmark")
   .description("运行 benchmark 用例，验证规则输出是否符合预期。")
-  .option("--cases <dir>", "Directory containing benchmark case JSON files.", "benchmarks/cases")
-  .option("--format <format>", "Output format: text, markdown, or json.", parseBenchmarkFormat, "text")
-  .option("--output <path>", "Write benchmark output to a file instead of stdout.")
+  .option("--cases <dir>", "benchmark JSON 用例目录。", "benchmarks/cases")
+  .option("--format <format>", "输出格式：text、markdown 或 json。", parseBenchmarkFormat, "text")
+  .option("--output <path>", "把 benchmark 输出写入文件，而不是输出到终端。")
   .action(async (options: BenchmarkCommandOptions) => {
     const report = await runBenchmarks(options.cases);
     let output: string;
@@ -573,7 +595,7 @@ program
 
     if (options.output) {
       await writeOutput(options.output, output);
-      process.stdout.write(`ProofPR benchmark report written to ${options.output}\n`);
+      process.stdout.write(`ProofPR benchmark 报告已写入 ${options.output}\n`);
     } else {
       process.stdout.write(output);
     }

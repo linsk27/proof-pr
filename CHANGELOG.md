@@ -4,6 +4,12 @@
 
 暂无。
 
+## 0.1.36 - 2026-05-18
+
+- CLI help 的 `Usage`、`Options`、`Commands`、`Arguments`、默认值提示和 help 命令说明改为中文。
+- `doctor`、`check`、`request`、`init`、`demo`、`scan`、`template`、`benchmark` 的参数说明改为中文。
+- 写入报告、补证请求、demo 和 benchmark 文件时的成功提示改为中文。
+
 ## 0.1.35 - 2026-05-18
 
 - `proof-pr template` 的成功提示和后续步骤改为中文。

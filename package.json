@@ -1,6 +1,6 @@
 {
   "name": "proof-pr-repo",
-  "version": "0.1.35",
+  "version": "0.1.36",
   "private": true,
   "description": "ProofPR helps maintainers review evidence, not vibes.",
   "license": "MIT",
