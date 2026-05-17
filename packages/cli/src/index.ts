@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.34";
+const CLI_VERSION = "0.1.35";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -355,7 +355,7 @@ program
   .action(async (options: TemplateCommandOptions) => {
     await writeIfMissing(options.output, renderPullRequestTemplate(), options.force);
     process.stdout.write(
-      `ProofPR pull request template written to ${options.output}\n\nNext:\n1. Commit the template.\n2. Ask contributors to fill verification, reproduction, screenshot, changelog, and permission rationale sections when relevant.\n3. Run npx proof-pr@latest doctor to check setup.\n`
+      `ProofPR PR 模板已写入 ${options.output}\n\n下一步:\n1. 提交这个模板文件。\n2. 让贡献者在相关场景补充验证、复现、截图、changelog 和权限理由。\n3. 运行 npx proof-pr@latest doctor 检查接入状态。\n`
     );
   });
 
