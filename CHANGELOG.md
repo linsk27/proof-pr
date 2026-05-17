@@ -4,6 +4,12 @@
 
 暂无。
 
+## 0.1.38 - 2026-05-18
+
+- `doctor` 统计从 `fail/warn` 改为中文“失败/警告”。
+- `init` 输出里的报告位置说明改为“GitHub Actions 摘要、Workflow 标注、报告文件”。
+- CLI 中面向普通用户的 HTML 报告 `artifact` 说明改为“报告文件”。
+
 ## 0.1.37 - 2026-05-18
 
 - CLI 总错误前缀从 `ProofPR failed` 改为中文。

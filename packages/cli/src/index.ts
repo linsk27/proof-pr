@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.37";
+const CLI_VERSION = "0.1.38";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -538,7 +538,7 @@ program
     "PR 模板写入路径。",
     ".github/pull_request_template.md"
   )
-  .option("--no-html-report", "不生成和上传默认 HTML 可视化报告 artifact。")
+  .option("--no-html-report", "不生成和上传默认 HTML 可视化报告文件。")
   .option("--html-output <path>", "GitHub Actions 中生成的 HTML 报告路径。", "proofpr-report.html")
   .option(
     "--preset <preset>",
@@ -950,13 +950,13 @@ function inspectWorkflow(workflow: string, checks: DoctorCheck[], nextSteps: Set
     checks.push({ level: "pass", title: "workflow 会生成 HTML 可视化报告" });
 
     if (/actions\/upload-artifact@v\d+/.test(workflow)) {
-      checks.push({ level: "pass", title: "workflow 会上传 proofpr-report artifact" });
+      checks.push({ level: "pass", title: "workflow 会上传 proofpr-report 报告文件" });
     } else {
-      checks.push({ level: "warn", title: "HTML 报告已生成，但没有上传为 artifact" });
-      nextSteps.add("在 workflow 里加入 actions/upload-artifact@v4，把 proofpr-report.html 上传为 proofpr-report。");
+      checks.push({ level: "warn", title: "HTML 报告已生成，但没有上传为报告文件" });
+      nextSteps.add("在 workflow 里加入 actions/upload-artifact@v4，把 proofpr-report.html 上传为 proofpr-report 报告文件。");
     }
   } else {
-    checks.push({ level: "warn", title: "workflow 未启用 HTML 可视化报告 artifact" });
+    checks.push({ level: "warn", title: "workflow 未启用 HTML 可视化报告文件" });
     nextSteps.add("想让新用户更直观看报告时，重新运行 npx proof-pr@latest init --force，或在 Action step 中加入 html-output: proofpr-report.html。");
   }
 }
@@ -1070,7 +1070,7 @@ function renderDoctorReport(report: DoctorReport): string {
   return `ProofPR doctor
 
 状态：${status}
-统计：${failCount} fail, ${warnCount} warn, ${report.checks.length} 项检查
+统计：${failCount} 失败, ${warnCount} 警告, ${report.checks.length} 项检查
 建议：${recommendation}
 ${fixes}
 
@@ -1088,7 +1088,7 @@ function renderDoctorRecommendation(report: DoctorReport, failCount: number, war
   }
 
   if (failCount > 0) {
-    return "先运行 npx proof-pr@latest doctor --fix；如果仍有 fail，再按 Next steps 处理。";
+    return "先运行 npx proof-pr@latest doctor --fix；如果仍有失败项，再按“下一步”处理。";
   }
 
   if (warnCount > 0) {
@@ -1125,8 +1125,8 @@ git commit -m "chore: add ProofPR"
 
 打开或更新 Pull Request 后，报告会出现在:
 - PR 评论
-- GitHub Actions summary
-- Workflow annotations${options.htmlReport ? `\n- ${options.htmlOutput} artifact` : ""}
+- GitHub Actions 摘要
+- Workflow 标注${options.htmlReport ? `\n- ${options.htmlOutput} 报告文件` : ""}
 
 本地先自查:
 npx proof-pr@latest check
