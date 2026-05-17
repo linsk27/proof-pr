@@ -4,6 +4,12 @@
 
 暂无。
 
+## 0.1.33 - 2026-05-17
+
+- CLI root help 的项目描述和命令描述改为中文，首次运行 `proof-pr --help` 时更容易理解入口。
+- README、npm 包 README、快速开始和发布文档同步更新到当前版本。
+- 默认使用路径继续保持为 `init`、`check`、`request`。
+
 ## 0.1.32 - 2026-05-17
 
 - CLI `--help`、`init --help`、`check --help`、`request --help` 和 `doctor --help` 新增中文“常用复制”区域。

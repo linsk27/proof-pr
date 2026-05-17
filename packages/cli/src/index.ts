@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.32";
+const CLI_VERSION = "0.1.33";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -317,20 +317,20 @@ const program = new Command();
 
 program
   .name("proof-pr")
-  .description("Review pull request evidence, scope, and safety before maintainers spend time on it.")
+  .description("PR 证据门禁：在维护者投入 review 前，检查证据、范围和高风险改动。")
   .version(CLI_VERSION)
   .addHelpText("after", renderRootHelpFooter());
 
 program
   .command("guide")
-  .description("Show a copy-paste friendly guide for common ProofPR tasks.")
+  .description("显示中文向导和最常用复制命令。")
   .action(() => {
     process.stdout.write(renderGuide());
   });
 
 program
   .command("doctor")
-  .description("Check whether ProofPR is installed correctly in the current repository.")
+  .description("体检当前仓库是否已正确接入 ProofPR。")
   .option("--config <path>", "Path to .proofpr.yml.", ".proofpr.yml")
   .option("--workflow-path <path>", "Path to the GitHub Actions workflow.", ".github/workflows/proofpr.yml")
   .option("--pr-template-path <path>", "Path to the pull request template.", ".github/pull_request_template.md")
@@ -349,7 +349,7 @@ program
 
 program
   .command("template")
-  .description("Create a ProofPR-friendly pull request template.")
+  .description("生成适合 ProofPR 的 PR 模板。")
   .option("--output <path>", "Path to write the pull request template.", ".github/pull_request_template.md")
   .option("--force", "Overwrite the existing template.", false)
   .action(async (options: TemplateCommandOptions) => {
@@ -361,7 +361,7 @@ program
 
 program
   .command("demo")
-  .description("Run a built-in ProofPR demo case without cloning this repository.")
+  .description("运行内置案例，不需要接入仓库也能先看效果。")
   .argument("[case]", "Demo case id. Use --list to see available cases.", "workflow")
   .option("--list", "List built-in demo cases.", false)
   .option("--format <format>", "Output format: markdown, json, sarif, or html.", parseFormat, "markdown")
@@ -395,7 +395,7 @@ program
 
 program
   .command("check")
-  .description("Scan the current branch with simple defaults.")
+  .description("发 PR 前扫描当前分支。")
   .option("--base <ref>", "Base git ref. Defaults to origin/main, origin/master, main, or master.")
   .option("--head <ref>", "Head git ref used with --base.", "HEAD")
   .option("--config <path>", "Path to .proofpr.yml.", ".proofpr.yml")
@@ -432,7 +432,7 @@ program
 
 program
   .command("request")
-  .description("Print a contributor-ready evidence request for the current branch.")
+  .description("生成可直接发给贡献者的补证请求。")
   .option("--base <ref>", "Base git ref. Defaults to origin/main, origin/master, main, or master.")
   .option("--head <ref>", "Head git ref used with --base.", "HEAD")
   .option("--config <path>", "Path to .proofpr.yml.", ".proofpr.yml")
@@ -462,7 +462,7 @@ program
 
 program
   .command("scan", { isDefault: true })
-  .description("Scan a git diff and print a ProofPR report.")
+  .description("扫描指定 diff 并输出 ProofPR 报告。")
   .option("--base <ref>", "Base git ref. When provided, ProofPR scans base...head.")
   .option("--head <ref>", "Head git ref used with --base.", "HEAD")
   .option("--diff-file <path>", "Read a unified diff from a file instead of running git diff.")
@@ -503,7 +503,7 @@ program
 
 program
   .command("init")
-  .description("Create a starter .proofpr.yml and GitHub Actions workflow.")
+  .description("生成默认可用的配置、GitHub Actions workflow 和 PR 模板。")
   .option("--config-path <path>", "Path to write the ProofPR configuration file.", ".proofpr.yml")
   .option(
     "--workflow-path <path>",
@@ -555,7 +555,7 @@ program
 
 program
   .command("benchmark")
-  .description("Run ProofPR benchmark cases and compare expected risk/finding output.")
+  .description("运行 benchmark 用例，验证规则输出是否符合预期。")
   .option("--cases <dir>", "Directory containing benchmark case JSON files.", "benchmarks/cases")
   .option("--format <format>", "Output format: text, markdown, or json.", parseBenchmarkFormat, "text")
   .option("--output <path>", "Write benchmark output to a file instead of stdout.")
