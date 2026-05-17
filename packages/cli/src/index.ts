@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.39";
+const CLI_VERSION = "0.1.40";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -640,7 +640,7 @@ function renderGuide(): string {
 报告会给出：
 - 是否建议继续 review、先补证据，还是先处理高风险。
 - 缺什么证据：测试、复现、截图、changelog、权限理由。
-- 风险主要在哪：供应链、Workflow、Secret、证据完整性或 Review 面。
+- 风险主要在哪：供应链、Workflow、Secret、证据完整性或审查范围。
 
 不确定装好没有：
    npx proof-pr@latest doctor

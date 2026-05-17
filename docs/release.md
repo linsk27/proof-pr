@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.39`。
+当前最新公开版本是 `0.1.40`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.39
-git push origin v0.1.39
+git tag v0.1.40
+git push origin v0.1.40
 ```
 
 发布完成后需要检查：
@@ -66,9 +66,17 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.39
-npx proof-pr@latest --version -> 0.1.39
+npm view proof-pr version -> 0.1.40
+npx proof-pr@latest --version -> 0.1.40
 ```
+
+## `v0.1.40` 发布状态
+
+`v0.1.40` 是中文报告术语简化版，重点包括：
+
+- 中文 Markdown 报告把 `Review 门禁` 改为“审查门禁”。
+- 风险雷达表头从 `Findings` 改为“发现数”，说明文字从 `rule id` 改为“规则 ID”。
+- 风险雷达中的 `Review 面` 改为“审查范围”，HTML 报告标题同步更新。
 
 ## `v0.1.39` 发布状态
 
@@ -290,7 +298,7 @@ npx proof-pr@latest --version -> 0.1.39
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.39` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.40` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 
