@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.33";
+const CLI_VERSION = "0.1.34";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -1035,7 +1035,7 @@ function renderDoctorReport(report: DoctorReport): string {
   const recommendation = renderDoctorRecommendation(report, failCount, warnCount);
   const fixes =
     report.fixes.length > 0
-      ? `\nAuto-fix:\n${report.fixes.map((fix) => `- ${fix}`).join("\n")}\n`
+      ? `\n自动修复:\n${report.fixes.map((fix) => `- ${fix}`).join("\n")}\n`
       : "";
   const checks = report.checks
     .map((check) => {
@@ -1048,14 +1048,14 @@ function renderDoctorReport(report: DoctorReport): string {
   return `ProofPR doctor
 
 状态：${status}
-统计：${failCount} fail, ${warnCount} warn, ${report.checks.length} checks
+统计：${failCount} fail, ${warnCount} warn, ${report.checks.length} 项检查
 建议：${recommendation}
 ${fixes}
 
-Checks:
+检查项:
 ${checks}
 
-Next:
+下一步:
 ${nextSteps}
 `;
 }

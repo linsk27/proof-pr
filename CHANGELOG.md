@@ -4,6 +4,12 @@
 
 暂无。
 
+## 0.1.34 - 2026-05-18
+
+- `proof-pr doctor` 输出中的 `Checks`、`Next`、`Auto-fix` 等主标签改为中文。
+- doctor 截图、README、npm 包 README 和发布文档同步更新到当前版本。
+- 默认使用路径继续保持为 `init`、`check`、`request`。
+
 ## 0.1.33 - 2026-05-17
 
 - CLI root help 的项目描述和命令描述改为中文，首次运行 `proof-pr --help` 时更容易理解入口。
