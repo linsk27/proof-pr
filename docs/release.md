@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.48`。
+当前最新公开版本是 `0.1.49`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.48
-git push origin v0.1.48
+git tag v0.1.49
+git push origin v0.1.49
 ```
 
 发布完成后需要检查：
@@ -66,9 +66,17 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.48
-npx proof-pr@latest --version -> 0.1.48
+npm view proof-pr version -> 0.1.49
+npx proof-pr@latest --version -> 0.1.49
 ```
+
+## `v0.1.49` 发布状态
+
+`v0.1.49` 是本地 PR 描述模拟版，重点包括：
+
+- `check` 支持隐藏高级参数 `--pr-title`、`--pr-body` 和 `--pr-body-file`，本地自查可以带上 PR 标题和描述上下文。
+- `request` 同步支持 `--pr-body-file`，生成补证请求时可参考本地 PR 描述草稿。
+- 默认帮助页仍然只显示常用参数；README、命令文档、快速开始和 npm README 补充了 `--pr-body-file pr.md` 的按需用法。
 
 ## `v0.1.48` 发布状态
 
@@ -362,7 +370,7 @@ npx proof-pr@latest --version -> 0.1.48
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.48` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.49` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 

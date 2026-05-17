@@ -23,19 +23,16 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.48";
+const CLI_VERSION = "0.1.49";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
 type DoctorLevel = "pass" | "warn" | "fail" | "info";
 
-interface ScanCommandOptions {
+interface ScanCommandOptions extends PullRequestInputOptions {
   base?: string;
   head: string;
   diffFile?: string;
-  prTitle?: string;
-  prBody?: string;
-  prBodyFile?: string;
   config: string;
   format: OutputFormat;
   output?: string;
@@ -43,7 +40,13 @@ interface ScanCommandOptions {
   failOn: FailLevel;
 }
 
-interface CheckCommandOptions {
+interface PullRequestInputOptions {
+  prTitle?: string;
+  prBody?: string;
+  prBodyFile?: string;
+}
+
+interface CheckCommandOptions extends PullRequestInputOptions {
   base?: string;
   head: string;
   config: string;
@@ -53,7 +56,7 @@ interface CheckCommandOptions {
   failOn: FailLevel;
 }
 
-interface RequestCommandOptions {
+interface RequestCommandOptions extends PullRequestInputOptions {
   base?: string;
   head: string;
   config: string;
@@ -429,6 +432,9 @@ program
   .addOption(new Option("--base <ref>", "base Git 引用，默认自动选择 origin/main、origin/master、main 或 master。").hideHelp())
   .addOption(new Option("--head <ref>", "和 --base 对比的 head Git 引用。").default("HEAD").hideHelp())
   .addOption(new Option("--config <path>", ".proofpr.yml 配置文件路径。").default(".proofpr.yml").hideHelp())
+  .addOption(new Option("--pr-title <title>", "用于证据检查的 Pull Request 标题。").hideHelp())
+  .addOption(new Option("--pr-body <body>", "用于证据检查的 Pull Request 描述。").hideHelp())
+  .addOption(new Option("--pr-body-file <path>", "从 Markdown 文件读取 Pull Request 描述。").hideHelp())
   .addOption(new Option("--format <format>", "输出格式：markdown、json、sarif 或 html。").argParser(parseFormat).default("markdown"))
   .option("--output <path>", "把报告写入文件，而不是输出到终端。")
   .addOption(new Option("--locale <locale>", "报告语言：en 或 zh-CN。").default("zh-CN").hideHelp())
@@ -444,13 +450,14 @@ program
     const diffText = await readCheckDiff(base, options.head);
     const config = await loadConfig(options.config);
     const locale = parseLocale(options.locale, config.locale);
+    const pullRequest = await readPullRequestContext(options);
 
     if (!options.output && options.format === "markdown" && diffText.trim().length === 0) {
       process.stdout.write(renderNoDiffCheckMessage(base, options.head, locale));
       return;
     }
 
-    const result = scanDiff(diffText, { config });
+    const result = scanDiff(diffText, { config, pullRequest });
     const output = renderOutput(result, options.format, locale);
 
     if (options.output) {
@@ -471,6 +478,9 @@ program
   .addOption(new Option("--base <ref>", "base Git 引用，默认自动选择 origin/main、origin/master、main 或 master。").hideHelp())
   .addOption(new Option("--head <ref>", "和 --base 对比的 head Git 引用。").default("HEAD").hideHelp())
   .addOption(new Option("--config <path>", ".proofpr.yml 配置文件路径。").default(".proofpr.yml").hideHelp())
+  .addOption(new Option("--pr-title <title>", "用于证据检查的 Pull Request 标题。").hideHelp())
+  .addOption(new Option("--pr-body <body>", "用于证据检查的 Pull Request 描述。").hideHelp())
+  .addOption(new Option("--pr-body-file <path>", "从 Markdown 文件读取 Pull Request 描述。").hideHelp())
   .option("--output <path>", "把补证请求写入文件，而不是输出到终端。")
   .addOption(new Option("--locale <locale>", "报告语言：en 或 zh-CN。").default("zh-CN").hideHelp())
   .option("--full", "输出完整补证模板，而不是简短 PR 评论。", false)
@@ -480,10 +490,11 @@ program
     const diffText = await readCheckDiff(base, options.head);
     const config = await loadConfig(options.config);
     const locale = parseLocale(options.locale, config.locale);
+    const pullRequest = await readPullRequestContext(options);
     const output =
       diffText.trim().length === 0
         ? renderNoDiffRequestMessage(base, options.head, locale)
-        : renderContributorRequest(scanDiff(diffText, { config }), locale, {
+        : renderContributorRequest(scanDiff(diffText, { config, pullRequest }), locale, {
             style: options.full ? "full" : "short"
           });
 
@@ -515,11 +526,7 @@ program
       : await readGitDiff(options.base, options.head);
 
     const config = await loadConfig(options.config);
-    const prBody = await readPullRequestBody(options);
-    const pullRequest =
-      options.prTitle !== undefined || prBody !== undefined
-        ? { title: options.prTitle, body: prBody }
-        : undefined;
+    const pullRequest = await readPullRequestContext(options);
     const result = scanDiff(diffText, { config, pullRequest });
     const locale = parseLocale(options.locale, config.locale);
     const output = renderOutput(result, options.format, locale);
@@ -742,7 +749,7 @@ function renderCheckHelpFooter(): string {
 
 说明：
   当前没有可扫描 diff 时，check 会给短提示，不会输出完整空报告。
-  base、config、locale 等高级参数仍可使用；通常不需要设置。
+  base、config、locale、PR 描述等高级参数仍可使用；通常不需要设置。
 `;
 }
 
@@ -754,7 +761,7 @@ function renderRequestHelpFooter(): string {
 
 说明：
   request 只生成可贴给贡献者的补证说明，不展示完整扫描报告。
-  base、config、locale 等高级参数仍可使用；通常不需要设置。
+  base、config、locale、PR 描述等高级参数仍可使用；通常不需要设置。
 `;
 }
 
@@ -1315,7 +1322,15 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-async function readPullRequestBody(options: ScanCommandOptions): Promise<string | undefined> {
+async function readPullRequestContext(
+  options: PullRequestInputOptions
+): Promise<{ title?: string; body?: string } | undefined> {
+  const body = await readPullRequestBody(options);
+
+  return options.prTitle !== undefined || body !== undefined ? { title: options.prTitle, body } : undefined;
+}
+
+async function readPullRequestBody(options: PullRequestInputOptions): Promise<string | undefined> {
   if (options.prBodyFile) {
     return readFile(options.prBodyFile, "utf8");
   }
