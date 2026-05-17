@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.41";
+const CLI_VERSION = "0.1.42";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -370,7 +370,7 @@ program
   });
 
 program
-  .command("template")
+  .command("template", { hidden: true })
   .description("生成适合 ProofPR 的 PR 模板。")
   .option("--output <path>", "PR 模板写入路径。", ".github/pull_request_template.md")
   .option("--force", "覆盖已有模板文件。", false)
@@ -483,7 +483,7 @@ program
   });
 
 program
-  .command("scan", { isDefault: true })
+  .command("scan", { isDefault: true, hidden: true })
   .description("扫描指定 diff 并输出 ProofPR 报告。")
   .option("--base <ref>", "base Git 引用；传入后 ProofPR 会扫描 base...head。")
   .option("--head <ref>", "和 --base 对比的 head Git 引用。", "HEAD")
@@ -576,7 +576,7 @@ program
   });
 
 program
-  .command("benchmark")
+  .command("benchmark", { hidden: true })
   .description("运行 benchmark 用例，验证规则输出是否符合预期。")
   .option("--cases <dir>", "benchmark JSON 用例目录。", "benchmarks/cases")
   .option("--format <format>", "输出格式：text、markdown 或 json。", parseBenchmarkFormat, "text")
@@ -670,6 +670,9 @@ function renderRootHelpFooter(): string {
 
 中文向导：
   npx proof-pr@latest guide
+
+高级命令：
+  npx proof-pr@latest guide 里有 demo、HTML、SARIF、benchmark 的按需用法。
 `;
 }
 

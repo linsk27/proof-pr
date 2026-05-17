@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.41`。
+当前最新公开版本是 `0.1.42`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.41
-git push origin v0.1.41
+git tag v0.1.42
+git push origin v0.1.42
 ```
 
 发布完成后需要检查：
@@ -66,9 +66,17 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.41
-npx proof-pr@latest --version -> 0.1.41
+npm view proof-pr version -> 0.1.42
+npx proof-pr@latest --version -> 0.1.42
 ```
+
+## `v0.1.42` 发布状态
+
+`v0.1.42` 是入口简化版，重点包括：
+
+- 顶层 `--help` 只展示核心入口：`guide`、`doctor`、`demo`、`check`、`request`、`init`。
+- `template`、`scan`、`benchmark` 仍保留可用，但不再挤在首次帮助页里，降低新用户理解成本。
+- 帮助页底部明确提示高级命令在 `guide` 中按需查看。
 
 ## `v0.1.41` 发布状态
 
@@ -306,7 +314,7 @@ npx proof-pr@latest --version -> 0.1.41
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.41` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.42` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 

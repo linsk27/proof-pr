@@ -12,7 +12,7 @@
        comment.enabled=true
 [通过] .github/workflows/proofpr.yml 已存在
 [通过] workflow 会在 Pull Request 事件运行
-[通过] GitHub Action 版本为 v0.1.41
+[通过] GitHub Action 版本为 v0.1.42
 [通过] workflow 具备写 PR 评论权限
 [通过] workflow 具备读取仓库内容权限
 [通过] workflow 会生成 HTML 可视化报告
