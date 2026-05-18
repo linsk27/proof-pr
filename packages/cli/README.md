@@ -1,8 +1,10 @@
 # proof-pr
 
-ProofPR 是给开源维护者和工程团队使用的 PR 证据门禁。它只回答一个问题：这个 PR 有没有足够证据，值得维护者开始审查？
+ProofPR 是给开源维护者和团队 reviewer 使用的 AI PR 初审门禁。它只回答一个问题：这个 PR 现在值不值得维护者投入人工 review？
 
-它不是 AI code reviewer，也不是漏洞库。它不依赖大模型，不上传代码，只基于 diff、PR 描述和配置做确定性判断。
+它不是个人开发者的 git 工作树工具，也不是 AI code reviewer。它不依赖大模型，不上传代码，只基于 diff、PR 描述和配置做确定性判断。
+
+如果你只是个人项目，自己写、自己测、自己合并，通常不需要它。它更适合外部贡献、AI 生成 PR、依赖/Workflow/secret 等高风险改动较多的仓库。
 
 ## 快速使用
 
@@ -12,7 +14,7 @@ ProofPR 是给开源维护者和工程团队使用的 PR 证据门禁。它只�
 npx proof-pr@latest --version
 ```
 
-当前应输出 `0.1.51`。
+当前应输出 `1.0.0`。
 
 不知道怎么开始时：
 
@@ -22,10 +24,10 @@ npx proof-pr@latest
 npx proof-pr@latest guide
 ```
 
-`npx proof-pr@latest --help` 会显示中文命令说明，底部也会给出四条常用复制命令。
+`npx proof-pr@latest --help` 会显示中文命令说明，底部也会给出常用复制命令。
 各子命令的 `--help` 默认只显示常用参数，高级参数仍可使用；普通接入不需要先理解完整参数表。
 
-默认只用四条命令。
+正式接入只用两步。
 
 接入 GitHub PR 自动检查：
 
@@ -44,7 +46,7 @@ npx proof-pr@latest doctor
 
 `doctor` 会检查配置文件、workflow、PR 模板、Action 版本、PR 权限和本地 diff 是否可读，并直接给出下一步建议。
 
-发 PR 前本地自查：
+本地模拟 PR 初审：
 
 ```bash
 npx proof-pr@latest check
@@ -127,7 +129,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.51
+- uses: linsk27/proof-pr@v1.0.0
   with:
     fail-on: high
     comment: "true"

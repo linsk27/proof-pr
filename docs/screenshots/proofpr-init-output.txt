@@ -12,7 +12,7 @@ git add .proofpr.yml .github/workflows/proofpr.yml .github/pull_request_template
 git commit -m "chore: add ProofPR"
 npx proof-pr@latest doctor
 
-发 PR 前本地自查:
+本地模拟 PR 初审:
 npx proof-pr@latest check
 
 打开或更新 Pull Request 后，报告会出现在:

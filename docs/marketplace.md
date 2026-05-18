@@ -10,10 +10,10 @@ ProofPR 作为 GitHub Action 已经具备 Marketplace 上架所需的基础信�
 ## 上架前检查清单
 
 1. 确认 `action.yml` 中的输入项稳定。
-2. 确认 README 第一屏说明清楚：ProofPR 是 PR 证据门禁，不是 AI code reviewer。
+2. 确认 README 第一屏说明清楚：ProofPR 是 AI PR 初审门禁，不是个人 git 工具，也不是 AI code reviewer。
 3. 确认至少有一个真实 PR 评论截图。
 4. 确认仓库有 `LICENSE`、`SECURITY.md`、`CONTRIBUTING.md`。
-5. 打 `v0.1.51` tag，等待 GitHub Release 创建完成。
+5. 打 `v1.0.0` tag，等待 GitHub Release 创建完成。
 6. 在 GitHub 仓库页面进入 `Releases`，选择最新 release，点击 `Publish this Action to the GitHub Marketplace`。
 
 ## 推荐 Marketplace 描述
@@ -21,13 +21,13 @@ ProofPR 作为 GitHub Action 已经具备 Marketplace 上架所需的基础信�
 短描述：
 
 ```txt
-PR evidence gate for maintainers: risk, evidence score, annotations, SARIF, and review checklist.
+AI PR intake gate for maintainers: evidence, risky changes, annotations, SARIF, and review checklist.
 ```
 
 中文定位：
 
 ```txt
-ProofPR 帮助开源维护者在深入审查前，先检查 PR 是否具备足够的测试、复现、权限、依赖和安全证据。
+ProofPR 帮助开源维护者在人工 review 前，先判断 PR 是否具备足够的测试、复现、权限、依赖和安全证据。
 ```
 
 推荐标签：
@@ -39,7 +39,7 @@ pull-request, code-review, maintainers, security, ai-coding, mcp, sarif
 ## 安装入口文案
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.51
+- uses: linsk27/proof-pr@v1.0.0
   with:
     fail-on: high
     comment: "true"
@@ -49,7 +49,7 @@ pull-request, code-review, maintainers, security, ai-coding, mcp, sarif
 如果团队需要接入 Code Scanning：
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.51
+- uses: linsk27/proof-pr@v1.0.0
   with:
     sarif-output: proofpr.sarif
 - uses: github/codeql-action/upload-sarif@v3

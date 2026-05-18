@@ -1,6 +1,6 @@
 # 命令速查
 
-ProofPR 不是通用扫描器。它是 PR 证据门禁，默认只围绕一件事工作：判断 PR 有没有足够证据，值得维护者开始审查。
+ProofPR 不是通用扫描器，也不是个人 git 工作树管理工具。它是 AI PR 初审门禁，默认只围绕一件事工作：判断 PR 现在是否值得维护者投入人工 review。
 
 如果不知道怎么开始，先运行：
 
@@ -14,7 +14,7 @@ npx proof-pr@latest
 npx proof-pr@latest guide
 ```
 
-也可以运行 `npx proof-pr@latest --help`。帮助信息会显示中文命令说明，底部会给出 `init`、`doctor`、`check`、`request` 四条常用复制命令。
+也可以运行 `npx proof-pr@latest --help`。帮助信息会显示中文命令说明，底部会给出常用复制命令。
 各子命令的帮助页默认只展示常用参数；`--base`、`--config`、`--locale` 等高级参数仍可使用，普通接入不需要先理解它们。
 
 ![ProofPR 中文功能菜单](screenshots/proofpr-guide-output.png)
@@ -25,7 +25,7 @@ npx proof-pr@latest guide
 | --- | --- | --- |
 | 接入 GitHub PR 自动检查 | `npx proof-pr@latest init` | PR 评论、Actions summary、Checks、HTML artifact |
 | 体检接入是否正确 | `npx proof-pr@latest doctor` | 当前终端 |
-| 发 PR 前本地自查 | `npx proof-pr@latest check` | 当前终端 |
+| 本地模拟 PR 初审 | `npx proof-pr@latest check` | 当前终端 |
 | 生成贡献者补证请求 | `npx proof-pr@latest request` | 当前终端 |
 
 ## 辅助命令
@@ -121,12 +121,12 @@ npx proof-pr@latest doctor
 - `.github/workflows/proofpr.yml` 是否存在。
 - `.github/pull_request_template.md` 是否存在，以及是否提示验证、复现、截图或权限理由。
 - workflow 是否监听 `pull_request`。
-- workflow 是否使用当前推荐的 `linsk27/proof-pr@v0.1.51`。
+- workflow 是否使用当前推荐的 `linsk27/proof-pr@v1.0.0`。
 - 是否具备 `pull-requests: write` 和 `contents: read` 权限。
 - 是否启用了 `html-output` 和 `actions/upload-artifact`，方便下载 HTML 可视化报告。
 - 当前目录是否在 Git 仓库里，以及自动识别出的 base...HEAD diff 是否可读。
 
-报告顶部会给一句话建议：接入正常时提示打开 PR 或运行 `check`，存在问题时提示先运行 `doctor --fix` 或按 Next steps 处理。
+报告顶部会给一句话建议：接入正常时提示打开 PR，存在问题时提示先运行 `doctor --fix` 或按 Next steps 处理。
 
 `doctor` 默认会像 `check` 一样自动选择 `origin/main`、`origin/master`、`upstream/main`、`upstream/master`、`main` 或 `master`。如果你的主分支不是这些名字，可以这样指定：
 
@@ -134,7 +134,7 @@ npx proof-pr@latest doctor
 npx proof-pr@latest doctor --base origin/master
 ```
 
-## 4. 本地扫描当前分支
+## 4. 本地模拟 PR 初审
 
 执行：
 

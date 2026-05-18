@@ -1,8 +1,8 @@
 {
   "name": "proof-pr-repo",
-  "version": "0.1.51",
+  "version": "1.0.0",
   "private": true,
-  "description": "ProofPR helps maintainers review evidence, not vibes.",
+  "description": "AI PR intake gate for maintainers: decide whether a pull request is ready for human review.",
   "license": "MIT",
   "type": "module",
   "packageManager": "pnpm@10.33.3",
@@ -11,6 +11,8 @@
     "pull-request",
     "pull-request-review",
     "pr-triage",
+    "pr-intake",
+    "pull-request-gate",
     "code-review",
     "maintainer-tools",
     "open-source",
@@ -18,6 +20,7 @@
     "sarif",
     "code-scanning",
     "ai-coding",
+    "ai-pr",
     "mcp-security"
   ],
   "homepage": "https://github.com/linsk27/proof-pr#readme",

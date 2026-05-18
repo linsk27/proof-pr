@@ -2,7 +2,7 @@
 
 状态：接入正常
 统计：0 失败, 0 警告, 15 项检查
-建议：接入已可用；当前没有可扫描改动，提交业务改动后再运行 npx proof-pr@latest check。
+建议：接入已可用；当前没有可扫描改动。打开或更新 PR 后会自动生成初审报告。
 
 
 检查项:
@@ -12,7 +12,7 @@
        comment.enabled=true
 [通过] .github/workflows/proofpr.yml 已存在
 [通过] workflow 会在 Pull Request 事件运行
-[通过] GitHub Action 版本为 v0.1.51
+[通过] GitHub Action 版本为 v1.0.0
 [通过] workflow 具备写 PR 评论权限
 [通过] workflow 具备读取仓库内容权限
 [通过] workflow 会生成 HTML 可视化报告

@@ -5,38 +5,48 @@
 [![npm](https://img.shields.io/npm/v/proof-pr)](https://www.npmjs.com/package/proof-pr)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-先要证据，再看代码。
+AI 写 PR 很快，人审 PR 很贵。
 
-ProofPR 是给开源维护者和工程团队使用的 **PR 证据门禁**。
+ProofPR 是给开源维护者和团队 reviewer 使用的 **AI PR 初审门禁**。
 
-它不是 AI code reviewer，也不是漏洞库。它只在审查开始前回答一个问题：
+它不是个人开发者的 git 工作树工具，也不是 AI code reviewer。它只在人工审查开始前回答一个问题：
 
-> 这个 PR 有没有足够证据，值得维护者开始审查？
+> 这个 PR 现在值不值得维护者投入时间 review？
 
-ProofPR 会读取 PR diff、PR 描述和仓库配置，判断贡献者是否补齐了测试、复现、截图、变更说明、权限理由，以及这次改动是否碰到依赖、workflow、secret、MCP 或其他高风险区域。输出结果会收敛成三类信息：
+ProofPR 会读取 PR diff、PR 描述和仓库配置，判断贡献者是否补齐了测试、复现、截图、变更说明、权限理由，以及这次改动是否碰到依赖、workflow、secret、MCP 或其他高风险区域。输出结果只服务 reviewer 的第一轮判断：
 
-- **能不能开始审查**：继续审查、先补证据，还是高风险先别合并。
-- **缺什么证据**：测试、复现、截图、变更说明、权限理由。
-- **先看哪里**：风险雷达把问题归到证据完整性、供应链、Workflow 权限、密钥泄露和审查范围。
+- **结论**：可以 review、先补证据，还是高风险先别合并。
+- **缺口**：测试、复现、截图、变更说明、权限理由。
+- **重点**：供应链、Workflow 权限、密钥、MCP、敏感路径和改动范围。
+
+## 适合谁
+
+| 你是谁 | 是否适合 |
+| --- | --- |
+| 开源维护者，需要处理陌生贡献者或 AI 生成 PR | 适合 |
+| 团队 reviewer，希望 PR 先补齐验证证据再进入 review | 适合 |
+| 安全/平台团队，关注依赖、workflow、secret、发布链路变更 | 适合 |
+| 个人开发者，自己写、自己测、自己合并 | 通常不需要 |
+| 想找一个 AI 自动判断代码对错的 reviewer | 不适合 |
 
 ## 现在能用吗
 
-- GitHub Release：[`v0.1.51`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.51)
-- npm：[`proof-pr@0.1.51`](https://www.npmjs.com/package/proof-pr)
-- GitHub Action：`linsk27/proof-pr@v0.1.51`
+- GitHub Release：[`v1.0.0`](https://github.com/linsk27/proof-pr/releases/tag/v1.0.0)
+- npm：[`proof-pr@1.0.0`](https://www.npmjs.com/package/proof-pr)
+- GitHub Action：`linsk27/proof-pr@v1.0.0`
 - 当前源码 benchmark：`22/22 passed`
 - 默认接入：`npx proof-pr@latest init`
 - 接入体检：`npx proof-pr@latest doctor`
-- 本地自查：`npx proof-pr@latest check`
-- 补证请求：`npx proof-pr@latest request`
+- 本地模拟初审：`npx proof-pr@latest check`
+- 生成补证请求：`npx proof-pr@latest request`
 - 可视化报告：`init` 生成的 workflow 会自动上传 `proofpr-report.html` artifact
 
-项目当前状态：
+1.0 状态：
 
-- **已可正式试用**：CLI、GitHub Action、npm 包、GitHub Release、中文文档和截图都已经打通。
-- **核心边界明确**：ProofPR 不做通用代码审查，不判断代码好不好；它只做确定性 PR 证据门禁，帮助维护者先判断是否值得审查。
-- **发布链路已验证**：npm Trusted Publishing 已绑定 `linsk27/proof-pr` + `release.yml`，`v0.1.21` 到 `v0.1.51` 已通过 GitHub OIDC 自动发布到 npm。
-- **下一步增长点**：继续减少首屏概念，补充真实 PR 案例和 Marketplace 上架材料。
+- **功能收口**：不继续扩成大而全的开发者工具，只保留 PR 初审、补证、供应链/Workflow 风险提醒。
+- **边界明确**：不判断代码业务逻辑对错，不替代人工 review，不承诺发现所有漏洞。
+- **发布链路已验证**：npm Trusted Publishing 已绑定 `linsk27/proof-pr` + `release.yml`，`v0.1.21` 到 `v1.0.0` 已通过 GitHub OIDC 自动发布到 npm。
+- **维护策略**：1.0 后优先修 bug、修文档、补真实案例；不再继续堆复杂命令。
 
 验证你拿到的是最新版本：
 
@@ -45,7 +55,7 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-这两个命令当前都应输出 `0.1.51`。
+这两个命令当前都应输出 `1.0.0`。
 
 不知道怎么开始时，直接运行中文向导：
 
@@ -55,18 +65,23 @@ npx proof-pr@latest
 npx proof-pr@latest guide
 ```
 
-如果你习惯先看帮助，`npx proof-pr@latest --help` 会显示中文命令说明，并在底部给出四条常用复制命令。
+如果你习惯先看帮助，`npx proof-pr@latest --help` 会显示中文命令说明，并在底部给出常用复制命令。
 子命令帮助页默认只展示常用参数，高级参数仍可使用；普通接入不需要先理解完整参数表。
 
 ![ProofPR 中文功能菜单](docs/screenshots/proofpr-guide-output.png)
 
-默认只需要四条命令：
+正式使用只需要两步：
 
 | 目标 | 命令 |
 | --- | --- |
 | 接入 GitHub PR 自动检查 | `npx proof-pr@latest init` |
 | 体检接入是否正确 | `npx proof-pr@latest doctor` |
-| 本地检查当前分支 | `npx proof-pr@latest check` |
+
+本地命令是辅助项：
+
+| 目标 | 命令 |
+| --- | --- |
+| 发 PR 前模拟初审 | `npx proof-pr@latest check` |
 | 生成贡献者补证请求 | `npx proof-pr@latest request` |
 
 其他能力是辅助项，不是理解 ProofPR 的入口：
@@ -312,7 +327,7 @@ evidence:
 `init` 默认已经会在 GitHub Action 里保存 HTML 面板，对应 workflow 片段如下：
 
 ```yaml
-- uses: linsk27/proof-pr@v0.1.51
+- uses: linsk27/proof-pr@v1.0.0
   with:
     html-output: proofpr-report.html
 - uses: actions/upload-artifact@v4

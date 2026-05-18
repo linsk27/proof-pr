@@ -1,6 +1,8 @@
 # ProofPR 文档
 
-这里是 ProofPR 的中文文档入口。ProofPR 的核心定位是 PR 证据门禁：先判断一个 PR 是否带够证据、值不值得审查，再进入代码细节。
+这里是 ProofPR 的中文文档入口。ProofPR 1.0 的核心定位是 AI PR 初审门禁：先判断一个 PR 是否值得维护者投入人工 review，再进入代码细节。
+
+它不面向个人开发者的日常 git 管理，也不替代 AI code reviewer。它更适合开源维护者、团队 reviewer，以及 AI 生成 PR、外部贡献和供应链改动较多的仓库。
 
 第一次使用建议先看“快速开始”，它只保留最短安装路径。
 
@@ -17,9 +19,9 @@
 
 ## 当前发布
 
-- GitHub Release：[`v0.1.51`](https://github.com/linsk27/proof-pr/releases/tag/v0.1.51)
-- npm：[`proof-pr@0.1.51`](https://www.npmjs.com/package/proof-pr)
-- 核心能力：判断 PR 是否值得审查、指出缺失证据、标出高风险改动区域，并生成维护者行动清单。
+- GitHub Release：[`v1.0.0`](https://github.com/linsk27/proof-pr/releases/tag/v1.0.0)
+- npm：[`proof-pr@1.0.0`](https://www.npmjs.com/package/proof-pr)
+- 核心能力：判断 PR 是否值得人工 review、指出缺失证据、标出高风险改动区域，并生成维护者行动清单。
 - 辅助能力：HTML 报告、GitHub annotations、SARIF、benchmark、真实案例库和 npm Trusted Publishing 发布流程。
 
 确认本机拿到的 latest：
@@ -29,7 +31,7 @@ npm view proof-pr version
 npx proof-pr@latest --version
 ```
 
-当前都应输出 `0.1.51`。
+当前都应输出 `1.0.0`。
 
 不知道怎么开始时：
 
@@ -78,7 +80,7 @@ npx proof-pr@latest guide
 
 ## 项目定位
 
-ProofPR 是一个给开源维护者使用的 PR 证据门禁。它关注的是“这个 PR 有没有足够证据值得审查”，不是猜测“代码是不是 AI 写的”。
+ProofPR 是一个给开源维护者使用的 AI PR 初审门禁。它关注的是“这个 PR 现在值不值得人工 review”，不是猜测“代码是不是 AI 写的”。
 
 它的核心输出只有三类：
 

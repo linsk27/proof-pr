@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.51";
+const CLI_VERSION = "1.0.0";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -335,7 +335,7 @@ function localizeHelpMetadata(text: string | undefined): string {
 
 program
   .name("proof-pr")
-  .description("PR 证据门禁：在维护者投入审查前，检查证据、范围和高风险改动。")
+  .description("AI PR 初审门禁：在维护者投入审查前，判断 PR 是否已经值得人工 review。")
   .version(CLI_VERSION, "-V, --version", "显示版本号。")
   .helpOption("-h, --help", "显示帮助信息。")
   .addHelpCommand("help [command]", "显示某个命令的帮助信息。")
@@ -428,7 +428,7 @@ program
 
 program
   .command("check")
-  .description("发 PR 前扫描当前分支。")
+  .description("本地模拟 PR 初审，发 PR 前检查当前分支。")
   .addOption(new Option("--base <ref>", "base Git 引用，默认自动选择 origin/main、origin/master、main 或 master。").hideHelp())
   .addOption(new Option("--head <ref>", "和 --base 对比的 head Git 引用。").default("HEAD").hideHelp())
   .addOption(new Option("--config <path>", ".proofpr.yml 配置文件路径。").default(".proofpr.yml").hideHelp())
@@ -645,33 +645,37 @@ parseTask.catch((error: unknown) => {
 });
 
 function renderGuide(): string {
-  return `ProofPR = PR 证据门禁
+  return `ProofPR 1.0 = AI PR 初审门禁
 
 它只回答一个问题：
-这个 PR 有没有足够证据，值得维护者开始审查？
+这个 PR 现在值不值得维护者投入人工 review？
 
-真的只记四条命令：
+它不是给个人项目管理 git 工作树的工具。
+它更适合开源维护者、团队 reviewer，以及 AI 生成 PR 变多的仓库。
 
-1. 接入 GitHub PR 自动检查
+正式接入只记两步：
+
+1. 安装到仓库
    npx proof-pr@latest init
-   生成 .proofpr.yml、.github/workflows/proofpr.yml 和 PR 模板；提交后打开 PR 即可看到报告。
+   生成 .proofpr.yml、GitHub Actions workflow 和 PR 模板；提交后打开 PR 即可看到初审报告。
 
-2. 体检接入是否正确
+2. 确认接入正常
    npx proof-pr@latest doctor
-   检查配置、workflow、PR 模板、Action 版本、权限和本地 diff，并直接给下一步建议。
+   检查 workflow、权限、PR 模板和 Action 版本，并直接给下一步建议。
 
-3. 发 PR 前本地自查
+本地命令只是辅助：
    npx proof-pr@latest check
-   自动识别常见 base 分支，并检查当前工作区相对 base 的最终改动。
+   发 PR 前模拟一次初审。
 
-4. 直接生成补证请求
    npx proof-pr@latest request
-   只输出一段可以贴给贡献者的补证说明，不展示完整扫描报告。
+   生成一段可以贴给贡献者的补证请求。
 
-报告会给出：
-- 是否建议继续审查、先补证据，还是先处理高风险。
-- 缺什么证据：测试、复现、截图、变更说明、权限理由。
-- 风险主要在哪：供应链、Workflow、密钥、证据完整性或审查范围。
+PR 报告会给维护者三件事：
+- 结论：可以 review、先补证据，还是高风险先别合并。
+- 缺口：测试、复现、截图、变更说明、权限理由。
+- 重点：供应链、Workflow、密钥、MCP、敏感路径或改动范围。
+
+如果你只是个人项目，且 PR 都是自己写自己合并，通常不需要它。
 
 想自动修复常见接入问题：
    npx proof-pr@latest doctor --fix
@@ -699,6 +703,8 @@ function renderRootHelpFooter(): string {
 常用复制：
   npx proof-pr@latest init
   npx proof-pr@latest doctor
+
+本地辅助：
   npx proof-pr@latest check
   npx proof-pr@latest request
 
@@ -932,7 +938,7 @@ async function runDoctor(options: DoctorCommandOptions): Promise<DoctorReport> {
     if (doctorHasEmptyDiff(checks)) {
       nextSteps.add("当前没有可扫描改动；接入已正常。提交业务改动后运行 npx proof-pr@latest check，或打开/更新 PR 查看自动报告。");
     } else {
-      nextSteps.add("当前接入状态正常；可以打开 PR，或运行 npx proof-pr@latest check 做本地自查。");
+      nextSteps.add("当前接入状态正常；可以打开 PR，或运行 npx proof-pr@latest check 做本地模拟初审。");
     }
   }
 
@@ -1176,10 +1182,10 @@ function renderDoctorRecommendation(report: DoctorReport, failCount: number, war
   }
 
   if (doctorHasEmptyDiff(report.checks)) {
-    return "接入已可用；当前没有可扫描改动，提交业务改动后再运行 npx proof-pr@latest check。";
+    return "接入已可用；当前没有可扫描改动。打开或更新 PR 后会自动生成初审报告。";
   }
 
-  return "接入已可用；现在可以打开 PR，或本地运行 npx proof-pr@latest check。";
+  return "接入已可用；现在可以打开或更新 PR 查看自动初审报告。";
 }
 
 function doctorHasEmptyDiff(checks: DoctorCheck[]): boolean {
@@ -1217,7 +1223,7 @@ git add ${gitAddPaths}
 git commit -m "chore: add ProofPR"
 npx proof-pr@latest doctor
 
-发 PR 前本地自查:
+本地模拟 PR 初审:
 npx proof-pr@latest check
 
 打开或更新 Pull Request 后，报告会出现在:

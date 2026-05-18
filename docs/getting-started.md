@@ -2,6 +2,8 @@
 
 这份文档只讲怎么安装和怎么跑起来。
 
+先确认边界：ProofPR 适合开源维护者和团队 reviewer，用来在人工 review 前判断 PR 是否已经补齐测试、复现、截图、权限理由和高风险改动说明。个人项目如果都是自己写、自己测、自己合并，通常不需要接入。
+
 如果你想看完整图文流程，先看 [从 0 到 1 安装和验证 ProofPR](zero-to-one.md)。
 
 ![ProofPR 真实 PR 评论截图](screenshots/proofpr-demo-pr-comment.png)
@@ -44,7 +46,7 @@ npx proof-pr@latest doctor
 
 ![ProofPR doctor 体检输出](screenshots/proofpr-doctor-output.png)
 
-如果你不确定下一步该做什么，可以直接看中文向导。它会把默认路径收敛成“接入仓库、体检接入、本地自查、生成补证请求”四个动作：
+如果你不确定下一步该做什么，可以直接看中文向导。它会把默认路径收敛成“接入仓库、体检接入、本地模拟初审、生成补证请求”四个动作：
 
 ```bash
 npx proof-pr@latest
@@ -52,7 +54,7 @@ npx proof-pr@latest
 npx proof-pr@latest guide
 ```
 
-如果你习惯先看帮助，`npx proof-pr@latest --help` 会显示中文命令说明，底部也会给出四条常用复制命令。
+如果你习惯先看帮助，`npx proof-pr@latest --help` 会显示中文命令说明，底部也会给出常用复制命令。
 
 ![ProofPR 中文功能菜单](screenshots/proofpr-guide-output.png)
 
@@ -76,7 +78,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.51
+      - uses: linsk27/proof-pr@v1.0.0
         with:
           fail-on: high
           comment: "true"
@@ -147,7 +149,7 @@ npx proof-pr@latest request
 
 `check` 会自动选择常见主分支作为 base，并纳入已提交分支 diff、staged、unstaged 和未跟踪新文件。本地运行时通常没有 PR 标题和描述上下文，报告会提示这一点；打开 PR 后会结合 PR 标题和描述重新评估证据。需要本地模拟 PR 描述时，可以把描述写入 `pr.md` 后运行 `npx proof-pr@latest check --pr-body-file pr.md`，这个命令也会出现在 `check --help` 的常用复制里。当前没有可扫描 diff 时，它只输出短提示和下一步建议；刚接入但还没有业务改动时不用处理。
 
-如果第一行输出 `0.1.51`，说明你正在使用当前最新发布版。
+如果第一行输出 `1.0.0`，说明你正在使用当前最新发布版。
 
 也可以全局安装：
 

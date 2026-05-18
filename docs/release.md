@@ -1,6 +1,6 @@
 # 发布流程
 
-当前最新公开版本是 `0.1.51`。
+当前最新公开版本是 `1.0.0`。
 
 ## 发布前检查
 
@@ -52,8 +52,8 @@ npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm tr
 确认 `pnpm release:check` 通过后：
 
 ```bash
-git tag v0.1.51
-git push origin v0.1.51
+git tag v1.0.0
+git push origin v1.0.0
 ```
 
 发布完成后需要检查：
@@ -66,9 +66,19 @@ npx proof-pr@latest --version
 当前验证结果：
 
 ```txt
-npm view proof-pr version -> 0.1.51
-npx proof-pr@latest --version -> 0.1.51
+npm view proof-pr version -> 1.0.0
+npx proof-pr@latest --version -> 1.0.0
 ```
+
+## `v1.0.0` 发布状态
+
+`v1.0.0` 是 ProofPR 的产品收口版，重点包括：
+
+- 定位从泛泛的“PR 证据门禁”收敛为“AI PR 初审门禁”：只回答 PR 是否值得维护者投入人工 review。
+- README 首屏明确写出适合和不适合人群：开源维护者、团队 reviewer、AI PR/供应链高风险场景适合；个人项目通常不需要。
+- CLI 中文向导改成“两步正式接入”：`init` 安装到仓库，`doctor` 体检接入；`check` 和 `request` 下沉为本地辅助。
+- 路线图改为 1.0 维护模式：后续优先修 bug、修文档、保发布链路，不继续堆复杂命令。
+- GitHub Action、npm 包、README、npm README、中文文档和截图统一更新到 `1.0.0`。
 
 ## `v0.1.51` 发布状态
 
@@ -386,7 +396,7 @@ npx proof-pr@latest --version -> 0.1.51
 
 ## 版本说明
 
-`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`0.1.51` 继承了后续修复，并且是当前推荐使用版本。
+`0.1.8` 已经发布到 npm，但 CLI `--version` 仍显示旧版本。`1.0.0` 继承了后续修复，并且是当前推荐使用版本。
 
 ## 发布后动作
 

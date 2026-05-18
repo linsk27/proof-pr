@@ -1,7 +1,7 @@
 {
   "name": "@proof-pr/github-action",
-  "version": "0.1.51",
-  "description": "GitHub Action entrypoint for ProofPR.",
+  "version": "1.0.0",
+  "description": "GitHub Action entrypoint for ProofPR PR intake reports.",
   "license": "MIT",
   "type": "module",
   "private": true,

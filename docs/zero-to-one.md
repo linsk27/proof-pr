@@ -1,6 +1,8 @@
 # 从 0 到 1 安装和验证 ProofPR
 
-这份文档面向第一次使用 ProofPR 的用户。照着做完，你会知道它什么时候运行、在哪里看结果、报告每一块是什么意思。
+这份文档面向第一次使用 ProofPR 的维护者或团队 reviewer。照着做完，你会知道它什么时候运行、在哪里看结果、报告每一块是什么意思。
+
+如果你只是个人项目，自己写、自己测、自己合并，ProofPR 通常不是必要工具。它的主要价值在外部贡献、AI 生成 PR、依赖和 workflow 等高风险改动较多的仓库。
 
 ![ProofPR 从 0 到 1 使用流程示意图](assets/proofpr-zero-to-one.svg)
 
@@ -51,7 +53,7 @@ npx proof-pr@latest init
 npx proof-pr@latest guide
 ```
 
-它会先给出“接入仓库、本地自查、生成补证请求”三个默认动作，再把 demo、HTML、SARIF、benchmark 等命令放到辅助区域。
+它会先给出“接入仓库、体检接入、本地模拟初审、生成补证请求”这些默认动作，再把 demo、HTML、SARIF、benchmark 等命令放到辅助区域。
 
 ## 第 2 步：体检接入状态
 
@@ -149,7 +151,7 @@ npx proof-pr@latest check
 
 `check` 会自动选择常见主分支作为 base，并纳入已提交分支 diff、staged、unstaged 和未跟踪新文件。当前没有可扫描 diff 时，它只输出短提示和下一步建议。
 
-第一行当前应输出 `0.1.51`，用于确认 npm latest 已经安装正确。
+第一行当前应输出 `1.0.0`，用于确认 npm latest 已经安装正确。
 
 扫描内置案例：
 
@@ -201,7 +203,7 @@ permissions:
 
 steps:
   - uses: actions/checkout@v4
-  - uses: linsk27/proof-pr@v0.1.51
+  - uses: linsk27/proof-pr@v1.0.0
     with:
       fail-on: high
       comment: "true"
