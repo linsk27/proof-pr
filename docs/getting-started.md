@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v0.1.50
+      - uses: linsk27/proof-pr@v0.1.51
         with:
           fail-on: high
           comment: "true"
@@ -147,7 +147,7 @@ npx proof-pr@latest request
 
 `check` 会自动选择常见主分支作为 base，并纳入已提交分支 diff、staged、unstaged 和未跟踪新文件。本地运行时通常没有 PR 标题和描述上下文，报告会提示这一点；打开 PR 后会结合 PR 标题和描述重新评估证据。需要本地模拟 PR 描述时，可以把描述写入 `pr.md` 后运行 `npx proof-pr@latest check --pr-body-file pr.md`，这个命令也会出现在 `check --help` 的常用复制里。当前没有可扫描 diff 时，它只输出短提示和下一步建议；刚接入但还没有业务改动时不用处理。
 
-如果第一行输出 `0.1.50`，说明你正在使用当前最新发布版。
+如果第一行输出 `0.1.51`，说明你正在使用当前最新发布版。
 
 也可以全局安装：
 
@@ -245,10 +245,10 @@ node packages/cli/dist/index.js init --preset security-strict
 proof-pr check --format json --output proofpr-report.json
 ```
 
-需要精确指定 base、PR 标题或 PR 描述时，再使用底层 `scan` 命令：
+需要精确指定 base、PR 标题或 PR 描述时，仍然使用 `check` 命令：
 
 ```bash
-proof-pr scan --base origin/main --pr-title "Fix login redirect" --pr-body-file pr-body.md
+proof-pr check --base origin/main --pr-title "Fix login redirect" --pr-body-file pr-body.md
 ```
 
 风险达到 medium 或 high 时让进程失败：

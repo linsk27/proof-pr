@@ -559,7 +559,7 @@ index 0000000..1111111 100644
 +++ b/docs/usage.md
 @@ -1 +1,2 @@
  # Usage
-+Run proof-pr scan before opening a pull request.
++Run proof-pr check before opening a pull request.
 `);
 
     expect(result.risk).toBe("low");

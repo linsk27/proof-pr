@@ -23,7 +23,7 @@ import {
 } from "@proof-pr/core";
 
 const execFileAsync = promisify(execFile);
-const CLI_VERSION = "0.1.50";
+const CLI_VERSION = "0.1.51";
 
 type OutputFormat = "json" | "markdown" | "sarif" | "html";
 type FailLevel = RiskLevel | "never";
@@ -1266,7 +1266,7 @@ async function resolveDefaultBaseRef(): Promise<string> {
   }
 
   throw new Error(
-    "无法自动识别 base 分支。请运行 `proof-pr check --base origin/main`，或使用 `proof-pr scan --base <ref> --head HEAD`。"
+    "无法自动识别 base 分支。请运行 `proof-pr check --base origin/main`，把 origin/main 换成你的主分支。"
   );
 }
 
