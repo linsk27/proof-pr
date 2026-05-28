@@ -9,6 +9,12 @@ AI 写 PR 很快，人审 PR 很贵。
 
 ProofPR 是给开源维护者和团队 reviewer 使用的 **AI PR 初审门禁**。
 
+English summary: ProofPR is a GitHub Action and CLI for pull request evidence scanning, PR triage, dependency risk, workflow permission checks, secrets detection, MCP security, and maintainer review guidance.
+
+项目展示页：[linsk27 projects - ProofPR](https://linsk27-github-io.vercel.app/projects/#proofpr)
+
+如果 ProofPR 能帮你的仓库减少无效 review 和重复追问，欢迎 Star；这会帮助我判断是否继续补更多真实案例和规则。
+
 它不是个人开发者的 git 工作树工具，也不是 AI code reviewer。它只在人工审查开始前回答一个问题：
 
 > 这个 PR 现在值不值得维护者投入时间 review？
