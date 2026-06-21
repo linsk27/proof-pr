@@ -11,7 +11,7 @@ ProofPR 是给开源维护者和团队 reviewer 使用的 **AI PR 初审门禁**
 
 English summary: ProofPR is a GitHub Action and CLI for pull request evidence scanning, PR triage, dependency risk, workflow permission checks, secrets detection, MCP security, and maintainer review guidance.
 
-项目展示页：[linsk27 projects - ProofPR](https://linsk27-github-io.vercel.app/projects/#proofpr)
+项目展示页：[linsk27 projects - ProofPR](https://linsk27.github.io/projects/proofpr/)
 
 如果 ProofPR 能帮你的仓库减少无效 review 和重复追问，欢迎 Star；这会帮助我判断是否继续补更多真实案例和规则。
 
