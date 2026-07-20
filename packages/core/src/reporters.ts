@@ -743,7 +743,7 @@ export function renderSarifReport(result: ScanResult): string {
           tool: {
             driver: {
               name: "ProofPR",
-              informationUri: "https://github.com/linsk27/proof-pr",
+              informationUri: "https://github.com/linsk-labs/proof-pr",
               rules: [...rules.values()]
             }
           },

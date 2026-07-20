@@ -129,7 +129,7 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 ## GitHub Action
 
 ```yaml
-- uses: linsk27/proof-pr@v1.0.0
+- uses: linsk-labs/proof-pr@v1.0.0
   with:
     fail-on: high
     comment: "true"
@@ -156,4 +156,4 @@ npx proof-pr@latest benchmark --cases benchmarks/cases
 
 完整中文文档、截图和从 0 到 1 教程见仓库 README：
 
-https://github.com/linsk27/proof-pr
+https://github.com/linsk-labs/proof-pr

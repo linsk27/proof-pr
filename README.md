@@ -1,7 +1,7 @@
 # ProofPR
 
-[![CI](https://github.com/linsk27/proof-pr/actions/workflows/ci.yml/badge.svg)](https://github.com/linsk27/proof-pr/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/linsk27/proof-pr)](https://github.com/linsk27/proof-pr/releases)
+[![CI](https://github.com/linsk-labs/proof-pr/actions/workflows/ci.yml/badge.svg)](https://github.com/linsk-labs/proof-pr/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/linsk-labs/proof-pr)](https://github.com/linsk-labs/proof-pr/releases)
 [![npm](https://img.shields.io/npm/v/proof-pr)](https://www.npmjs.com/package/proof-pr)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -37,9 +37,9 @@ ProofPR 会读取 PR diff、PR 描述和仓库配置，判断贡献者是否补�
 
 ## 现在能用吗
 
-- GitHub Release：[`v1.0.0`](https://github.com/linsk27/proof-pr/releases/tag/v1.0.0)
+- GitHub Release：[`v1.0.0`](https://github.com/linsk-labs/proof-pr/releases/tag/v1.0.0)
 - npm：[`proof-pr@1.0.0`](https://www.npmjs.com/package/proof-pr)
-- GitHub Action：`linsk27/proof-pr@v1.0.0`
+- GitHub Action：`linsk-labs/proof-pr@v1.0.0`
 - 当前源码 benchmark：`22/22 passed`
 - 默认接入：`npx proof-pr@latest init`
 - 接入体检：`npx proof-pr@latest doctor`
@@ -51,7 +51,7 @@ ProofPR 会读取 PR diff、PR 描述和仓库配置，判断贡献者是否补�
 
 - **功能收口**：不继续扩成大而全的开发者工具，只保留 PR 初审、补证、供应链/Workflow 风险提醒。
 - **边界明确**：不判断代码业务逻辑对错，不替代人工 review，不承诺发现所有漏洞。
-- **发布链路已验证**：npm Trusted Publishing 已绑定 `linsk27/proof-pr` + `release.yml`，`v0.1.21` 到 `v1.0.0` 已通过 GitHub OIDC 自动发布到 npm。
+- **发布链路已验证**：`v0.1.21` 到 `v1.0.0` 已通过 GitHub OIDC 自动发布到 npm；仓库迁移后，下一次发版前需把 npm Trusted Publishing 更新为 `linsk-labs/proof-pr` + `release.yml`。
 - **维护策略**：1.0 后优先修 bug、修文档、补真实案例；不再继续堆复杂命令。
 
 验证你拿到的是最新版本：
@@ -191,7 +191,7 @@ npx proof-pr@latest request
 
 如果当前分支没有可扫描 diff，`request` 也会输出短提示，不会生成误导性的补证评论。
 
-真实 PR 评论截图来自 [demo PR #1](https://github.com/linsk27/proof-pr/pull/1)：
+真实 PR 评论截图来自 [demo PR #1](https://github.com/linsk-labs/proof-pr/pull/1)：
 
 ![ProofPR 真实 PR 评论截图](docs/screenshots/proofpr-demo-pr-comment.png)
 
@@ -333,7 +333,7 @@ evidence:
 `init` 默认已经会在 GitHub Action 里保存 HTML 面板，对应 workflow 片段如下：
 
 ```yaml
-- uses: linsk27/proof-pr@v1.0.0
+- uses: linsk-labs/proof-pr@v1.0.0
   with:
     html-output: proofpr-report.html
 - uses: actions/upload-artifact@v4

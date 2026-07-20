@@ -6,4 +6,4 @@ ProofPR 的核心扫描和报告引擎。
 
 仓库地址：
 
-https://github.com/linsk27/proof-pr
+https://github.com/linsk-labs/proof-pr

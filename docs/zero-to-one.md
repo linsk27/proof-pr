@@ -203,7 +203,7 @@ permissions:
 
 steps:
   - uses: actions/checkout@v4
-  - uses: linsk27/proof-pr@v1.0.0
+  - uses: linsk-labs/proof-pr@v1.0.0
     with:
       fail-on: high
       comment: "true"

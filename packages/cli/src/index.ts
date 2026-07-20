@@ -981,7 +981,7 @@ async function shouldRefreshDoctorWorkflow(path: string): Promise<boolean> {
   const workflow = await readFile(path, "utf8");
   return (
     !/pull_request\s*:/.test(workflow) ||
-    !new RegExp(`linsk27/proof-pr@v${escapeRegExp(CLI_VERSION)}`).test(workflow) ||
+    !new RegExp(`linsk-labs/proof-pr@v${escapeRegExp(CLI_VERSION)}`).test(workflow) ||
     !/pull-requests\s*:\s*write/.test(workflow) ||
     !/contents\s*:\s*read/.test(workflow) ||
     !/html-output\s*:/.test(workflow) ||
@@ -997,10 +997,10 @@ function inspectWorkflow(workflow: string, checks: DoctorCheck[], nextSteps: Set
     nextSteps.add("确认 .github/workflows/proofpr.yml 包含 on.pull_request。");
   }
 
-  const actionVersion = workflow.match(/linsk27\/proof-pr@(v[0-9]+\.[0-9]+\.[0-9]+)/)?.[1];
+  const actionVersion = workflow.match(/linsk-labs\/proof-pr@(v[0-9]+\.[0-9]+\.[0-9]+)/)?.[1];
   if (!actionVersion) {
-    checks.push({ level: "fail", title: "workflow 没有使用 linsk27/proof-pr Action" });
-    nextSteps.add(`把 workflow step 更新为 uses: linsk27/proof-pr@v${CLI_VERSION}。`);
+    checks.push({ level: "fail", title: "workflow 没有使用 linsk-labs/proof-pr Action" });
+    nextSteps.add(`把 workflow step 更新为 uses: linsk-labs/proof-pr@v${CLI_VERSION}。`);
   } else if (actionVersion === `v${CLI_VERSION}`) {
     checks.push({ level: "pass", title: `GitHub Action 版本为 ${actionVersion}` });
   } else {
@@ -1009,7 +1009,7 @@ function inspectWorkflow(workflow: string, checks: DoctorCheck[], nextSteps: Set
       title: `GitHub Action 版本较旧：${actionVersion}`,
       detail: `当前 CLI 版本是 v${CLI_VERSION}`
     });
-    nextSteps.add(`把 workflow 里的 uses 更新为 linsk27/proof-pr@v${CLI_VERSION}。`);
+    nextSteps.add(`把 workflow 里的 uses 更新为 linsk-labs/proof-pr@v${CLI_VERSION}。`);
   }
 
   if (/pull-requests\s*:\s*write/.test(workflow)) {
@@ -1423,7 +1423,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v${CLI_VERSION}
+      - uses: linsk-labs/proof-pr@v${CLI_VERSION}
         with:
           fail-on: ${failOn}
           comment: "true"

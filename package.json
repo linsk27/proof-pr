@@ -23,13 +23,13 @@
     "ai-pr",
     "mcp-security"
   ],
-  "homepage": "https://github.com/linsk27/proof-pr#readme",
+  "homepage": "https://github.com/linsk-labs/proof-pr#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/linsk27/proof-pr.git"
+    "url": "git+https://github.com/linsk-labs/proof-pr.git"
   },
   "bugs": {
-    "url": "https://github.com/linsk27/proof-pr/issues"
+    "url": "https://github.com/linsk-labs/proof-pr/issues"
   },
   "scripts": {
     "build": "pnpm -r build",

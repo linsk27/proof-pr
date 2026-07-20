@@ -27,14 +27,14 @@ pnpm release:check
 
 GitHub Release 会先创建；随后 workflow 会检查该版本是否已经存在于 npm。只有 npm 还没有该版本时，才会执行发布步骤。
 
-workflow 使用 Node 24 和 npm 11，并通过 GitHub OIDC 使用 npm Trusted Publishing。`linsk27/proof-pr` 的 trusted publisher 已配置完成；如果 fork 或新包没有配置，发布步骤会失败，需要先在 npm 包设置页补齐 publisher。
+workflow 使用 Node 24 和 npm 11，并通过 GitHub OIDC 使用 npm Trusted Publishing。仓库迁移后应把 trusted publisher 更新为 `linsk-labs/proof-pr`；如果没有完成绑定，发布步骤会失败，需要先在 npm 包设置页补齐 publisher。
 
 ## npm Trusted Publishing 设置
 
 `proof-pr` 当前已在 npm 网站配置 trusted publisher：
 
 - Provider：GitHub Actions
-- Repository：`linsk27/proof-pr`
+- Repository：`linsk-labs/proof-pr`
 - Workflow file：`release.yml`
 - Environment：留空，除非以后给 release job 配 GitHub environment
 
@@ -42,7 +42,7 @@ workflow 使用 Node 24 和 npm 11，并通过 GitHub OIDC 使用 npm Trusted Pu
 
 ```bash
 npm install -g npm@^11.10.0
-npm trust github proof-pr --repo linsk27/proof-pr --file release.yml
+npm trust github proof-pr --repo linsk-labs/proof-pr --file release.yml
 ```
 
 npm 官方要求 trusted publishing 使用 npm 11.5.1+ 和 Node 22.14+；`npm trust` 命令需要 npm 11.10+。后续推 tag 应该能自动发布 npm，不再需要本地粘贴 token。
@@ -363,7 +363,7 @@ npx proof-pr@latest --version -> 1.0.0
 - `proof-pr init` 生成的 GitHub workflow 默认写出 `proofpr-report.html` 并上传为 `proofpr-report` artifact。
 - `proof-pr init` 新增 `--no-html-report` 和 `--html-output <path>`，需要精简 workflow 时可以关闭或改路径。
 - `proof-pr doctor` 新增 HTML artifact 检查，能提示 workflow 是否启用了 `html-output` 和 `actions/upload-artifact`。
-- 项目自身 `.github/workflows/proofpr.yml` 已同步到 `linsk27/proof-pr@v0.1.17`，并启用 annotations 和 HTML artifact。
+- 项目自身 `.github/workflows/proofpr.yml` 已同步到 `linsk-labs/proof-pr@v0.1.17`，并启用 annotations 和 HTML artifact。
 - README、快速开始、从 0 到 1 文档、命令速查和示意图同步说明 artifact 查看路径。
 
 ## `v0.1.16` 发布状态

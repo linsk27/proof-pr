@@ -78,7 +78,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: linsk27/proof-pr@v1.0.0
+      - uses: linsk-labs/proof-pr@v1.0.0
         with:
           fail-on: high
           comment: "true"
@@ -161,7 +161,7 @@ proof-pr check
 也可以从源码运行：
 
 ```bash
-git clone https://github.com/linsk27/proof-pr.git
+git clone https://github.com/linsk-labs/proof-pr.git
 cd proof-pr
 pnpm install
 pnpm build

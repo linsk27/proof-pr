@@ -19,7 +19,7 @@
 
 ## 当前发布
 
-- GitHub Release：[`v1.0.0`](https://github.com/linsk27/proof-pr/releases/tag/v1.0.0)
+- GitHub Release：[`v1.0.0`](https://github.com/linsk-labs/proof-pr/releases/tag/v1.0.0)
 - npm：[`proof-pr@1.0.0`](https://www.npmjs.com/package/proof-pr)
 - 核心能力：判断 PR 是否值得人工 review、指出缺失证据、标出高风险改动区域，并生成维护者行动清单。
 - 辅助能力：HTML 报告、GitHub annotations、SARIF、benchmark、真实案例库和 npm Trusted Publishing 发布流程。

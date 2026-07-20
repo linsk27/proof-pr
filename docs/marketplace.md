@@ -39,7 +39,7 @@ pull-request, code-review, maintainers, security, ai-coding, mcp, sarif
 ## 安装入口文案
 
 ```yaml
-- uses: linsk27/proof-pr@v1.0.0
+- uses: linsk-labs/proof-pr@v1.0.0
   with:
     fail-on: high
     comment: "true"
@@ -49,7 +49,7 @@ pull-request, code-review, maintainers, security, ai-coding, mcp, sarif
 如果团队需要接入 Code Scanning：
 
 ```yaml
-- uses: linsk27/proof-pr@v1.0.0
+- uses: linsk-labs/proof-pr@v1.0.0
   with:
     sarif-output: proofpr.sarif
 - uses: github/codeql-action/upload-sarif@v3

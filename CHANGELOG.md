@@ -252,13 +252,13 @@
 ## 0.1.2 - 2026-05-10
 
 - 修复 CLI `--version` 输出仍显示 `0.1.0` 的问题。
-- 更新文档中的 GitHub Action 示例到 `linsk27/proof-pr@v0.1.2`。
+- 更新文档中的 GitHub Action 示例到 `linsk-labs/proof-pr@v0.1.2`。
 
 ## 0.1.1 - 2026-05-10
 
 - 发布 `proof-pr` CLI 到 npm。
 - 更新 README 和快速开始文档，改为 npm 优先安装路径。
-- 更新 GitHub Action 示例到 `linsk27/proof-pr@v0.1.1`。
+- 更新 GitHub Action 示例到 `linsk-labs/proof-pr@v0.1.1`。
 - 增加更清晰的使用说明、搜索关键词和效果图展示。
 
 ## 0.1.0 - 2026-05-09

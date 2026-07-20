@@ -4,14 +4,14 @@
   "description": "Deterministic pull request intake rules for ProofPR.",
   "license": "MIT",
   "type": "module",
-  "homepage": "https://github.com/linsk27/proof-pr#readme",
+  "homepage": "https://github.com/linsk-labs/proof-pr#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/linsk27/proof-pr.git",
+    "url": "git+https://github.com/linsk-labs/proof-pr.git",
     "directory": "packages/core"
   },
   "bugs": {
-    "url": "https://github.com/linsk27/proof-pr/issues"
+    "url": "https://github.com/linsk-labs/proof-pr/issues"
   },
   "keywords": [
     "pull-request",
